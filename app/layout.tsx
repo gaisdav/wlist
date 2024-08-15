@@ -60,6 +60,16 @@ export default function RootLayout({
   console.log("!!!");
   console.log("!!!");
 
+  if (dataSource.isInitialized) {
+    const repo = dataSource.getRepository(User);
+
+    repo.find().then((users) => {
+      console.log("Users", users);
+    });
+  } else {
+    console.log("Data source not initialized");
+  }
+
   return (
     <html suppressHydrationWarning lang="en">
       <head />
