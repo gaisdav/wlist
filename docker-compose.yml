@@ -1,0 +1,12 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:alpine'
+    container_name: 'postgres'
+    environment:
+      POSTGRES_USER: 'postgres_user'
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'postgres_db'
+    ports:
+      - '3306:3306'
+    command: -p 3306
