@@ -132,6 +132,21 @@ export default tseslint.config(
     },
   },
 
+  // Edge Functions run in Deno, not Node. Tell the linter about Deno globals
+  // (Deno.env, Deno.serve) and stop trying to resolve modules with the Node
+  // resolver — Deno uses its own (`npm:`, `jsr:`, `https://`, plus an import
+  // map in deno.json that aliases bare `zod` / `@supabase/supabase-js`).
+  {
+    files: ['supabase/functions/**/*.ts'],
+    ignores: ['supabase/functions/**/*.{test,spec}.ts'],
+    languageOptions: {
+      globals: { Deno: 'readonly' },
+    },
+    rules: {
+      'import-x/no-unresolved': 'off',
+    },
+  },
+
   // Disable formatting rules that conflict with Prettier — must be last.
   prettier,
 );

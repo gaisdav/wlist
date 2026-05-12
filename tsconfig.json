@@ -3,5 +3,9 @@
   "compilerOptions": {
     "noEmit": true
   },
+  // Workspace package typechecks happen via `pnpm -r typecheck` (each package
+  // has its own tsconfig with the right libs). This root config is just for
+  // IDE / `tsc` smoke and intentionally narrow.
+  // Edge Function helpers are typechecked at test time by Vitest+esbuild.
   "include": ["packages/*/src/**/*", "apps/*/src/**/*", "*.config.ts", "*.config.mts"]
 }
