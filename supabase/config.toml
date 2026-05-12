@@ -380,6 +380,14 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# `auth-telegram` is the entry point for the auth flow itself, so the caller
+# does not yet have a Supabase JWT to present. The function authenticates the
+# request via the HMAC inside the Telegram initData payload (see
+# functions/auth-telegram/_lib/verifyInitData.ts) — Supabase's own JWT check
+# would reject every legit call before our code ever ran.
+[functions.auth-telegram]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
