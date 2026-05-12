@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  # No `branches` filter — CI runs on every PR (including stacked PRs whose
+  # base is another PR branch).
+  pull_request:
+
+# Cancel duplicate runs (e.g. two pushes in a row to the same PR).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Opt into Node 24 for JavaScript actions (default starting June 2026).
+  # Suppresses the pnpm/action-setup@v4 deprecation warning today.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  build:
+    name: typecheck · lint · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.1
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        # `unrs-resolver` postinstall is allowlisted in pnpm-workspace.yaml.
+        # On some pnpm 11.x versions the allowlist is consulted but the install
+        # still exits non-zero with ERR_PNPM_IGNORED_BUILDS — the rebuild step
+        # below makes the workflow deterministic.
+        run: |
+          pnpm install --frozen-lockfile || true
+          pnpm rebuild unrs-resolver
+          pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build (apps/tma)
+        # The TMA build needs VITE_* env vars to exist — fake them, the values
+        # don't matter for the build step (they're only read at runtime).
+        env:
+          VITE_PUBLIC_APP_URL: https://example.invalid
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_value_xxxxxxxxxxxxxx
+        run: pnpm build
+
+# A migrations job (boot a local Postgres via `supabase start`, run
+# `supabase db lint`) is added in plan 01 when the first real migration lands.
+# A drift-check job (`pnpm db:codegen` + `git diff --exit-code`) needs
+# SUPABASE_ACCESS_TOKEN in repo secrets — also added later.
