@@ -6,12 +6,12 @@ Social wishlist Telegram Mini App — coordinate gifts, not money.
 
 ```
 apps/
-  tma/                  # Telegram Mini App (Vite + React + Tailwind) — added in PR2
+  tma/                  # Telegram Mini App (Vite + React + Tailwind)
 packages/
   core/                 # @wlist/core — business logic, hooks, tokens, routes, i18n
   api/                  # @wlist/api  — Supabase client, generated types/Zod, edge contracts
-  config/               # @wlist/config — shared tsconfig (& tailwind preset, PR2)
-supabase/               # SQL migrations & Edge Functions — added in PR3
+  config/               # @wlist/config — shared tsconfig
+supabase/               # SQL migrations + Edge Functions (CLI managed)
 docs/
   architecture.md       # Target architecture (single source of truth)
 plans/                  # Stage-by-stage development plan (00–13)
@@ -27,13 +27,17 @@ Requires:
 
 ```bash
 pnpm install
+cp .env.example .env                           # Supabase CLI / codegen
+cp apps/tma/.env.example apps/tma/.env         # browser env
+
+pnpm dev          # Start the Mini App at http://localhost:5173
 pnpm typecheck    # Type-check all packages in parallel
 pnpm lint         # ESLint across the repo
 pnpm test         # Vitest (no tests yet — see docs/architecture.md §16)
 pnpm format       # Prettier write
 ```
 
-`pnpm dev` will start the Mini App once `apps/tma` is added in PR2.
+For the database / Supabase CLI workflow, see [`supabase/README.md`](./supabase/README.md).
 
 ## Where to read first
 

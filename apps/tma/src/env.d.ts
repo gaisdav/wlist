@@ -3,9 +3,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_PUBLIC_APP_URL: string;
-  // Supabase env vars are added in PR3.
-  // readonly VITE_SUPABASE_URL: string;
-  // readonly VITE_SUPABASE_ANON_KEY: string;
+  readonly VITE_SUPABASE_URL: string;
+  readonly VITE_SUPABASE_ANON_KEY: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
