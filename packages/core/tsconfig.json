@@ -2,7 +2,10 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
+    // No `rootDir` — workspace deps (@wlist/api/...) resolve through symlinks
+    // into ../api/src, which TS rejects as "outside rootDir" even though we
+    // never emit. The TS docs explicitly note: rootDir is irrelevant when
+    // noEmit is true except for this validation, which it shouldn't do.
     "outDir": "dist",
     "noEmit": true
   },
