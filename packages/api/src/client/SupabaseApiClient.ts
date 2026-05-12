@@ -164,15 +164,24 @@ const createAuthApi = (sb: SupabaseClientLike, supabaseUrl: string, anonKey: str
         `auth-telegram returned an unexpected payload: ${okBody.error.message}`,
       );
     }
-    const { tokenHash, email, isNewUser } = okBody.data;
+    const { tokenHash, isNewUser } = okBody.data;
 
     // 3. Swap the magic-link token_hash for a real Supabase session.
     //    Same internal call path as a clicked email link → we get refresh
     //    tokens, autoRefreshToken kicks in for the rest of the session.
+    //
+    //    `verifyOtp` is overloaded — `VerifyTokenHashParams` (the variant
+    //    we want) accepts ONLY `type` + `token_hash`. Passing `email`
+    //    alongside is a `VerifyEmailOtpParams` shape, which uses a
+    //    different `token` (numeric OTP, not the hash). The Supabase Auth
+    //    server enforces this distinction with a 400:
+    //    "Only the token_hash and type should be provided".
+    //    The `email` field on our edge response stays useful for future
+    //    UI (e.g. logging which synthetic identity was used) but is NOT
+    //    needed by verifyOtp itself.
     const { data: otpData, error: otpError } = await sb.auth.verifyOtp({
       type: 'magiclink',
       token_hash: tokenHash,
-      email,
     });
     if (otpError || !otpData?.session) {
       throw new SignInError(
