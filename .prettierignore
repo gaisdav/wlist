@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+coverage
+.vite
+.turbo
+.vercel
+pnpm-lock.yaml
+packages/api/src/generated
+plans
+docs
+concept.md
