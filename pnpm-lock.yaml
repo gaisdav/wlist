@@ -137,16 +137,22 @@ importers:
       '@wlist/config':
         specifier: workspace:*
         version: link:../config
-      react:
-        specifier: ^19.0.0
-        version: 19.2.6
       zod:
         specifier: ^4.4.0
         version: 4.4.3
     devDependencies:
+      '@tanstack/react-query':
+        specifier: ^5.100.0
+        version: 5.100.9(react@19.2.6)
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.14
       i18next:
         specifier: ^26.0.0
         version: 26.1.0(typescript@5.9.3)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.6
 
 packages:
 

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { createApiClient } from './api/createApiClient';
 import { App } from './App';
+import { AuthGate } from './auth/AuthGate';
 import './i18n';
 import { ApiClientProvider } from './providers/ApiClientProvider';
 import { QueryProvider } from './providers/QueryProvider';
@@ -19,7 +20,9 @@ createRoot(rootEl).render(
     <TelegramProvider>
       <ApiClientProvider client={apiClient}>
         <QueryProvider>
-          <App />
+          <AuthGate>
+            <App />
+          </AuthGate>
         </QueryProvider>
       </ApiClientProvider>
     </TelegramProvider>
