@@ -1,0 +1,87 @@
+---
+description: UI и стилизация в Telegram Mini App (Tailwind, токены, варианты)
+globs: apps/tma/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# TMA — UI и стилизация
+
+Подробности — в [`docs/architecture.md`](mdc:docs/architecture.md) §8.
+
+## Стек стилей
+
+- **Tailwind CSS** — основной инструмент (95% случаев).
+- **`tailwind-variants`** (или `cva`) + `clsx` — для типизированных вариантов компонентов.
+- **CSS Modules** — точечно, только для сложной графики (mesh-градиенты, `@keyframes`, layered glassmorphism).
+- **UI-библиотек нет** — все компоненты пишем сами.
+
+## Дизайн-токены
+
+Всегда импортируй из `@wlist/core/tokens`. Никаких хардкод-цветов/отступов в компонентах.
+
+```ts
+// ❌ BAD
+<div style={{ color: '#0088cc', padding: 16 }} />
+<div className="bg-[#1c1c1e] text-[14px]" />
+
+// ✅ GOOD — через семантические токены, замаппленные в Tailwind
+<div className="bg-background text-foreground p-4 text-sm" />
+```
+
+## Telegram-темы
+
+- Семантические токены (`bg-background`, `text-foreground`, `border-border`, …) маппятся на `--tg-theme-*` CSS-переменные.
+- Не хардкодь light/dark классы — Telegram сам обновляет переменные при смене темы.
+
+## Варианты компонентов
+
+Любой переиспользуемый компонент с >1 визуального состояния — через `tailwind-variants`:
+
+```ts
+import { tv } from 'tailwind-variants';
+
+export const button = tv({
+  base: 'inline-flex items-center justify-center rounded-md font-medium transition',
+  variants: {
+    variant: {
+      primary: 'bg-primary text-primary-foreground hover:opacity-90',
+      ghost: 'bg-transparent text-foreground hover:bg-muted/20',
+    },
+    size: { sm: 'h-8 px-3 text-sm', md: 'h-10 px-4 text-base' },
+  },
+  defaultVariants: { variant: 'primary', size: 'md' },
+});
+```
+
+## Telegram SDK
+
+- BackButton/MainButton управляются через `@telegram-apps/sdk-react` хуки.
+- Импорты из `@telegram-apps/*` разрешены **только** в `apps/tma`, никогда в `core` или `api`.
+
+## Формы
+
+- React Hook Form + Zod, схема — из `@wlist/core/entities`.
+- Отдавай ошибки валидации в UI через `formState.errors`, не вручную.
+- `MainButton` Telegram используем как submit для основных форм.
+
+## i18n
+
+- **Никаких хардкод-строк в UI.** Любая видимая пользователю строка — через `t(...)` (`react-i18next`).
+- Ключи в `dot.case` по namespace'ам: `t('wishes.create.title')`.
+- Словари — в `@wlist/core/i18n/locales/<lng>/<namespace>.json`. Init i18next — в `apps/tma/src/i18n.ts`.
+- В `services/` возвращай **коды ошибок**, не локализованные строки. Локализация — здесь, в UI.
+
+```tsx
+// ❌ BAD
+<button>Create wish</button>
+toast.error('Failed to load')
+
+// ✅ GOOD
+<button>{t('wishes.create.action')}</button>
+toast.error(t('errors.wishesLoadFailed'))
+```
+
+## Ассеты
+
+- Иконки — inline SVG как React-компоненты (`?react` импорт через Vite). Никаких `<img>` для иконок.
+- Изображения пользовательского контента — через `<img>` с `loading="lazy"`.

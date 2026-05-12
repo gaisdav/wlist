@@ -1,0 +1,53 @@
+---
+description: Структура моно-репо, правила импортов и зависимости пакетов
+alwaysApply: true
+---
+
+# Моно-репо: структура и зависимости
+
+Подробности — в [`docs/architecture.md`](mdc:docs/architecture.md) §2.
+
+## Структура
+
+```
+apps/tma/              # Telegram Mini App
+packages/core/         # @wlist/core — бизнес-логика, hooks, токены, маршруты
+packages/api/          # @wlist/api  — Supabase клиент, типы из БД, edge-contracts
+packages/config/       # @wlist/config — eslint/tsconfig/prettier/tailwind preset
+supabase/migrations/   # SQL-миграции
+supabase/functions/    # Edge Functions (Deno)
+```
+
+## Жёсткие правила импортов
+
+| Из            | Может импортировать                            | Запрещено                                              |
+| ------------- | ---------------------------------------------- | ------------------------------------------------------ |
+| `apps/tma`    | `@wlist/core`, `@wlist/api`, `@wlist/config`   | —                                                      |
+| `@wlist/core` | `@wlist/api` (только тип `ApiClient`!), `@wlist/config` | `react-dom`, `window/document`, `@telegram-apps/*`, `apps/*`, `SupabaseApiClient` |
+| `@wlist/api`  | `@wlist/config`                                | `react`, `react-dom`, `apps/*`, `@telegram-apps/*`     |
+| `@wlist/config` | (ничего)                                     | всё runtime-специфичное                                |
+
+## Версионирование и менеджер пакетов
+
+- **pnpm workspaces** (никаких `npm`/`yarn`).
+- Все пакеты резолвятся через `"@wlist/*": "workspace:*"`.
+- Fixed versioning — все пакеты имеют одну версию.
+- Не публикуем в npm.
+
+## Path-aliases
+
+Пиши импорты через alias, а не относительные пути между пакетами:
+
+```ts
+// ❌ BAD
+import { wishSchema } from '../../../core/src/entities/wish';
+
+// ✅ GOOD
+import { wishSchema } from '@wlist/core/entities';
+```
+
+## Добавление зависимости
+
+- Уточняй область действия: `pnpm add -F @wlist/core <pkg>` (а не в корень).
+- Никогда не ставь зависимости «во все пакеты сразу» (`-w` без необходимости).
+- Перед добавлением новой библиотеки — сверься с принятыми решениями в [`plans/README.md`](mdc:plans/README.md). Если там есть аналог — используй его.

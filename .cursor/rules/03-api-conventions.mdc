@@ -1,0 +1,78 @@
+---
+description: Конвенции packages/api (Supabase, ApiClient, edge-contracts)
+globs: packages/api/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# `@wlist/api` — конвенции
+
+Подробности — в [`docs/architecture.md`](mdc:docs/architecture.md) §4 и §9.
+
+## Структура
+
+```
+src/
+├── client/
+│   ├── ApiClient.ts         # Интерфейс — главное, что импортирует core
+│   └── SupabaseApiClient.ts # Реализация поверх supabase-js
+├── generated/
+│   ├── database.types.ts    # TS-типы row (snake_case) — supabase gen types
+│   └── database.zod.ts      # Zod-схемы row (snake_case) — supazod
+├── modules/                 # Низкоуровневые операции по доменам
+└── edge-contracts/          # Zod-схемы request/response Edge Functions
+```
+
+## ApiClient — единственная точка интеграции
+
+- `core` зависит **только от интерфейса** `ApiClient`, не от реализации.
+- Любой новый use-case → метод в интерфейсе → реализация в `SupabaseApiClient`.
+- Не утекай типы из `supabase-js` наружу. Возвращай чистые доменные типы из `@wlist/core/entities`.
+
+## Маппинг snake_case ↔ camelCase
+
+Маппинг живёт **в Zod-схемах `core/entities/`** через `.transform()` (см. `02-core-conventions.mdc`). В `modules/` мы передаём snake_case row напрямую в схему сущности — без ручного `mapKeys`.
+
+```ts
+// modules/wishes.ts
+import { wishSchema } from '@wlist/core/entities';
+
+export const wishes = {
+  async list(supabase: SupabaseClient, params: { ownerId: string }): Promise<Wish[]> {
+    const { data, error } = await supabase
+      .from('wishes').select('*').eq('owner_id', params.ownerId);
+    if (error) throw error;
+    return z.array(wishSchema).parse(data); // transform внутри схемы вернёт camelCase
+  },
+};
+```
+
+## Generated files (НЕ редактировать руками!)
+
+Два артефакта, оба генерируются из БД:
+
+| Команда         | Файл                                    |
+| --------------- | --------------------------------------- |
+| `pnpm db:types` | `generated/database.types.ts` (TS-типы) |
+| `pnpm db:zod`   | `generated/database.zod.ts` (Zod-схемы через `supazod`) |
+
+После каждой миграции — запустить **обе** команды и закоммитить. CI это проверяет.
+
+## Edge contracts
+
+Для каждой Edge Function — Zod-схемы request/response в `edge-contracts/`. Используются **одновременно** в функции (на парсинг входа) и в клиенте (на типизацию вызова и валидацию ответа).
+
+```ts
+// edge-contracts/auth-telegram.ts
+export const authTelegramRequest = z.object({ initData: z.string().min(1) });
+export const authTelegramResponse = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  profile: profileSchema,
+});
+```
+
+## Безопасность
+
+- `service-role`-ключ используется **только** в Edge Functions, никогда в TMA.
+- В клиентских bundles — только `VITE_PUBLIC_SUPABASE_ANON_KEY`.
+- Не логируй PII (`initData` целиком, телефоны).

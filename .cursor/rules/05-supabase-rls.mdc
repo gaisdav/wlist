@@ -1,0 +1,77 @@
+---
+description: Supabase — миграции, RLS, Edge Functions
+globs: supabase/**/*
+alwaysApply: false
+---
+
+# Supabase — миграции, RLS, Edge Functions
+
+Подробности — в [`docs/architecture.md`](mdc:docs/architecture.md) §9–§11.
+
+## Миграции
+
+- Создаём через `supabase migration new <snake_case_name>`. Вручную SQL-файлы в `migrations/` не плодим.
+- Имя — описательное: `0007_add_wish_slots_table.sql`.
+- В одной миграции — одно логическое изменение.
+- «Down»-миграции не пишем. Откат = новая миграция.
+- После любой миграции, меняющей схему: запустить **обе** команды и закоммитить:
+  - `pnpm db:types` → `packages/api/src/generated/database.types.ts`
+  - `pnpm db:zod` → `packages/api/src/generated/database.zod.ts`
+
+## RLS — обязательные правила
+
+На каждой таблице с пользовательскими данными:
+
+```sql
+alter table public.<name> enable row level security;
+alter table public.<name> force row level security;  -- защита от service-role
+```
+
+`force` обязателен — иначе Edge Function с service-role-ключом обходит политики.
+
+## Шаблон политик (CRUD)
+
+```sql
+create policy <table>_select on public.<table>
+  for select using (<условие>);
+
+create policy <table>_insert on public.<table>
+  for insert with check (owner_id = auth.uid());
+
+create policy <table>_update on public.<table>
+  for update using (owner_id = auth.uid());
+
+create policy <table>_delete on public.<table>
+  for delete using (owner_id = auth.uid());
+```
+
+## Скрытие от автора (slots, comments)
+
+Это **инвариант безопасности**, не косметика. Не полагайся на UI.
+
+```sql
+create policy wish_slots_select on public.wish_slots
+  for select using (
+    auth.uid() != (select owner_id from public.wishes where id = wish_slots.wish_id)
+  );
+```
+
+## Edge Functions
+
+```
+supabase/functions/<name>/
+├── index.ts           # Entry (Deno)
+└── _lib/              # Подсобные модули, начинающиеся с _ (не публикуются)
+```
+
+- Парсинг входа — Zod-схемой из `@wlist/api/edge-contracts`.
+- Секреты — через Supabase Function Secrets, не через repo.
+- `service-role`-ключ — только если действительно нужен (admin-операции).
+- Не логируй PII (`initData` целиком, телефоны).
+- Идемпотентность: `auth-telegram` для существующего пользователя не должен дублировать `auth.users` или `profiles`.
+
+## Storage
+
+- Bucket-имена в `kebab-case`: `wish-photos`.
+- Политики доступа на bucket — те же принципы, что у RLS таблиц.
+- Аплоад — через signed URL от Edge Function, никогда не отдавай service-role-ключ клиенту.

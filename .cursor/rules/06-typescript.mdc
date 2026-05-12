@@ -1,0 +1,58 @@
+---
+description: TypeScript/JavaScript конвенции для всего репо
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# TypeScript — конвенции
+
+## Strict mode
+
+- Никаких `any`. Если действительно нужно — `unknown` + narrow.
+- `// @ts-ignore` / `// @ts-expect-error` — только с комментарием почему.
+- Используй `satisfies` вместо явного аннотирования, где это даёт лучший вывод типа.
+
+## Runtime-валидация
+
+- Все границы доверия (ответы Supabase, входы Edge Functions, формы) — **через Zod**.
+- Тип сущности всегда выводится из Zod-схемы (`z.infer<typeof schema>`), а не объявляется отдельно.
+
+## Импорты
+
+- Type-only импорты явно: `import type { Wish } from '@wlist/core/entities'`.
+- Никаких default-экспортов в библиотечных пакетах (`@wlist/*`). Только named.
+- Сортировку делает ESLint — не ручную.
+
+## Naming
+
+- Файлы: `kebab-case.ts` (для модулей), `PascalCase.tsx` (для React-компонентов).
+- React-компоненты и типы: `PascalCase`.
+- Переменные/функции: `camelCase`.
+- Константы: `UPPER_SNAKE_CASE` только если действительно константа на уровне модуля.
+
+## Комментарии
+
+- Комментарий объясняет **почему**, не **что**.
+- Никаких пояснительных комментариев к очевидному коду (`// increment counter`).
+- JSDoc — только для публичного API пакетов (`@wlist/*`) и для нетривиальных функций.
+
+## Ошибки
+
+```ts
+// ❌ BAD: молчаливое подавление
+try { await x(); } catch (e) {}
+
+// ❌ BAD: без контекста
+catch (e) { throw e; }
+
+// ✅ GOOD: с контекстом и без потери оригинала
+catch (cause) {
+  throw new Error('Failed to load wish list', { cause });
+}
+```
+
+## Async
+
+- Используй `async/await`, не `.then()`-цепочки.
+- Не глотай `Promise` — обработай или верни.
+- В React-эффектах помни про cleanup, чтобы не сетить state на unmount.
