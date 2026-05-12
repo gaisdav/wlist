@@ -37,7 +37,7 @@
 | Optimistic updates       | По умолчанию для каждой мутации с очевидным UX-выигрышем; в MVP — минимум |
 | Тестирование RLS         | До релиза — ручное; автоматический suite — после первой беты       |
 | Генерация типов из БД    | `supabase gen types` → `database.types.ts` + **`supazod`** → `database.zod.ts`. Доменные entities — `.transform()` поверх row-схем |
-| Структура `core/hooks/`  | По доменам (`hooks/wishes/`, `hooks/slots/`, …); `entities/` и `services/` — плоско |
+| Структура `core` слоёв   | `entities/`, `services/`, `hooks/` — все по доменам: одна папка на сущность с `index.ts` (например, `entities/profile/{profile,profile.test,index}.ts`); юнит-тесты лежат рядом с реализацией |
 | Sentry / аналитика       | В MVP не подключаем, добавим post-MVP                              |
 | Realtime                 | В MVP не используем (см. этап 11)                                  |
 | Тестирование             | **Vitest** unit для security-critical и pure-функций по факту фичи; **Playwright** smoke-E2E перед релизом MVP; полный RLS test suite — после беты. Подробнее: `docs/architecture.md` §16 |

@@ -140,19 +140,38 @@ flowchart TD
 
 ## 3. Слои `packages/core`
 
-`core` структурирован **по слоям** (а не по фичам), потому что он маленький и весь так или иначе про вишлисты. Внутри слоя `hooks/` — поддиректории по доменам (там много хуков на сущность). `entities/` и `services/` — плоско (один файл на сущность).
+`core` структурирован **по слоям** (а не по фичам), потому что он маленький и весь так или иначе про вишлисты. Внутри каждого доменного слоя (`entities/`, `services/`, `hooks/`) — поддиректория на сущность; рядом с реализацией лежат её юнит-тесты.
 
 ```
 packages/core/src/
 ├── entities/        # camelCase Zod-схемы доменных сущностей + выводимые TS-типы
-│   ├── user.ts
-│   ├── wish.ts
-│   ├── slot.ts
+│   ├── profile/
+│   │   ├── profile.ts
+│   │   ├── profile.test.ts
+│   │   └── index.ts
+│   ├── wish/
+│   │   ├── wish.ts
+│   │   ├── wish.test.ts
+│   │   └── index.ts
+│   ├── slot/
+│   │   ├── slot.ts
+│   │   ├── slot.test.ts
+│   │   └── index.ts
 │   └── index.ts
 ├── services/        # Бизнес-операции; принимают ApiClient через аргумент
-│   ├── auth.service.ts
-│   ├── wishes.service.ts
-│   └── slots.service.ts
+│   ├── auth/
+│   │   ├── auth.ts
+│   │   ├── auth.test.ts
+│   │   └── index.ts
+│   ├── wishes/
+│   │   ├── wishes.ts
+│   │   ├── wishes.test.ts
+│   │   └── index.ts
+│   ├── slots/
+│   │   ├── slots.ts
+│   │   ├── slots.test.ts
+│   │   └── index.ts
+│   └── index.ts
 ├── hooks/           # React-хуки поверх services + TanStack Query, по доменам
 │   ├── auth/
 │   │   ├── useCurrentUser.ts
@@ -188,14 +207,15 @@ packages/core/src/
 
 **Правила вложенности:**
 
-- `entities/`, `services/` — плоско. Если у сущности появляются связанные типы (например, у `slot.ts` — `SlotStatus`, `BookSlotInput`, `CancelReason`) — всё в одном файле. Если файл превышает ~250 строк — выносим во вложенную папку (`entities/slot/{schema,inputs,statuses}.ts`).
-- `hooks/` — **всегда по доменам**, даже если в домене один хук. Импорт всегда из `@wlist/core/hooks/wishes`, не `…/wishes/useMyWishes`.
+- `entities/`, `services/`, `hooks/` — **всегда по доменам**, одна папка на сущность, даже если внутри один файл. Юнит-тесты лежат рядом с реализацией (`profile.test.ts` рядом с `profile.ts`), а не в отдельном `__tests__/`.
+- В каждой папке домена — `index.ts`, который реэкспортит публичный API. Импорт извне идёт через barrel: `@wlist/core/entities/profile`, `@wlist/core/services/wishes`, `@wlist/core/hooks/wishes` — никогда не `…/wishes/wishes` и не `…/wishes/useMyWishes`.
+- Если у сущности появляются связанные типы (например, у `slot` — `SlotStatus`, `BookSlotInput`, `CancelReason`) — оставляй их в одном файле `slot.ts`. Когда он превысит ~250 строк, разделяй на `slot/{schema,inputs,statuses}.ts` (а не плоский файл).
 
 ### Принципы
 
 - **`entities/`** — единственный источник правды для **доменных** (camelCase) типов. Каждая сущность — `.transform()` поверх автогенерированной snake_case схемы из `@wlist/api/generated/database.zod.ts` (см. §4.5). Так невозможно расхождение между БД и доменом.
   ```ts
-  // packages/core/src/entities/wish.ts
+  // packages/core/src/entities/wish/wish.ts
   import { z } from 'zod';
   import { wishesRowSchema } from '@wlist/api/generated/database.zod';
 
@@ -337,14 +357,14 @@ flowchart LR
   Migrate["supabase/migrations/*.sql"] --> DB[(Postgres)]
   DB -- supabase gen types --> Types["api/generated/database.types.ts"]
   DB -- supazod --> Zod["api/generated/database.zod.ts"]
-  Zod -- import + .transform() --> Ent["core/entities/*.ts (camelCase)"]
+  Zod -- import + .transform() --> Ent["core/entities/<name>/<name>.ts (camelCase)"]
   Types -. typing supabase-js .-> Modules["api/modules/*.ts"]
 ```
 
 **CI-инварианты:**
 
 - Если PR содержит миграции (`supabase/migrations/*.sql`) — оба `database.types.ts` и `database.zod.ts` должны быть пересгенерированы и закоммичены. CI запускает обе команды и diff-ит.
-- Если поле добавлено в БД, но не покрыто в `entities/*.ts` (transform не возвращает его, или забыли расширить) — TypeScript-сборка `core` падает. Это ожидаемое поведение, не баг.
+- Если поле добавлено в БД, но не покрыто в соответствующем `entities/<name>/<name>.ts` (transform не возвращает его, или забыли расширить) — TypeScript-сборка `core` падает. Это ожидаемое поведение, не баг.
 
 **Никогда не редактируй файлы в `generated/` руками.**
 

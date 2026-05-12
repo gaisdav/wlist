@@ -2,8 +2,8 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import { type ApiClient } from '@wlist/api';
 
 import { queryKeys } from '../../config/index.js';
-import { type Profile } from '../../entities/profile.js';
-import { loginWithTelegram } from '../../services/auth.js';
+import { type Profile } from '../../entities/profile/index.js';
+import { loginWithTelegram } from '../../services/auth/index.js';
 
 export interface SignInVariables {
   initData: string;

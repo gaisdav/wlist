@@ -39,12 +39,17 @@ supabase/functions/    # Edge Functions (Deno)
 Пиши импорты через alias, а не относительные пути между пакетами:
 
 ```ts
-// ❌ BAD
-import { wishSchema } from '../../../core/src/entities/wish';
+// ❌ BAD — относительный путь между пакетами
+import { wishSchema } from '../../../core/src/entities/wish/wish';
 
-// ✅ GOOD
-import { wishSchema } from '@wlist/core/entities';
+// ❌ BAD — обращение к внутреннему файлу домена в обход barrel
+import { wishSchema } from '@wlist/core/entities/wish/wish';
+
+// ✅ GOOD — через barrel домена (или агрегированный `@wlist/core/entities`)
+import { wishSchema } from '@wlist/core/entities/wish';
 ```
+
+В `packages/core/src/{entities,services,hooks}/` каждая сущность живёт в своей папке с `index.ts` и юнит-тестами рядом — см. [`docs/architecture.md`](mdc:docs/architecture.md) §3.
 
 ## Добавление зависимости
 

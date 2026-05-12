@@ -26,6 +26,9 @@ coverage/
 .env.*.local
 !.env.example
 
+# Cursor (MCP config may contain API keys; rules/ are committed)
+.cursor/mcp.json
+
 # Vercel / deploys
 .vercel
 .turbo

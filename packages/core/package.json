@@ -6,7 +6,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./entities": "./src/entities/index.ts",
+    "./entities/profile": "./src/entities/profile/index.ts",
     "./services": "./src/services/index.ts",
+    "./services/auth": "./src/services/auth/index.ts",
     "./hooks": "./src/hooks/index.ts",
     "./hooks/auth": "./src/hooks/auth/index.ts",
     "./hooks/wishes": "./src/hooks/wishes/index.ts",

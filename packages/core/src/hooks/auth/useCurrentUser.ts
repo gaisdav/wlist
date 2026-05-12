@@ -2,7 +2,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { type ApiClient } from '@wlist/api';
 
 import { queryKeys } from '../../config/index.js';
-import { type Profile, profileSchema } from '../../entities/profile.js';
+import { type Profile, profileSchema } from '../../entities/profile/index.js';
 
 /**
  * Read-only query for the currently signed-in user's `Profile`.

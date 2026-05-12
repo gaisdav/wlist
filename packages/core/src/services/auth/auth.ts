@@ -1,6 +1,6 @@
 import { type ApiClient } from '@wlist/api';
 
-import { type Profile, profileSchema } from '../entities/profile.js';
+import { type Profile, profileSchema } from '../../entities/profile/index.js';
 
 /**
  * `loginWithTelegram` ties three platform calls together into one
