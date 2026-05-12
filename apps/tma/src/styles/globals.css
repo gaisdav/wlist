@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens for Tailwind v4. The raw values mirror packages/core/src/tokens
+ * (single source of truth for non-CSS targets). Semantic colors are bound to
+ * Telegram WebApp theme variables — see docs/architecture.md §8.
+ */
+@theme {
+  /* Brand palette (raw) */
+  --color-brand-50: #eaf6ff;
+  --color-brand-100: #cfeaff;
+  --color-brand-200: #a3d6ff;
+  --color-brand-300: #6ebcff;
+  --color-brand-400: #3aa1ff;
+  --color-brand-500: #0d8aff;
+  --color-brand-600: #006fda;
+  --color-brand-700: #0058ad;
+  --color-brand-800: #01457f;
+  --color-brand-900: #013559;
+
+  /* Semantic surfaces (bound to Telegram theme vars at runtime) */
+  --color-background: var(--tg-theme-bg-color, #ffffff);
+  --color-foreground: var(--tg-theme-text-color, #0e0e12);
+  --color-muted: var(--tg-theme-hint-color, #6b6b78);
+  --color-primary: var(--tg-theme-button-color, #0d8aff);
+  --color-primary-foreground: var(--tg-theme-button-text-color, #ffffff);
+  --color-accent: var(--tg-theme-link-color, #0d8aff);
+  --color-destructive: var(--tg-theme-destructive-text-color, #d1453b);
+  --color-border: var(--tg-theme-section-separator-color, #d9d9de);
+  --color-surface: var(--tg-theme-secondary-bg-color, #f7f7f8);
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+}
