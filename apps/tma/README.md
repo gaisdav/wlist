@@ -5,11 +5,12 @@ Telegram Mini App — Vite + React 19 + Tailwind v4 + TanStack Query + i18next +
 ## Run locally
 
 ```bash
-# from repo root
-pnpm dev
+# 1. Copy env template (first time only)
+cp apps/tma/.env.example apps/tma/.env
 
-# or directly
-pnpm --filter @wlist/tma dev
+# 2. Start the dev server
+pnpm dev
+# or directly: pnpm --filter @wlist/tma dev
 ```
 
 By default Vite serves on `http://0.0.0.0:5173`. Use [ngrok](https://ngrok.com/) /
@@ -36,8 +37,5 @@ See [`docs/architecture.md`](../../docs/architecture.md) §1 (high-level) and §
 
 ## Env
 
-`.env.example` is added in PR3 together with Supabase. PR2 only needs:
-
-```env
-VITE_PUBLIC_APP_URL=http://localhost:5173
-```
+See [`.env.example`](./.env.example). PR2 only needs `VITE_PUBLIC_APP_URL`;
+Supabase variables are added in PR3.
