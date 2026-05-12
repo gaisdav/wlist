@@ -15,5 +15,21 @@
     "loading": "Loading…",
     "empty": "Nothing here yet.",
     "error": "Something went wrong."
+  },
+  "auth": {
+    "signing_in": "Signing in via Telegram…",
+    "errors": {
+      "invalid_init_data": "Telegram couldn't verify this session. Try reopening the Mini App.",
+      "expired_init_data": "This Telegram session has expired. Please reopen the Mini App.",
+      "replayed_init_data": "Already signed in elsewhere. Please reopen the Mini App.",
+      "network": "Network error. Check your connection and try again.",
+      "verify_otp_failed": "We couldn't finish signing you in. Please try again.",
+      "missing_init_data": "Telegram didn't provide session data. Open this app inside Telegram.",
+      "outside_telegram": "Open this app inside Telegram to sign in.",
+      "generic": "Sign-in failed. Please try again."
+    },
+    "actions": {
+      "retry": "Try again"
+    }
   }
 }
