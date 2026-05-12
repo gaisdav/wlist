@@ -3,6 +3,5 @@
   "buildCommand": "pnpm --filter @wlist/tma build",
   "installCommand": "pnpm install --frozen-lockfile || (pnpm rebuild unrs-resolver && pnpm install --frozen-lockfile)",
   "outputDirectory": "apps/tma/dist",
-  "framework": null,
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- apps/tma packages pnpm-lock.yaml package.json"
+  "framework": null
 }
