@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      auth_telegram_used_init_data: {
+        Row: {
+          init_data_hash: string
+          used_at: string
+        }
+        Insert: {
+          init_data_hash: string
+          used_at?: string
+        }
+        Update: {
+          init_data_hash?: string
+          used_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string
+          id: string
+          is_premium: boolean
+          language_code: string | null
+          last_name: string | null
+          photo_url: string | null
+          telegram_id: number
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          first_name: string
+          id: string
+          is_premium?: boolean
+          language_code?: string | null
+          last_name?: string | null
+          photo_url?: string | null
+          telegram_id: number
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          first_name?: string
+          id?: string
+          is_premium?: boolean
+          language_code?: string | null
+          last_name?: string | null
+          photo_url?: string | null
+          telegram_id?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

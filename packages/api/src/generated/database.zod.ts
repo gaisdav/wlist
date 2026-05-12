@@ -18,3 +18,57 @@ export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
     ])
     .nullable(),
 );
+
+export const publicAuthTelegramUsedInitDataRowSchema = z.object({
+  init_data_hash: z.string(),
+  used_at: z.string(),
+});
+
+export const publicAuthTelegramUsedInitDataInsertSchema = z.object({
+  init_data_hash: z.string(),
+  used_at: z.string().optional(),
+});
+
+export const publicAuthTelegramUsedInitDataUpdateSchema = z.object({
+  init_data_hash: z.string().optional(),
+  used_at: z.string().optional(),
+});
+
+export const publicProfilesRowSchema = z.object({
+  created_at: z.string(),
+  first_name: z.string(),
+  id: z.string(),
+  is_premium: z.boolean(),
+  language_code: z.string().nullable(),
+  last_name: z.string().nullable(),
+  photo_url: z.string().nullable(),
+  telegram_id: z.number(),
+  updated_at: z.string(),
+  username: z.string().nullable(),
+});
+
+export const publicProfilesInsertSchema = z.object({
+  created_at: z.string().optional(),
+  first_name: z.string(),
+  id: z.string(),
+  is_premium: z.boolean().optional(),
+  language_code: z.string().optional().nullable(),
+  last_name: z.string().optional().nullable(),
+  photo_url: z.string().optional().nullable(),
+  telegram_id: z.number(),
+  updated_at: z.string().optional(),
+  username: z.string().optional().nullable(),
+});
+
+export const publicProfilesUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  first_name: z.string().optional(),
+  id: z.string().optional(),
+  is_premium: z.boolean().optional(),
+  language_code: z.string().optional().nullable(),
+  last_name: z.string().optional().nullable(),
+  photo_url: z.string().optional().nullable(),
+  telegram_id: z.number().optional(),
+  updated_at: z.string().optional(),
+  username: z.string().optional().nullable(),
+});

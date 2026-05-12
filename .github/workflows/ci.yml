@@ -70,7 +70,13 @@ jobs:
           VITE_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_value_xxxxxxxxxxxxxx
         run: pnpm build
 
-# A migrations job (boot a local Postgres via `supabase start`, run
-# `supabase db lint`) is added in plan 01 when the first real migration lands.
-# A drift-check job (`pnpm db:codegen` + `git diff --exit-code`) needs
-# SUPABASE_ACCESS_TOKEN in repo secrets — also added later.
+# Supabase migrations get their own workflow (see .github/workflows/supabase.yml)
+# with a `paths:` filter — that way TS-only PRs don't pay for Docker boot, and
+# the conditional logic actually works (GitHub doesn't expose changed_files on
+# the pull_request event payload, so an `if:` here is awkward).
+#
+# A `db:codegen` drift-check job is intentionally deferred — it would need
+# either SUPABASE_ACCESS_TOKEN as a repo secret OR a Postgres-version-diff
+# suppressor between the local stack and the linked dev project. We rely on
+# PR review + .cursor/rules/05-supabase-rls.mdc instead. Revisit when first
+# drift regression bites.
