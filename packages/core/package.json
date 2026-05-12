@@ -1,0 +1,45 @@
+{
+  "name": "@wlist/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./entities": "./src/entities/index.ts",
+    "./services": "./src/services/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./hooks/auth": "./src/hooks/auth/index.ts",
+    "./hooks/wishes": "./src/hooks/wishes/index.ts",
+    "./hooks/slots": "./src/hooks/slots/index.ts",
+    "./routes": "./src/routes/index.ts",
+    "./tokens": "./src/tokens/index.ts",
+    "./i18n": "./src/i18n/index.ts",
+    "./i18n/types": "./src/i18n/types.ts",
+    "./lib": "./src/lib/index.ts",
+    "./config": "./src/config/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "echo \"core: type-only package, no build step yet\""
+  },
+  "dependencies": {
+    "@wlist/api": "workspace:*",
+    "@wlist/config": "workspace:*",
+    "zod": "^4.4.0"
+  },
+  "devDependencies": {
+    "i18next": "^26.0.0"
+  },
+  "peerDependencies": {
+    "i18next": "^26.0.0",
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "i18next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
+}

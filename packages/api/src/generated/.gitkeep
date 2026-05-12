@@ -1,0 +1,4 @@
+# Generated artifacts land here.
+# - database.types.ts (via `pnpm db:types` — supabase gen types)
+# - database.zod.ts   (via `pnpm db:zod`   — supazod)
+# Never edit by hand. See docs/architecture.md §4.5.

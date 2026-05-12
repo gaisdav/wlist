@@ -1,0 +1,9 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# Allowlist for native postinstall scripts (pnpm 11+).
+onlyBuiltDependencies:
+  - unrs-resolver
+allowBuilds:
+  unrs-resolver: true
