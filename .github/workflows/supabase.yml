@@ -1,0 +1,47 @@
+name: Supabase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/supabase.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/config.toml'
+      - '.github/workflows/supabase.yml'
+
+concurrency:
+  group: supabase-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  lint:
+    name: migrations · lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Boot local Supabase stack
+        # `supabase start` boots Postgres in Docker and applies every migration
+        # in supabase/migrations/ in order — that's our SQL syntax + ordering
+        # check. We skip the heavy services we don't need for linting.
+        run: supabase start -x studio,inbucket,storage-api,imgproxy,edge-runtime,logflare,vector,pgbouncer,realtime
+
+      - name: Lint migrations
+        # `supabase db lint` checks the resulting schema for common foot-guns
+        # (missing indexes on FKs, mutable functions in `using`, …).
+        run: supabase db lint --schema public

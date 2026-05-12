@@ -70,41 +70,13 @@ jobs:
           VITE_SUPABASE_ANON_KEY: sb_publishable_ci_placeholder_value_xxxxxxxxxxxxxx
         run: pnpm build
 
-  supabase:
-    name: supabase migrations · lint
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-
-    # Only run when SQL migrations changed. Saves ~3min on PRs that touch
-    # only TS / app code.
-    if: |
-      github.event_name == 'push' ||
-      contains(toJSON(github.event.pull_request.changed_files), 'supabase/migrations/')
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Boot local Supabase stack
-        # `supabase start` boots Postgres in Docker and applies every migration
-        # in supabase/migrations/ in order — that's our SQL syntax + ordering
-        # check. We skip the heavy services we don't need for linting.
-        run: supabase start -x studio,inbucket,storage-api,imgproxy,edge-runtime,logflare,vector,pgbouncer,realtime
-
-      - name: Lint migrations
-        # `supabase db lint` checks the resulting schema for common foot-guns
-        # (missing indexes on FKs, mutable functions in `using`, …).
-        run: supabase db lint --schema public
-
-# A `db:codegen` drift-check job (re-run codegen, assert no diff against
-# committed artifacts) is intentionally NOT here — it would need either
-# SUPABASE_ACCESS_TOKEN as a repo secret (--linked) or a hack to hide the
-# PostgREST version difference between the local stack and the linked dev
-# project. We rely on PR review + the convention reinforced in
-# .cursor/rules/05-supabase-rls.mdc instead. Revisit when first drift
-# regression bites.
+# Supabase migrations get their own workflow (see .github/workflows/supabase.yml)
+# with a `paths:` filter — that way TS-only PRs don't pay for Docker boot, and
+# the conditional logic actually works (GitHub doesn't expose changed_files on
+# the pull_request event payload, so an `if:` here is awkward).
+#
+# A `db:codegen` drift-check job is intentionally deferred — it would need
+# either SUPABASE_ACCESS_TOKEN as a repo secret OR a Postgres-version-diff
+# suppressor between the local stack and the linked dev project. We rely on
+# PR review + .cursor/rules/05-supabase-rls.mdc instead. Revisit when first
+# drift regression bites.
