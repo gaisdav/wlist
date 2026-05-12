@@ -93,14 +93,29 @@ const createAuthApi = (sb: SupabaseClientLike, supabaseUrl: string, anonKey: str
     try {
       response = await fetch(url, {
         method: 'POST',
+        // Headers MUST be the bare minimum: every entry the browser doesn't
+        // CORS-safelist forces a preflight check, and the Edge Function's
+        // CORS allow list is finite. Sending any header that isn't in
+        // supabase/functions/_shared/cors.ts → preflight rejected →
+        // WebKit / WKWebView (Telegram iOS) throws "Load failed", Chrome
+        // throws "Failed to fetch". Bit me once already — keep this lean.
+        //
+        // What's here:
+        //   Content-Type: application/json — required so the function can
+        //     `await req.json()`. Triggers preflight on its own; nothing
+        //     to do about it short of reshaping the function to accept
+        //     text/plain (not worth it).
+        //   apikey: <publishable> — Supabase gateway's "this is anonymous
+        //     traffic from a known project" identifier. Function itself
+        //     authenticates via the HMAC inside initData
+        //     (verify_jwt=false in supabase/config.toml).
+        //
+        // Notably absent: `Authorization` (no session yet) and
+        // `x-wlist-client` (a diagnostic tag set in supabase-js's global
+        // config — pointless for this single call, and not in the allow list).
         headers: {
           'Content-Type': 'application/json',
-          // `apikey` (NOT Authorization) is the Supabase platform's way of
-          // telling the gateway "this is anonymous traffic from a known
-          // project". With verify_jwt=false on the function (see
-          // supabase/config.toml), no real JWT is required.
           apikey: anonKey,
-          'x-wlist-client': 'tma',
         },
         body: JSON.stringify({ initData }),
       });

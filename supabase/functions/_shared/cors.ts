@@ -14,11 +14,18 @@
  *
  * Production hardening (post-MVP): pin to `https://wlist-tma.vercel.app`
  * (or `https://wlist.pro` once the domain is live).
+ *
+ * `Access-Control-Allow-Headers` MUST cover every non-CORS-safelisted
+ * header any client might send. Anything missing → spec-compliant browsers
+ * (notably WKWebView in Telegram iOS) reject the preflight, fetch throws
+ * "Load failed" / "Failed to fetch" with no useful detail. Adding a new
+ * client header? Append it here too.
  */
 export const corsHeaders: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type, x-wlist-client',
   'Access-Control-Max-Age': '86400',
 };
 
