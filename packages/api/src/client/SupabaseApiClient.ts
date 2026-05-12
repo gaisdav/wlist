@@ -63,7 +63,7 @@ export class SupabaseApiClient implements ApiClient {
       },
     });
 
-    this.auth = createAuthApi(this.supabase);
+    this.auth = createAuthApi(this.supabase, url, anonKey);
     this.profiles = createProfilesApi(this.supabase);
   }
 }
@@ -72,32 +72,77 @@ export class SupabaseApiClient implements ApiClient {
 // auth
 // =============================================================================
 
-const createAuthApi = (sb: SupabaseClientLike): AuthApi => ({
+const createAuthApi = (sb: SupabaseClientLike, supabaseUrl: string, anonKey: string): AuthApi => ({
   async signInWithTelegram(initData) {
-    // 1. Hand initData to the Edge Function. It validates HMAC, dedupes via
-    //    the anti-replay table, upserts the profile, and returns a magic-link
-    //    token_hash we can swap for a real session.
-    let edgeResponse: Awaited<ReturnType<typeof sb.functions.invoke>>;
+    // 1. Hand initData to the Edge Function via direct fetch.
+    //
+    //    We bypass `sb.functions.invoke` here because:
+    //      - this call happens BEFORE the user has a session, so supabase-js's
+    //        auto-injected `Authorization: Bearer <session_jwt>` header is
+    //        either missing or stale and the Telegram WebView's CORS preflight
+    //        chokes on the resulting request shape (observed empirically:
+    //        Node + curl work, Telegram in-app browser throws TypeError);
+    //      - direct fetch gives us pixel-precise control over headers + a
+    //        readable Response on every code path, which makes diagnosing
+    //        Edge runtime failures trivial.
+    //    Once we have a session, every other DB call goes through supabase-js
+    //    as normal.
+    const url = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/auth-telegram`;
+
+    let response: Response;
     try {
-      edgeResponse = await sb.functions.invoke('auth-telegram', {
-        body: { initData },
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // `apikey` (NOT Authorization) is the Supabase platform's way of
+          // telling the gateway "this is anonymous traffic from a known
+          // project". With verify_jwt=false on the function (see
+          // supabase/config.toml), no real JWT is required.
+          apikey: anonKey,
+          'x-wlist-client': 'tma',
+        },
+        body: JSON.stringify({ initData }),
       });
     } catch (e) {
+      // CORS rejection / DNS / offline — `TypeError: Failed to fetch` (Chrome)
+      // or similar. No response object available; fall through with the
+      // platform's own message so it shows up in the splash for diagnostics.
       throw new SignInError(
         'network',
         e instanceof Error ? e.message : 'Network error calling auth-telegram',
       );
     }
 
-    if (edgeResponse.error || !edgeResponse.data) {
-      // supabase-js wraps non-2xx Edge responses inside `error` AND keeps the
-      // body in `error.context.text()` — we parse it back to our typed error
-      // shape so callers can branch on `code`.
-      const parsed = await parseEdgeError(edgeResponse.error);
-      throw parsed;
+    // 2. Parse the response body. We always try as JSON because both success
+    //    and failure paths from our function are JSON; if the body isn't JSON
+    //    that's an outage at the platform layer (Cloudflare HTML 502 page,
+    //    Edge runtime cold-start crash) — surface the status + a snippet so
+    //    we can see it in the user-facing splash.
+    let body: unknown;
+    let bodyText = '';
+    try {
+      bodyText = await response.text();
+      body = bodyText ? JSON.parse(bodyText) : null;
+    } catch {
+      throw new SignInError(
+        'internal_error',
+        `auth-telegram returned non-JSON (HTTP ${response.status}): ${bodyText.slice(0, 200)}`,
+      );
     }
 
-    const okBody = authTelegramResponseSchema.safeParse(edgeResponse.data);
+    if (!response.ok) {
+      const parsed = authTelegramErrorSchema.safeParse(body);
+      if (parsed.success) {
+        throw new SignInError(parsed.data.error, parsed.data.message ?? `HTTP ${response.status}`);
+      }
+      throw new SignInError(
+        'internal_error',
+        `auth-telegram returned HTTP ${response.status}: ${bodyText.slice(0, 200)}`,
+      );
+    }
+
+    const okBody = authTelegramResponseSchema.safeParse(body);
     if (!okBody.success) {
       throw new SignInError(
         'internal_error',
@@ -106,7 +151,7 @@ const createAuthApi = (sb: SupabaseClientLike): AuthApi => ({
     }
     const { tokenHash, email, isNewUser } = okBody.data;
 
-    // 2. Swap the magic-link token_hash for a real Supabase session.
+    // 3. Swap the magic-link token_hash for a real Supabase session.
     //    Same internal call path as a clicked email link → we get refresh
     //    tokens, autoRefreshToken kicks in for the rest of the session.
     const { data: otpData, error: otpError } = await sb.auth.verifyOtp({
@@ -163,33 +208,3 @@ const createProfilesApi = (sb: SupabaseClientLike): ProfilesApi => ({
     return (data as ProfileRow | null) ?? null;
   },
 });
-
-// =============================================================================
-// helpers
-// =============================================================================
-
-/**
- * Best-effort: pull the JSON body out of supabase-js's `FunctionsHttpError`
- * and map it to our typed `SignInError`. Falls back to a generic
- * `internal_error` if the body isn't our documented shape (means Edge
- * platform itself responded — e.g. cold-start crash).
- */
-const parseEdgeError = async (err: unknown): Promise<SignInError> => {
-  if (!err) return new SignInError('internal_error', 'Unknown auth-telegram error');
-
-  const message = err instanceof Error ? err.message : String(err);
-
-  const ctx = (err as { context?: { json?: () => Promise<unknown> } }).context;
-  if (ctx?.json) {
-    try {
-      const body = await ctx.json();
-      const parsed = authTelegramErrorSchema.safeParse(body);
-      if (parsed.success) {
-        return new SignInError(parsed.data.error, parsed.data.message ?? message);
-      }
-    } catch {
-      // fall through
-    }
-  }
-  return new SignInError('internal_error', message);
-};
