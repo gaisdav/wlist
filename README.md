@@ -39,6 +39,29 @@ pnpm format       # Prettier write
 
 For the database / Supabase CLI workflow, see [`supabase/README.md`](./supabase/README.md).
 
+## Deploy (Vercel)
+
+The TMA is deployed to Vercel. Configuration lives in [`vercel.json`](./vercel.json) — it points Vercel at `apps/tma/dist` and runs `pnpm --filter @wlist/tma build`.
+
+### One-time setup
+
+1. <https://vercel.com/new> → **Import** the GitHub repo.
+2. Vercel will detect `vercel.json` and **not** prompt for build settings — leave them as-is.
+3. Set environment variables in **Project Settings → Environment Variables** (same names as in `apps/tma/.env`):
+   - `VITE_PUBLIC_APP_URL` → the Vercel URL Vercel will give you (e.g. `https://wlist.vercel.app`)
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+4. After the first deploy, copy the Vercel URL into [@BotFather](https://t.me/BotFather) → your bot → **Bot Settings → Configure Mini App → Edit URL**.
+5. Once `wlist.pro` is owned, add it as a Vercel custom domain and update `VITE_PUBLIC_APP_URL` + the BotFather Mini App URL.
+
+### CI
+
+GitHub Actions ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) runs on every push and PR:
+
+- `format:check`, `lint`, `typecheck`, `test`, `build`
+
+A `supabase db lint` job (with a local Postgres) and a `db:codegen` drift-check job land in plan 01 when the first real migration is added.
+
 ## Where to read first
 
 1. [`docs/architecture.md`](./docs/architecture.md) — full architecture (16 sections).
