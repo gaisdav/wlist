@@ -282,6 +282,26 @@ const createStorageApi = (sb: SupabaseClientLike): StorageApi => ({
     }
     return parsed.data;
   },
+
+  async completeWishPhotoUpload({ uploadUrl, body, contentType }) {
+    const res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': contentType },
+      body,
+    });
+    if (!res.ok) {
+      throw new Error(`wish photo upload failed: HTTP ${res.status}`);
+    }
+  },
+
+  async createWishPhotoSignedReadUrl(storagePath, expiresInSec = 3600) {
+    const { data, error } = await sb.storage
+      .from('wish-photos')
+      .createSignedUrl(storagePath, expiresInSec);
+    if (error) throw error;
+    if (!data?.signedUrl) throw new Error('createSignedUrl returned no URL');
+    return data.signedUrl;
+  },
 });
 
 // =============================================================================

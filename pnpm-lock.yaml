@@ -89,6 +89,9 @@ importers:
       tailwind-variants:
         specifier: ^3.2.0
         version: 3.2.2(tailwindcss@4.3.0)
+      wouter:
+        specifier: ^3.9.0
+        version: 3.9.0(react@19.2.6)
       zod:
         specifier: ^4.4.0
         version: 4.4.3
@@ -1576,6 +1579,10 @@ packages:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
 
+  regexparam@3.0.0:
+    resolution: {integrity: sha512-RSYAtP31mvYLkAHrOlh25pCNQ5hWnT106VukGaaFfuJrZFkGRX5GhUAdPqpSDXxOhA2c4akmRuplv1mRqnBn6Q==}
+    engines: {node: '>=8'}
+
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
 
@@ -1943,6 +1950,11 @@ packages:
 
   wordwrap@1.0.0:
     resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
+
+  wouter@3.9.0:
+    resolution: {integrity: sha512-sF/od/PIgqEQBQcrN7a2x3MX6MQE6nW0ygCfy9hQuUkuB28wEZuu/6M5GyqkrrEu9M6jxdkgE12yDFsQMKos4Q==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   wrap-ansi@10.0.0:
     resolution: {integrity: sha512-SGcvg80f0wUy2/fXES19feHMz8E0JoXv2uNgHOu4Dgi2OrCy1lqwFYEJz1BLbDI0exjPMe/ZdzZ/YpGECBG/aQ==}
@@ -3266,6 +3278,8 @@ snapshots:
     dependencies:
       picomatch: 2.3.2
 
+  regexparam@3.0.0: {}
+
   resolve-pkg-maps@1.0.0: {}
 
   restore-cursor@3.1.0:
@@ -3606,6 +3620,13 @@ snapshots:
   word-wrap@1.2.5: {}
 
   wordwrap@1.0.0: {}
+
+  wouter@3.9.0(react@19.2.6):
+    dependencies:
+      mitt: 3.0.1
+      react: 19.2.6
+      regexparam: 3.0.0
+      use-sync-external-store: 1.6.0(react@19.2.6)
 
   wrap-ansi@10.0.0:
     dependencies:

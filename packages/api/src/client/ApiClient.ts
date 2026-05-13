@@ -107,6 +107,22 @@ export interface StorageApi {
     wishId: string;
     mime: WishPhotoUploadMime;
   }): Promise<WishPhotoSignedUpload>;
+
+  /**
+   * `PUT` raw bytes to the URL returned by `requestWishPhotoUpload` (browser
+   * `fetch` — no supabase-js surface in `ApiClient`).
+   */
+  completeWishPhotoUpload(input: {
+    uploadUrl: string;
+    body: Blob;
+    contentType: string;
+  }): Promise<void>;
+
+  /**
+   * Short-lived signed URL to **read** an object in the private `wish-photos`
+   * bucket (for `<img src>`). Visibility follows Storage RLS.
+   */
+  createWishPhotoSignedReadUrl(storagePath: string, expiresInSec?: number): Promise<string>;
 }
 
 export interface WishesApi {
