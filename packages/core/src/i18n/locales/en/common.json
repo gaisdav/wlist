@@ -48,7 +48,8 @@
     "card": {
       "no_description": "No description",
       "price": "{{amount}} {{currency}}",
-      "price_no_currency": "{{amount}}"
+      "price_no_currency": "{{amount}}",
+      "has_product_link": "Includes a product link"
     },
     "detail": {
       "title": "Wish",
