@@ -5,3 +5,4 @@ export * from './routes/index.js';
 export * from './tokens/index.js';
 export * from './i18n/index.js';
 export * from './config/index.js';
+export * from './lib/index.js';

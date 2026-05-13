@@ -72,3 +72,55 @@ export const publicProfilesUpdateSchema = z.object({
   updated_at: z.string().optional(),
   username: z.string().optional().nullable(),
 });
+
+export const publicWishesRowSchema = z.object({
+  created_at: z.string(),
+  currency: z.string(),
+  description: z.string().nullable(),
+  id: z.string(),
+  is_archived: z.boolean(),
+  link: z.string().nullable(),
+  owner_id: z.string(),
+  photo_storage_path: z.string().nullable(),
+  price: z.number().nullable(),
+  title: z.string(),
+  updated_at: z.string(),
+});
+
+export const publicWishesInsertSchema = z.object({
+  created_at: z.string().optional(),
+  currency: z.string().optional(),
+  description: z.string().optional().nullable(),
+  id: z.string().optional(),
+  is_archived: z.boolean().optional(),
+  link: z.string().optional().nullable(),
+  owner_id: z.string(),
+  photo_storage_path: z.string().optional().nullable(),
+  price: z.number().optional().nullable(),
+  title: z.string(),
+  updated_at: z.string().optional(),
+});
+
+export const publicWishesUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  currency: z.string().optional(),
+  description: z.string().optional().nullable(),
+  id: z.string().optional(),
+  is_archived: z.boolean().optional(),
+  link: z.string().optional().nullable(),
+  owner_id: z.string().optional(),
+  photo_storage_path: z.string().optional().nullable(),
+  price: z.number().optional().nullable(),
+  title: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const publicWishesRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("wishes_owner_id_fkey"),
+    columns: z.tuple([z.literal("owner_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);

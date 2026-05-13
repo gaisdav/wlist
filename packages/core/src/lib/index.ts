@@ -1,3 +1,3 @@
-// Platform-agnostic utilities (formatPrice, parseInitData, etc).
+// Platform-agnostic utilities (formatPrice, wish field limits, etc).
 // May be called from any runtime — including Edge Functions.
-export {};
+export * from './wishConstraints.js';

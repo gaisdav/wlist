@@ -57,6 +57,7 @@ flowchart LR
 **Ключевые свойства:**
 
 - Никакого собственного backend-сервиса в MVP — всё, что нельзя сделать через RLS, реализуется в Edge Functions.
+- Bucket `wish-photos` (private): в MVP не более одного изображения на желание; ключ объекта хранится в `wishes.photo_storage_path`.
 - TMA общается с Supabase напрямую (через `@wlist/api`), но обёртка `ApiClient` — единственная точка интеграции, чтобы при добавлении web/RN не плодить копии.
 - Telegram-бот в MVP — только launcher Mini App. Публичный URL приложения берётся из env (`VITE_PUBLIC_APP_URL`). На старте — временный домен Vercel; после покупки `wlist.pro` он подключается без правок кода.
 

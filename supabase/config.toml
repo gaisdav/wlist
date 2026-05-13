@@ -388,6 +388,12 @@ deno_version = 2
 [functions.auth-telegram]
 verify_jwt = false
 
+# `wish-photo-upload` — mints a signed PUT URL for the private `wish-photos`
+# bucket. Callers must present a valid Supabase user JWT; the function proves
+# wish ownership before issuing the URL.
+[functions.wish-photo-upload]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327

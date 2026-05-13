@@ -2,3 +2,4 @@
 // Imported in two places: the function itself (input parsing) and the client
 // (call typing + response validation). See docs/architecture.md §9.
 export * from './auth-telegram.js';
+export * from './wish-photo-upload.js';

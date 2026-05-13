@@ -17,21 +17,13 @@
 - `id` (`uuid`, PK)
 - `owner_id` (`uuid`, FK → `profiles.id`, not null)
 - `title` (`text`, not null, 1..200)
-- `description` (`text`, nullable, до 2000)
+- `description` (`text`, nullable, до **1000** символов — лимит в БД и в форме; в списке карточек UI обрезает превью)
 - `price` (`numeric`, nullable)
 - `currency` (`text`, default `'USD'`) — UI на старте только EN
 - `link` (`text`, nullable, валидный URL)
-- `cover_photo_id` (`uuid`, nullable, FK → `wish_photos.id`)
+- `photo_storage_path` (`text`, nullable) — один объект в bucket `wish-photos` (`<wish_id>/<file>`); null = без фото
 - `is_archived` (`boolean`, default false) — для скрытия выполненных, без удаления
 - `created_at`, `updated_at`
-
-Таблица `public.wish_photos`:
-
-- `id` (`uuid`, PK)
-- `wish_id` (`uuid`, FK → `wishes.id`, on delete cascade)
-- `storage_path` (`text`) — путь в Supabase Storage
-- `position` (`int`) — порядок отображения
-- `created_at`
 
 ### 2. Storage
 
@@ -44,20 +36,19 @@
   - **SELECT:** в MVP — любой авторизованный пользователь видит любые не-архивные желания (приватность появится в этапе 08).
   - **INSERT:** `owner_id = auth.uid()`.
   - **UPDATE/DELETE:** только владелец.
-- `wish_photos`: аналогично, через join к `wishes`.
 
 ### 4. UI экранов
 
 1. **Мой вишлист** — список собственных желаний (карточки), кнопка «+ Добавить».
 2. **Создание/редактирование желания** — форма (title, description, price, currency, link, фото).
-3. **Карточка желания (детальный экран)** — все поля, основное фото + галерея, кнопки «редактировать», «архивировать», «удалить» (для владельца).
+3. **Карточка желания (детальный экран)** — все поля, одно фото (если есть), кнопки «редактировать», «архивировать», «удалить» (для владельца).
 4. **Просмотр чужого вишлиста** — список карточек по `owner_id`. Без слотов и комментариев пока что.
 
 ### 5. Клиентский слой
 
 - В `packages/api`:
   - `wishes.list(ownerId)`, `wishes.get(id)`, `wishes.create()`, `wishes.update()`, `wishes.archive()`, `wishes.delete()`
-  - `wishPhotos.upload(file)`, `wishPhotos.remove()`
+  - загрузка фото: signed URL (`storage.requestWishPhotoUpload`) + обновление `wishes.photo_storage_path`; снятие фото — очистка поля + удаление объекта из Storage при необходимости
 - В `packages/core`:
   - hooks `useMyWishes()`, `useUserWishes(ownerId)`, `useWish(id)`
   - mutations `useCreateWish()`, `useUpdateWish()`, `useArchiveWish()`, `useDeleteWish()`
@@ -86,7 +77,7 @@
 
 ## Чек-лист задач
 
-- [ ] Миграция `wishes` + `wish_photos`
+- [ ] Миграция `wishes` (одно фото: `photo_storage_path`)
 - [ ] RLS-политики
 - [ ] Bucket `wish-photos` + storage policies
 - [ ] Edge Function для signed upload URL
@@ -107,7 +98,7 @@
 
 ## Открытые вопросы
 
-- Поддерживать ли drag-n-drop сортировку фото в MVP, или только последовательный аплоад?
-- Несколько валют (USD/EUR/GBP/…) или только USD в MVP?
-- Что делать с очень длинными описаниями — обрезать в карточке или показывать полностью?
+- ~~Несколько фото~~ — **в MVP одно фото** на желание; путь в `wishes.photo_storage_path`, без отдельной таблицы.
+- ~~Валюты~~ — **select из 10 кодов:** `USD`, `EUR`, `RUB`, `KZT`, `GBP`, `CHF`, `PLN`, `UAH`, `TRY`, `JPY` (константа в `@wlist/core`).
+- ~~Длинное описание~~ — **max 1000 символов** в БД и в форме создания/редактирования; в карточке списка — **обрезанное превью** (детальный экран — полный текст в пределах лимита).
 - Парсить ли OG-данные по `link` на сервере, чтобы автоматически подтягивать заголовок и фото? (Возможно — отдельной фичей в post-MVP.)
