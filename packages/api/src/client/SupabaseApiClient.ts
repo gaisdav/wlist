@@ -302,6 +302,11 @@ const createStorageApi = (sb: SupabaseClientLike): StorageApi => ({
     if (!data?.signedUrl) throw new Error('createSignedUrl returned no URL');
     return data.signedUrl;
   },
+
+  async deleteWishPhoto(storagePath) {
+    const { error } = await sb.storage.from('wish-photos').remove([storagePath]);
+    if (error) throw error;
+  },
 });
 
 // =============================================================================

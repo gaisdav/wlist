@@ -49,7 +49,7 @@
 
 - В `packages/api`:
   - `wishes.list(ownerId)`, `wishes.get(id)`, `wishes.create()`, `wishes.update()`, `wishes.archive()`, `wishes.delete()`
-  - загрузка фото: signed URL (`storage.requestWishPhotoUpload`) + обновление `wishes.photo_storage_path`; снятие фото — очистка поля + удаление объекта из Storage при необходимости
+  - загрузка фото: signed URL (`storage.requestWishPhotoUpload`) + обновление `wishes.photo_storage_path`; при **замене** фото — удаление прежнего объекта в bucket (`storage.deleteWishPhoto`); снятие фото — очистка поля + удаление объекта из Storage при необходимости
 - В `packages/core`:
   - hooks `useMyWishes()`, `useUserWishes(ownerId)`, `useWish(id)`
   - mutations `useCreateWish()`, `useUpdateWish()`, `useArchiveWish()`, `useDeleteWish()`

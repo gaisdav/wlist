@@ -123,6 +123,9 @@ export interface StorageApi {
    * bucket (for `<img src>`). Visibility follows Storage RLS.
    */
   createWishPhotoSignedReadUrl(storagePath: string, expiresInSec?: number): Promise<string>;
+
+  /** Remove an object from `wish-photos` (RLS: wish owner only). */
+  deleteWishPhoto(storagePath: string): Promise<void>;
 }
 
 export interface WishesApi {

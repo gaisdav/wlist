@@ -77,7 +77,11 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   };
   useTelegramBackButton(goBack, true);
 
-  const uploadPhotoIfNeeded = async (id: string, file: File): Promise<void> => {
+  const uploadPhotoIfNeeded = async (
+    id: string,
+    file: File,
+    previousStoragePath: string | null,
+  ): Promise<void> => {
     const mime = wishPhotoMimeForApi(file);
     if (!mime) throw new Error('unsupported_image_type');
     const signed = await api.storage.requestWishPhotoUpload({ wishId: id, mime });
@@ -87,6 +91,16 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       contentType: mime,
     });
     await updateMut.mutateAsync({ id, photo_storage_path: signed.storagePath });
+    if (
+      previousStoragePath &&
+      previousStoragePath !== signed.storagePath
+    ) {
+      try {
+        await api.storage.deleteWishPhoto(previousStoragePath);
+      } catch {
+        // Old object may already be gone; avoid failing the save flow.
+      }
+    }
   };
 
   const onValid = async (payload: WishDraftPayload): Promise<void> => {
@@ -102,14 +116,15 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
       if (mode === 'create') {
         const row = await createMut.mutateAsync(body);
-        if (photo) await uploadPhotoIfNeeded(row.id, photo);
+        if (photo) await uploadPhotoIfNeeded(row.id, photo, null);
         setLocation(`/wish/${row.id}`, { replace: true });
         return;
       }
 
       if (!wishId) return;
+      const previousPhotoPath = existing.data?.photo_storage_path ?? null;
       await updateMut.mutateAsync({ id: wishId, ...body });
-      if (photo) await uploadPhotoIfNeeded(wishId, photo);
+      if (photo) await uploadPhotoIfNeeded(wishId, photo, previousPhotoPath);
       setLocation(`/wish/${wishId}`, { replace: true });
     } finally {
       setIsSaving(false);

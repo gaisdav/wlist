@@ -40,6 +40,7 @@ const buildApi = (overrides: {
       requestWishPhotoUpload: vi.fn(),
       completeWishPhotoUpload: vi.fn(),
       createWishPhotoSignedReadUrl: vi.fn(),
+      deleteWishPhoto: vi.fn(),
     },
     wishes: {
       listByOwner: vi.fn(),
