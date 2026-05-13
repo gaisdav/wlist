@@ -103,14 +103,14 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       if (mode === 'create') {
         const row = await createMut.mutateAsync(body);
         if (photo) await uploadPhotoIfNeeded(row.id, photo);
-        setLocation(`/wish/${row.id}`);
+        setLocation(`/wish/${row.id}`, { replace: true });
         return;
       }
 
       if (!wishId) return;
       await updateMut.mutateAsync({ id: wishId, ...body });
       if (photo) await uploadPhotoIfNeeded(wishId, photo);
-      setLocation(`/wish/${wishId}`);
+      setLocation(`/wish/${wishId}`, { replace: true });
     } finally {
       setIsSaving(false);
     }
