@@ -33,7 +33,7 @@
 | Хостинг TMA              | **Vercel**                                                         |
 | Локализация              | **English only** в MVP (i18n-инфраструктуру закладываем сразу)     |
 | i18n библиотека          | **`i18next` + `react-i18next`**, словари в `@wlist/core/i18n`      |
-| Маршрутизация в TMA      | Свой лёгкий роутер на History API + интеграция с Telegram BackButton; `wouter` — резерв |
+| Маршрутизация в TMA      | **`wouter`** в `apps/tma` (History API) + Telegram `BackButton`; полностью кастомный роутер не нужен на MVP |
 | Optimistic updates       | По умолчанию для каждой мутации с очевидным UX-выигрышем; в MVP — минимум |
 | Тестирование RLS         | До релиза — ручное; автоматический suite — после первой беты       |
 | Генерация типов из БД    | `supabase gen types` → `database.types.ts` + **`supazod`** → `database.zod.ts`. Доменные entities — `.transform()` поверх row-схем |

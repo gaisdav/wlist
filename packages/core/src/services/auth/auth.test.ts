@@ -36,6 +36,19 @@ const buildApi = (overrides: {
     profiles: {
       getCurrent: overrides.getCurrent ?? vi.fn().mockResolvedValue(buildProfileRow()),
     },
+    storage: {
+      requestWishPhotoUpload: vi.fn(),
+      completeWishPhotoUpload: vi.fn(),
+      createWishPhotoSignedReadUrl: vi.fn(),
+    },
+    wishes: {
+      listByOwner: vi.fn(),
+      get: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      archive: vi.fn(),
+      delete: vi.fn(),
+    },
   }) as unknown as ApiClient;
 
 describe('loginWithTelegram', () => {

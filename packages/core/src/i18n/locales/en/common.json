@@ -31,5 +31,49 @@
     "actions": {
       "retry": "Try again"
     }
+  },
+  "nav": {
+    "my_wishes": "My wishes",
+    "add_wish": "Add wish",
+    "public_preview": "Public list preview"
+  },
+  "wishes": {
+    "list": {
+      "title": "My wishes",
+      "empty": "No wishes yet. Add one to get started.",
+      "user_title": "Wishlist",
+      "archived": "Archived"
+    },
+    "card": {
+      "no_description": "No description",
+      "price": "{{amount}} {{currency}}"
+    },
+    "detail": {
+      "title": "Wish",
+      "description": "Description",
+      "price": "Price",
+      "link": "Link",
+      "open_link": "Open link",
+      "archive": "Archive",
+      "delete_confirm": "Delete this wish? This cannot be undone.",
+      "owner_hint": "You own this wish."
+    },
+    "form": {
+      "create_title": "New wish",
+      "edit_title": "Edit wish",
+      "title_label": "Title",
+      "description_label": "Description",
+      "price_label": "Price (optional)",
+      "currency_label": "Currency",
+      "link_label": "Link (optional)",
+      "photo_label": "Photo (optional)",
+      "photo_hint": "JPEG, PNG, WebP, or GIF — one image.",
+      "submit_create": "Create wish",
+      "submit_edit": "Save changes",
+      "errors": {
+        "invalid_price": "Enter a valid non-negative number.",
+        "invalid_link": "Enter a valid https URL or leave empty."
+      }
+    }
   }
 }

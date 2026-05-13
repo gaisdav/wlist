@@ -83,11 +83,13 @@
 - [x] Edge Function для signed upload URL
 - [x] API-слой в `packages/api` (`wishes.*` на `ApiClient`)
 - [x] Hooks в `packages/core` (queries + mutations)
-- [ ] Экран «Мой вишлист»
-- [ ] Экран создания/редактирования желания (форма + загрузка фото)
-- [ ] Экран карточки желания
-- [ ] Экран просмотра чужого вишлиста
-- [ ] Skeleton + optimistic updates
+- [x] Экран «Мой вишлист»
+- [x] Экран создания/редактирования желания (форма + загрузка фото)
+- [x] Экран карточки желания
+- [x] Экран просмотра чужого вишлиста
+- [x] Skeleton (списки, деталь, форма)
+- [ ] Optimistic updates (можно добавить позже)
+- [ ] Telegram `MainButton` как дубль submit (сейчас достаточно кнопки в форме + `BackButton`)
 
 ## Definition of Done
 

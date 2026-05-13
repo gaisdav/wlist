@@ -2,12 +2,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { createApiClient } from './api/createApiClient';
-import { App } from './App';
 import { AuthGate } from './auth/AuthGate';
 import './i18n';
 import { ApiClientProvider } from './providers/ApiClientProvider';
 import { QueryProvider } from './providers/QueryProvider';
 import { TelegramProvider } from './providers/TelegramProvider';
+import { AppRouter } from './router';
 import './styles/globals.css';
 
 const rootEl = document.getElementById('root');
@@ -21,7 +21,7 @@ createRoot(rootEl).render(
       <ApiClientProvider client={apiClient}>
         <QueryProvider>
           <AuthGate>
-            <App />
+            <AppRouter />
           </AuthGate>
         </QueryProvider>
       </ApiClientProvider>
