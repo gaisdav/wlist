@@ -36,6 +36,17 @@ export const useArchiveWish = (api: ApiClient) => {
   });
 };
 
+export const useUnarchiveWish = (api: ApiClient) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.wishes.unarchive(id),
+    onSuccess: (row) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.wishes.byOwner(row.owner_id) });
+      void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(row.id) });
+    },
+  });
+};
+
 export const useDeleteWish = (api: ApiClient) => {
   const qc = useQueryClient();
   return useMutation({

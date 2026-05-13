@@ -382,6 +382,17 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
     return data as WishRow;
   },
 
+  async unarchive(id) {
+    const { data, error } = await sb
+      .from('wishes')
+      .update({ is_archived: false })
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as WishRow;
+  },
+
   async delete(id) {
     const { error } = await sb.from('wishes').delete().eq('id', id);
     if (error) throw error;

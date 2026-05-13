@@ -132,6 +132,7 @@ export interface WishesApi {
   create(input: WishCreateInput): Promise<WishRow>;
   update(input: WishUpdateInput): Promise<WishRow>;
   archive(id: string): Promise<WishRow>;
+  unarchive(id: string): Promise<WishRow>;
   delete(id: string): Promise<void>;
 }
 

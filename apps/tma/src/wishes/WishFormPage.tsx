@@ -13,6 +13,7 @@ import {
   readLastWishCurrency,
   SUPPORTED_WISH_CURRENCIES,
 } from '@wlist/core/lib';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const api = useApiClient();
   const [, setLocation] = useLocation();
   const [photo, setPhoto] = useState<File | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
   const createMut = useCreateWish(api);
@@ -90,25 +92,30 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   };
 
   const onValid = async (payload: WishDraftPayload): Promise<void> => {
-    const body = {
-      title: payload.title,
-      description: payload.description,
-      price: payload.price,
-      currency: payload.currency,
-      link: payload.link,
-    };
+    setIsSaving(true);
+    try {
+      const body = {
+        title: payload.title,
+        description: payload.description,
+        price: payload.price,
+        currency: payload.currency,
+        link: payload.link,
+      };
 
-    if (mode === 'create') {
-      const row = await createMut.mutateAsync(body);
-      if (photo) await uploadPhotoIfNeeded(row.id, photo);
-      setLocation(`/wish/${row.id}`);
-      return;
+      if (mode === 'create') {
+        const row = await createMut.mutateAsync(body);
+        if (photo) await uploadPhotoIfNeeded(row.id, photo);
+        setLocation(`/wish/${row.id}`);
+        return;
+      }
+
+      if (!wishId) return;
+      await updateMut.mutateAsync({ id: wishId, ...body });
+      if (photo) await uploadPhotoIfNeeded(wishId, photo);
+      setLocation(`/wish/${wishId}`);
+    } finally {
+      setIsSaving(false);
     }
-
-    if (!wishId) return;
-    await updateMut.mutateAsync({ id: wishId, ...body });
-    if (photo) await uploadPhotoIfNeeded(wishId, photo);
-    setLocation(`/wish/${wishId}`);
   };
 
   if (mode === 'edit' && (existing.isLoading || !wishId)) {
@@ -130,119 +137,135 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         {mode === 'create' ? t('wishes.form.create_title') : t('wishes.form.edit_title')}
       </h1>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">{t('wishes.form.title_label')}</span>
-        <input
-          className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-          {...register('title')}
-        />
-        {formState.errors.title ? (
-          <span className="text-xs text-destructive">{formState.errors.title.message}</span>
-        ) : null}
-      </label>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">
-          {t('wishes.form.description_label')}
-        </span>
-        <textarea
-          rows={4}
-          className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-          {...register('description')}
-        />
-        {formState.errors.description ? (
-          <span className="text-xs text-destructive">{formState.errors.description.message}</span>
-        ) : null}
-      </label>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">{t('wishes.form.price_label')}</span>
-        <input
-          inputMode="decimal"
-          className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-          {...register('priceStr', {
-            onChange: (e) => {
-              const v = String((e.target as HTMLInputElement).value ?? '');
-              const nextHas = v.trim() !== '';
-              if (!nextHas) {
-                setValue('currency', '', { shouldValidate: true, shouldDirty: true });
-                return;
-              }
-              const cur = getValues('currency');
-              if (!cur) {
-                setValue('currency', readLastWishCurrency(), {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                });
-              }
-            },
-          })}
-        />
-        {formState.errors.priceStr ? (
-          <span className="text-xs text-destructive">{t('wishes.form.errors.invalid_price')}</span>
-        ) : null}
-      </label>
-
-      {hasPrice ? (
+      <fieldset
+        disabled={isSaving}
+        className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0 disabled:opacity-60"
+      >
         <label className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.currency_label')}
+            {t('wishes.form.title_label')}
           </span>
-          <select
+          <input
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            {...register('currency', {
+            {...register('title')}
+          />
+          {formState.errors.title ? (
+            <span className="text-xs text-destructive">{formState.errors.title.message}</span>
+          ) : null}
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.description_label')}
+          </span>
+          <textarea
+            rows={4}
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            {...register('description')}
+          />
+          {formState.errors.description ? (
+            <span className="text-xs text-destructive">{formState.errors.description.message}</span>
+          ) : null}
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.price_label')}
+          </span>
+          <input
+            inputMode="decimal"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            {...register('priceStr', {
               onChange: (e) => {
-                const v = (e.target as HTMLSelectElement).value;
-                if (v) persistLastWishCurrency(v);
+                const v = String((e.target as HTMLInputElement).value ?? '');
+                const nextHas = v.trim() !== '';
+                if (!nextHas) {
+                  setValue('currency', '', { shouldValidate: true, shouldDirty: true });
+                  return;
+                }
+                const cur = getValues('currency');
+                if (!cur) {
+                  setValue('currency', readLastWishCurrency(), {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }
               },
             })}
-          >
-            <option value="">{t('wishes.form.currency_placeholder')}</option>
-            {SUPPORTED_WISH_CURRENCIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-          {formState.errors.currency ? (
+          />
+          {formState.errors.priceStr ? (
             <span className="text-xs text-destructive">
-              {formState.errors.currency.message === 'currency_without_price'
-                ? t('wishes.form.errors.currency_without_price')
-                : t('wishes.form.errors.invalid_currency')}
+              {t('wishes.form.errors.invalid_price')}
             </span>
           ) : null}
         </label>
-      ) : null}
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">{t('wishes.form.link_label')}</span>
-        <input
-          className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-          {...register('linkStr')}
-        />
-        {formState.errors.linkStr ? (
-          <span className="text-xs text-destructive">{t('wishes.form.errors.invalid_link')}</span>
+        {hasPrice ? (
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('wishes.form.currency_label')}
+            </span>
+            <select
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              {...register('currency', {
+                onChange: (e) => {
+                  const v = (e.target as HTMLSelectElement).value;
+                  if (v) persistLastWishCurrency(v);
+                },
+              })}
+            >
+              <option value="">{t('wishes.form.currency_placeholder')}</option>
+              {SUPPORTED_WISH_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            {formState.errors.currency ? (
+              <span className="text-xs text-destructive">
+                {formState.errors.currency.message === 'currency_without_price'
+                  ? t('wishes.form.errors.currency_without_price')
+                  : t('wishes.form.errors.invalid_currency')}
+              </span>
+            ) : null}
+          </label>
         ) : null}
-      </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-foreground">{t('wishes.form.photo_label')}</span>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          className="text-sm text-muted"
-          onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
-        />
-        <span className="text-xs text-muted">{t('wishes.form.photo_hint')}</span>
-      </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-foreground">{t('wishes.form.link_label')}</span>
+          <input
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            {...register('linkStr')}
+          />
+          {formState.errors.linkStr ? (
+            <span className="text-xs text-destructive">{t('wishes.form.errors.invalid_link')}</span>
+          ) : null}
+        </label>
 
-      <button
-        type="submit"
-        disabled={createMut.isPending || updateMut.isPending}
-        className="rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
-      >
-        {mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit')}
-      </button>
+        <label className="flex flex-col gap-1">
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.photo_label')}
+          </span>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="text-sm text-muted"
+            onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+          />
+          <span className="text-xs text-muted">{t('wishes.form.photo_hint')}</span>
+        </label>
+
+        <button
+          type="submit"
+          disabled={isSaving}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
+        >
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" strokeWidth={2} aria-hidden />
+          ) : null}
+          {mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit')}
+        </button>
+      </fieldset>
     </form>
   );
 };

@@ -47,6 +47,7 @@ const buildApi = (overrides: {
       create: vi.fn(),
       update: vi.fn(),
       archive: vi.fn(),
+      unarchive: vi.fn(),
       delete: vi.fn(),
     },
   }) as unknown as ApiClient;

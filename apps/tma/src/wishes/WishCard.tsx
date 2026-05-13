@@ -3,6 +3,7 @@ import { truncateWishDescriptionForList } from '@wlist/core/lib';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
+import { WISH_NO_PHOTO_EMOJI } from './constants';
 import { WishPhoto } from './WishPhoto';
 
 interface WishCardProps {
@@ -12,6 +13,7 @@ interface WishCardProps {
 export const WishCard = ({ wish }: WishCardProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const preview = truncateWishDescriptionForList(wish.description);
+  const hasPhoto = Boolean(wish.photo_storage_path);
 
   return (
     <Link
@@ -19,16 +21,20 @@ export const WishCard = ({ wish }: WishCardProps): React.JSX.Element => {
       className="flex gap-3 rounded-lg border border-border bg-surface p-3 text-left transition hover:bg-muted/10"
     >
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md bg-muted">
-        <WishPhoto
-          storagePath={wish.photo_storage_path}
-          alt=""
-          className="h-full w-full object-cover"
-        />
-        {!wish.photo_storage_path ? (
-          <div className="absolute inset-0 grid place-items-center text-sm font-semibold text-foreground">
-            {wish.title.slice(0, 1).toUpperCase()}
+        {hasPhoto ? (
+          <WishPhoto
+            storagePath={wish.photo_storage_path}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div
+            className="flex h-full w-full select-none items-center justify-center text-2xl"
+            aria-hidden
+          >
+            {WISH_NO_PHOTO_EMOJI}
           </div>
-        ) : null}
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-foreground">{wish.title}</p>

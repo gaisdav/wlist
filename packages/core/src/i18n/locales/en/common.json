@@ -56,6 +56,8 @@
       "link": "Link",
       "open_link": "Open link",
       "archive": "Archive",
+      "unarchive": "Restore to list",
+      "photo_lightbox": "Wish photo",
       "delete_confirm": "Delete this wish? This cannot be undone.",
       "owner_hint": "You own this wish."
     },
