@@ -248,8 +248,7 @@ const createStorageApi = (sb: SupabaseClientLike): StorageApi => ({
     try {
       res = await sb.functions.invoke('wish-photo-upload', { body: { wishId, mime } });
     } catch (e) {
-      const message =
-        e instanceof Error ? e.message : 'Network error calling wish-photo-upload';
+      const message = e instanceof Error ? e.message : 'Network error calling wish-photo-upload';
       throw new Error(message, { cause: e });
     }
 

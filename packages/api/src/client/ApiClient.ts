@@ -101,7 +101,10 @@ export interface WishPhotoSignedUpload {
 }
 
 export interface StorageApi {
-  requestWishPhotoUpload(input: { wishId: string; mime: WishPhotoUploadMime }): Promise<WishPhotoSignedUpload>;
+  requestWishPhotoUpload(input: {
+    wishId: string;
+    mime: WishPhotoUploadMime;
+  }): Promise<WishPhotoSignedUpload>;
 }
 
 export interface ApiClient {
