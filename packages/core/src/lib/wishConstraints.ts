@@ -20,7 +20,9 @@ export type WishCurrencyCode =
   | 'PLN'
   | 'UAH'
   | 'TRY'
-  | 'JPY';
+  | 'JPY'
+  | 'CNY'
+  | 'RSD';
 
 export interface WishCurrencyOption {
   code: WishCurrencyCode;
@@ -40,6 +42,8 @@ export const SUPPORTED_WISH_CURRENCIES: readonly WishCurrencyOption[] = [
   { code: 'UAH', label: 'Ukrainian Hryvnia (UAH)' },
   { code: 'TRY', label: 'Turkish Lira (TRY)' },
   { code: 'JPY', label: 'Japanese Yen (JPY)' },
+  { code: 'CNY', label: 'Chinese Yuan (CNY)' },
+  { code: 'RSD', label: 'Serbian Dinar (RSD)' },
 ] as const;
 
 const SUPPORTED_CODES = new Set(SUPPORTED_WISH_CURRENCIES.map((c) => c.code));
