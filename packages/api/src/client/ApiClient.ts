@@ -7,6 +7,8 @@
 
 import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
 
+import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
+
 /**
  * Authenticated session from the platform's perspective. Intentionally narrow:
  * we expose only what `@wlist/core` legitimately needs — the user id (for
@@ -107,10 +109,22 @@ export interface StorageApi {
   }): Promise<WishPhotoSignedUpload>;
 }
 
+export interface WishesApi {
+  /** All wishes visible to the caller for this owner (RLS applies). */
+  listByOwner(ownerId: string): Promise<WishRow[]>;
+  get(id: string): Promise<WishRow | null>;
+  create(input: WishCreateInput): Promise<WishRow>;
+  update(input: WishUpdateInput): Promise<WishRow>;
+  archive(id: string): Promise<WishRow>;
+  delete(id: string): Promise<void>;
+}
+
 export interface ApiClient {
   auth: AuthApi;
   profiles: ProfilesApi;
   storage: StorageApi;
-  // wishes.* → plan 02 (next PR)
+  wishes: WishesApi;
   // slots.* → plan 03
 }
+
+export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';

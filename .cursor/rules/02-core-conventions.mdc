@@ -12,7 +12,7 @@ alwaysApply: false
 
 ```
 src/
-├── entities/   # camelCase Zod-схемы (transform от api/generated/database.zod), плоско
+├── entities/   # Zod поверх `api/generated/database.zod` — по умолчанию snake_case как в БД
 ├── services/   # Бизнес-операции, чистые функции, принимают ApiClient, плоско
 ├── hooks/      # React-обёртки поверх services + TanStack Query, ПО ДОМЕНАМ
 ├── routes/     # Декларативные маршруты (см. ниже)
@@ -57,32 +57,21 @@ React импортируется **только** в `hooks/`. `services/` и `e
 
 ## Entities
 
-Каждая сущность — `.transform()` поверх автогенерированной snake_case схемы из `@wlist/api/generated/database.zod`. Так невозможно расхождение между БД и доменом.
+- Берём `public*RowSchema` из `@wlist/api/generated/database.zod`, затем `.extend()` / `.refine()` под инварианты, которых нет в CHECK (URL ссылки, список валют и т.п.).
+- **По умолчанию не делаем `.transform()` в camelCase** — тип строки совпадает с `Database['public']['Tables'][…]['Row']`, меньше дублирования и расхождений после `db:codegen`.
+- **Исключение:** осознанный `.transform()` в camelCase (сейчас: `Profile` для Telegram-полей в UI).
+- Не описывай табличную строку «с нуля» (`z.object({ … })`) — сначала generated row-схема, потом узкие правки.
 
 ```ts
-import { z } from 'zod';
-import { wishesRowSchema } from '@wlist/api/generated/database.zod';
+import { publicWishesRowSchema } from '@wlist/api/generated/database.zod';
 
-export const wishSchema = wishesRowSchema
-  .extend({
-    // format-уточнения, которых нет в БД:
-    link: z.string().url().nullable(),
-  })
-  .transform((row) => ({
-    id: row.id,
-    ownerId: row.owner_id,
-    title: row.title,
-    // ...
-  }));
+export const wishSchema = publicWishesRowSchema.extend({
+  link: z.union([z.string().url(), z.null()]),
+  currency: z.string().refine(isWishCurrencyCode),
+});
 
 export type Wish = z.infer<typeof wishSchema>;
 ```
-
-**Правила:**
-
-- camelCase в `core/entities/` всегда, без исключений.
-- Если в миграции добавлено поле — TS-сборка падает в `entities/`, пока не обновим transform. Это правильное поведение.
-- Не пиши Zod-схемы «с нуля» (`z.object({ ... })`) — сначала бери row-схему из generated, потом extend/transform.
 
 ## Services
 
@@ -95,8 +84,8 @@ export async function listWishes(ownerId: string) { ... }
 import type { ApiClient } from '@wlist/api';
 export const wishesService = {
   async listByOwner(api: ApiClient, ownerId: string): Promise<Wish[]> {
-    const wishes = await api.wishes.list({ ownerId });
-    return z.array(wishSchema).parse(wishes);
+    const wishes = await api.wishes.listByOwner(ownerId);
+    return wishes.map((row) => wishSchema.parse(row));
   },
 };
 ```

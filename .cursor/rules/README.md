@@ -4,16 +4,16 @@
 
 ## Состав
 
-| Файл                                                   | Когда применяется             | Назначение                                                     |
-| ------------------------------------------------------ | ----------------------------- | -------------------------------------------------------------- |
-| [`00-project-overview.mdc`](./00-project-overview.mdc) | **всегда**                    | Источники правды (concept / plans / architecture), стек, язык  |
-| [`01-monorepo.mdc`](./01-monorepo.mdc)                 | **всегда**                    | Структура моно-репо, правила импортов, pnpm                    |
-| [`02-core-conventions.mdc`](./02-core-conventions.mdc) | `packages/core/**/*.{ts,tsx}` | Layer-based структура, ApiClient через DI, queryKeys, routes   |
-| [`03-api-conventions.mdc`](./03-api-conventions.mdc)   | `packages/api/**/*.{ts,tsx}`  | ApiClient интерфейс, snake↔camel, edge-contracts, безопасность |
-| [`04-tma-ui.mdc`](./04-tma-ui.mdc)                     | `apps/tma/**/*.{ts,tsx,css}`  | Tailwind, токены, варианты компонентов, Telegram SDK, формы    |
-| [`05-supabase-rls.mdc`](./05-supabase-rls.mdc)         | `supabase/**/*`               | Миграции, RLS-шаблон, скрытие от автора, Edge Functions        |
-| [`06-typescript.mdc`](./06-typescript.mdc)             | `**/*.{ts,tsx}`               | strict-режим, Zod, импорты, naming, ошибки                     |
-| [`07-workflow.mdc`](./07-workflow.mdc)                 | **всегда**                    | Скоуп MVP, что не делать, когда заводить вопросы               |
+| Файл                                                   | Когда применяется             | Назначение                                                    |
+| ------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------- |
+| [`00-project-overview.mdc`](./00-project-overview.mdc) | **всегда**                    | Источники правды (concept / plans / architecture), стек, язык |
+| [`01-monorepo.mdc`](./01-monorepo.mdc)                 | **всегда**                    | Структура моно-репо, правила импортов, pnpm                   |
+| [`02-core-conventions.mdc`](./02-core-conventions.mdc) | `packages/core/**/*.{ts,tsx}` | Layer-based структура, ApiClient через DI, queryKeys, routes  |
+| [`03-api-conventions.mdc`](./03-api-conventions.mdc)   | `packages/api/**/*.{ts,tsx}`  | ApiClient, алиасы к `Database`, edge-contracts, безопасность  |
+| [`04-tma-ui.mdc`](./04-tma-ui.mdc)                     | `apps/tma/**/*.{ts,tsx,css}`  | Tailwind, токены, варианты компонентов, Telegram SDK, формы   |
+| [`05-supabase-rls.mdc`](./05-supabase-rls.mdc)         | `supabase/**/*`               | Миграции, RLS-шаблон, скрытие от автора, Edge Functions       |
+| [`06-typescript.mdc`](./06-typescript.mdc)             | `**/*.{ts,tsx}`               | strict-режим, Zod, импорты, naming, ошибки                    |
+| [`07-workflow.mdc`](./07-workflow.mdc)                 | **всегда**                    | Скоуп MVP, что не делать, когда заводить вопросы              |
 
 ## Принципы написания правил
 

@@ -145,7 +145,7 @@ flowchart TD
 
 ```
 packages/core/src/
-├── entities/        # camelCase Zod-схемы доменных сущностей + выводимые TS-типы
+├── entities/        # Zod поверх `database.zod` (уточнения формата); ключи как в БД (snake_case), см. §3
 │   ├── profile/
 │   │   ├── profile.ts
 │   │   ├── profile.test.ts
@@ -214,33 +214,20 @@ packages/core/src/
 
 ### Принципы
 
-- **`entities/`** — единственный источник правды для **доменных** (camelCase) типов. Каждая сущность — `.transform()` поверх автогенерированной snake_case схемы из `@wlist/api/generated/database.zod.ts` (см. §4.5). Так невозможно расхождение между БД и доменом.
+- **`entities/`** — валидация и узкие уточнения поверх автогенерированных row-схем из `@wlist/api/generated/database.zod.ts` (см. §4.5). **По умолчанию ключи остаются как в Postgres (`snake_case`)**, чтобы не дублировать форму строки из `database.types.ts` и не расходиться с ней при миграциях. Опциональный `.transform()` в camelCase допускается только там, где продукт явно выигрывает (сейчас: `Profile` / Telegram-поля).
   ```ts
   // packages/core/src/entities/wish/wish.ts
-  import { z } from 'zod';
-  import { wishesRowSchema } from '@wlist/api/generated/database.zod';
+  import { publicWishesRowSchema } from '@wlist/api/generated/database.zod';
 
-  export const wishSchema = wishesRowSchema
-    .extend({
-      // место для format-уточнений, которых нет в БД:
-      link: z.string().url().nullable(),
-    })
-    .transform((row) => ({
-      id: row.id,
-      ownerId: row.owner_id,
-      title: row.title,
-      description: row.description,
-      price: row.price,
-      currency: row.currency,
-      link: row.link,
-      isArchived: row.is_archived,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-    }));
+  export const wishSchema = publicWishesRowSchema.extend({
+    link: z.union([z.string().url(), z.null()]),
+    currency: z.string().refine(isWishCurrencyCode),
+  });
 
   export type Wish = z.infer<typeof wishSchema>;
   ```
-  При добавлении/изменении колонки в миграции и регенерации `database.zod.ts` — TS-сборка падает в `entities/`, пока не обновим transform. Расхождения видны на CI.
+  В `packages/api/src/client/` типы строк таблиц **алиасим** к `Database['public']['Tables'][…]['Row' | 'Insert' | 'Update']`, а не копируем поля вручную.
+  При добавлении/изменении колонки в миграции и регенерации `database.zod.ts` — TS-сборка падает в `entities/`, пока не поправим `extend`/refine. Расхождения видны на CI.
 - **`services/`** — оркестрируют бизнес-операции, не зависят от React. Принимают `ApiClient` через аргумент, возвращают типизированные данные. Здесь живут инварианты: «нельзя забронировать собственное желание», «нельзя удалить wish с активными слотами» и т.д. (плюс зеркальные проверки в БД).
 - **`hooks/`** — обёртка над `services`, привязанная к React и TanStack Query. Получают `ApiClient` через `useApiClient()` (см. §4). **Это единственное место, где `core` импортирует React.**
 - **`routes/`** — декларативное описание маршрутов (см. §7).
@@ -329,10 +316,11 @@ export interface ApiClient {
 - Прокидывается через React Context → `useApiClient()` в `core/hooks`.
 - Методы валидируют ответ Supabase через Zod-схемы из `core/entities` (защита от расхождения generated-типов и реальной формы данных).
 
-### Маппинг snake_case ↔ camelCase
+### Именование полей (snake_case по умолчанию)
 
-- БД оперирует `snake_case`. Доменный код — `camelCase`.
-- Маппинг живёт **в Zod-схемах `entities/`** через `.transform()` — см. §3 и §4.5. В `modules/` мы передаём sn_c-row напрямую в схему сущности; ручной `mapKeys` не нужен.
+- **БД и типы из codegen** — `snake_case` (`database.types.ts`, `database.zod.ts`).
+- **`ApiClient` для табличных сущностей** — возвращает и принимает те же формы, что и PostgREST (через алиасы к `Database[...]`, без ручного дублирования списка колонок).
+- **`core/entities`** — расширяют `public*RowSchema` через `.extend()` / `.refine()`; **camelCase через `.transform()`** — только по осознанной причине (сейчас так сделан `Profile` для удобства UI).
 
 ### 4.5. Generated types и Zod-схемы из Supabase
 
@@ -358,14 +346,14 @@ flowchart LR
   Migrate["supabase/migrations/*.sql"] --> DB[(Postgres)]
   DB -- supabase gen types --> Types["api/generated/database.types.ts"]
   DB -- supazod --> Zod["api/generated/database.zod.ts"]
-  Zod -- import + .transform() --> Ent["core/entities/<name>/<name>.ts (camelCase)"]
+  Zod -- import + extend/refine --> Ent["core/entities/<name>/<name>.ts (snake_case ≈ Row)"]
   Types -. typing supabase-js .-> Modules["api/modules/*.ts"]
 ```
 
 **CI-инварианты:**
 
 - Если PR содержит миграции (`supabase/migrations/*.sql`) — оба `database.types.ts` и `database.zod.ts` должны быть пересгенерированы и закоммичены. CI запускает обе команды и diff-ит.
-- Если поле добавлено в БД, но не покрыто в соответствующем `entities/<name>/<name>.ts` (transform не возвращает его, или забыли расширить) — TypeScript-сборка `core` падает. Это ожидаемое поведение, не баг.
+- Если поле добавлено в БД, но не покрыто в соответствующем `entities/<name>/<name>.ts` (например, забыли расширить схему под новый инвариант) — TypeScript-сборка `core` падает. Это ожидаемое поведение, не баг.
 
 **Никогда не редактируй файлы в `generated/` руками.**
 

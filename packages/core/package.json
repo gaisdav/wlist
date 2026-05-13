@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./entities": "./src/entities/index.ts",
     "./entities/profile": "./src/entities/profile/index.ts",
+    "./entities/wish": "./src/entities/wish/index.ts",
     "./services": "./src/services/index.ts",
     "./services/auth": "./src/services/auth/index.ts",
     "./hooks": "./src/hooks/index.ts",

@@ -77,12 +77,12 @@
 
 ## Чек-лист задач
 
-- [ ] Миграция `wishes` (одно фото: `photo_storage_path`)
-- [ ] RLS-политики
-- [ ] Bucket `wish-photos` + storage policies
-- [ ] Edge Function для signed upload URL
-- [ ] API-слой в `packages/api`
-- [ ] Hooks в `packages/core`
+- [x] Миграция `wishes` (одно фото: `photo_storage_path`)
+- [x] RLS-политики
+- [x] Bucket `wish-photos` + storage policies
+- [x] Edge Function для signed upload URL
+- [x] API-слой в `packages/api` (`wishes.*` на `ApiClient`)
+- [x] Hooks в `packages/core` (queries + mutations)
 - [ ] Экран «Мой вишлист»
 - [ ] Экран создания/редактирования желания (форма + загрузка фото)
 - [ ] Экран карточки желания

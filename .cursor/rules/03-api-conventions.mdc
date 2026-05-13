@@ -14,7 +14,8 @@ alwaysApply: false
 src/
 ├── client/
 │   ├── ApiClient.ts         # Интерфейс — главное, что импортирует core
-│   └── SupabaseApiClient.ts # Реализация поверх supabase-js
+│   ├── SupabaseApiClient.ts # Реализация поверх supabase-js
+│   └── wishTypes.ts         # пример: алиасы к Database, без ручного списка колонок
 ├── generated/
 │   ├── database.types.ts    # TS-типы row (snake_case) — supabase gen types
 │   └── database.zod.ts      # Zod-схемы row (snake_case) — supazod
@@ -26,22 +27,27 @@ src/
 
 - `core` зависит **только от интерфейса** `ApiClient`, не от реализации.
 - Любой новый use-case → метод в интерфейсе → реализация в `SupabaseApiClient`.
-- Не утекай типы из `supabase-js` наружу. Возвращай чистые доменные типы из `@wlist/core/entities`.
+- Не утекай типы из `supabase-js` наружу (`SupabaseClient`, Postgrest builders, …).
+- **Табличные строки и DTO для insert/update** — по возможности **алиасы** к `Database['public']['Tables'][name]['Row' | 'Insert' | 'Update']` (или `Pick` / `Omit`), а не ручные `interface` с копией полей — иначе при миграции легко забыть обновить тип.
+- Ответы, которые должны быть «доменно» проверены (ссылка, валюта), после получения из PostgREST можно прогонять через Zod из `@wlist/core/entities` в хуках/сервисах.
 
-## Маппинг snake_case ↔ camelCase
+## Именование полей
 
-Маппинг живёт **в Zod-схемах `core/entities/`** через `.transform()` (см. `02-core-conventions.mdc`). В `modules/` мы передаём snake_case row напрямую в схему сущности — без ручного `mapKeys`.
+- PostgREST и `database.types` — **snake_case**.
+- Переименование в camelCase для UI — **не обязательно**; по умолчанию держим snake_case до границы компонента (см. `02-core-conventions.mdc`). Исключения документируются рядом со схемой (например, `Profile`).
 
 ```ts
-// modules/wishes.ts
-import { wishSchema } from '@wlist/core/entities';
+// modules/wishes.ts (пример; фактический код может жить в SupabaseApiClient)
+import { wishSchema } from '@wlist/core/entities/wish';
 
 export const wishes = {
-  async list(supabase: SupabaseClient, params: { ownerId: string }): Promise<Wish[]> {
+  async list(supabase: SupabaseClient, params: { ownerId: string }) {
     const { data, error } = await supabase
-      .from('wishes').select('*').eq('owner_id', params.ownerId);
+      .from('wishes')
+      .select('*')
+      .eq('owner_id', params.ownerId);
     if (error) throw error;
-    return z.array(wishSchema).parse(data); // transform внутри схемы вернёт camelCase
+    return z.array(wishSchema).parse(data);
   },
 };
 ```
