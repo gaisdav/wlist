@@ -399,7 +399,20 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
   },
 
   async delete(id) {
+    const { data: row, error: getErr } = await sb
+      .from('wishes')
+      .select('photo_storage_path')
+      .eq('id', id)
+      .maybeSingle();
+    if (getErr) throw getErr;
+    if (!row) return;
+
     const { error } = await sb.from('wishes').delete().eq('id', id);
     if (error) throw error;
+
+    const path = row.photo_storage_path;
+    if (path) {
+      await sb.storage.from('wish-photos').remove([path]);
+    }
   },
 });
