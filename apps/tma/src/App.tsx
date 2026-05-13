@@ -31,9 +31,9 @@ export const App = (): React.JSX.Element => {
           aria-label="Your profile"
           className="flex items-center gap-3 rounded-lg border border-border bg-surface p-4"
         >
-          {profile.data.photoUrl ? (
+          {profile.data.photo_url ? (
             <img
-              src={profile.data.photoUrl}
+              src={profile.data.photo_url}
               alt=""
               className="h-12 w-12 rounded-full object-cover"
             />
@@ -42,14 +42,14 @@ export const App = (): React.JSX.Element => {
               aria-hidden
               className="grid h-12 w-12 place-items-center rounded-full bg-border text-sm font-semibold text-foreground"
             >
-              {profile.data.firstName.slice(0, 1).toUpperCase()}
+              {profile.data.first_name.slice(0, 1).toUpperCase()}
             </div>
           )}
           <div className="flex flex-col">
             <span className="text-base font-medium text-foreground">
               {getDisplayName(profile.data)}
             </span>
-            <span className="text-xs text-muted">tg id: {profile.data.telegramId}</span>
+            <span className="text-xs text-muted">tg id: {profile.data.telegram_id}</span>
           </div>
         </section>
       ) : (

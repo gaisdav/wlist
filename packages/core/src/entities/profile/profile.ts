@@ -2,33 +2,16 @@ import { publicProfilesRowSchema } from '@wlist/api/generated/database.zod';
 import { z } from 'zod';
 
 /**
- * Domain Profile.
+ * Validated `public.profiles` row — snake_case, aligned with
+ * `Database['public']['Tables']['profiles']['Row']`, with a stricter
+ * `photo_url` than the raw generated row schema.
  *
- * Source of truth: `public.profiles` row, exposed via the auto-generated
- * `publicProfilesRowSchema` (snake_case). We layer a `.transform()` on top
- * to map to camelCase + tighten a couple of types (URL string, Date) so the
- * rest of the app never sees snake_case.
- *
- * If a column is added to the DB but not threaded through this transform,
- * `pnpm typecheck` fails — that's the contract documented in
- * docs/architecture.md §4.5.
+ * If a column is added in a migration and `pnpm db:codegen` runs, TypeScript
+ * and this schema stay in sync with the DB shape.
  */
-export const profileSchema = publicProfilesRowSchema
-  .extend({
-    photo_url: z.url().nullable(),
-  })
-  .transform((row) => ({
-    id: row.id,
-    telegramId: row.telegram_id,
-    username: row.username,
-    firstName: row.first_name,
-    lastName: row.last_name,
-    photoUrl: row.photo_url,
-    languageCode: row.language_code,
-    isPremium: row.is_premium,
-    createdAt: new Date(row.created_at),
-    updatedAt: new Date(row.updated_at),
-  }));
+export const profileSchema = publicProfilesRowSchema.extend({
+  photo_url: z.url().nullable(),
+});
 
 export type Profile = z.infer<typeof profileSchema>;
 
@@ -43,13 +26,13 @@ export type Profile = z.infer<typeof profileSchema>;
  * like (`@username` / `Имя` / `user_42`), not a sentence to translate.
  */
 export const getDisplayName = (
-  profile: Pick<Profile, 'username' | 'firstName' | 'telegramId'>,
+  profile: Pick<Profile, 'username' | 'first_name' | 'telegram_id'>,
 ): string => {
   if (profile.username && profile.username.length > 0) {
     return `@${profile.username}`;
   }
-  if (profile.firstName && profile.firstName.length > 0) {
-    return profile.firstName;
+  if (profile.first_name && profile.first_name.length > 0) {
+    return profile.first_name;
   }
-  return `user_${profile.telegramId}`;
+  return `user_${profile.telegram_id}`;
 };

@@ -37,9 +37,9 @@ export interface SignInWithTelegramResult {
 /**
  * Profile row as it lives in the database — snake_case, raw types.
  *
- * `@wlist/core/entities/profile` parses this through `profileSchema` to
- * get the camelCased domain `Profile`. We do NOT import the entity type here
- * because that would create a `core ↔ api` cycle.
+ * `@wlist/core/entities/profile` validates the same shape via `profileSchema`
+ * (stricter `photo_url`). We do NOT import the entity type here because that
+ * would create a `core ↔ api` cycle.
  */
 export interface ProfileRow {
   id: string;

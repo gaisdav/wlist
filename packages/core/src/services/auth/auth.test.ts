@@ -39,7 +39,7 @@ const buildApi = (overrides: {
   }) as unknown as ApiClient;
 
 describe('loginWithTelegram', () => {
-  it('returns transformed Profile and isNewUser flag on the happy path', async () => {
+  it('returns parsed Profile and isNewUser flag on the happy path', async () => {
     const signIn = vi.fn().mockResolvedValue({
       session: { userId: 'u', expiresAt: 1234 },
       isNewUser: true,
@@ -52,13 +52,12 @@ describe('loginWithTelegram', () => {
     expect(signIn).toHaveBeenCalledWith('init=data');
     expect(getCurrent).toHaveBeenCalledTimes(1);
     expect(result.isNewUser).toBe(true);
-    // snake_case fields are gone after the schema transform
     expect(result.profile).toMatchObject({
-      telegramId: 1234567,
-      firstName: 'Pavel',
-      isPremium: false,
+      telegram_id: 1234567,
+      first_name: 'Pavel',
+      is_premium: false,
     });
-    expect(result.profile.createdAt).toBeInstanceOf(Date);
+    expect(result.profile.created_at).toBe('2026-05-12T12:00:00Z');
   });
 
   it('always re-fetches the profile (does not trust client-cached data)', async () => {

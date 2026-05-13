@@ -214,7 +214,7 @@ packages/core/src/
 
 ### Принципы
 
-- **`entities/`** — валидация и узкие уточнения поверх автогенерированных row-схем из `@wlist/api/generated/database.zod.ts` (см. §4.5). **По умолчанию ключи остаются как в Postgres (`snake_case`)**, чтобы не дублировать форму строки из `database.types.ts` и не расходиться с ней при миграциях. Опциональный `.transform()` в camelCase допускается только там, где продукт явно выигрывает (сейчас: `Profile` / Telegram-поля).
+- **`entities/`** — валидация и узкие уточнения поверх автогенерированных row-схем из `@wlist/api/generated/database.zod.ts` (см. §4.5). **Ключи остаются как в Postgres (`snake_case`)**, чтобы не дублировать форму строки из `database.types.ts` и не расходиться с ней при миграциях.
   ```ts
   // packages/core/src/entities/wish/wish.ts
   import { publicWishesRowSchema } from '@wlist/api/generated/database.zod';
@@ -320,7 +320,7 @@ export interface ApiClient {
 
 - **БД и типы из codegen** — `snake_case` (`database.types.ts`, `database.zod.ts`).
 - **`ApiClient` для табличных сущностей** — возвращает и принимает те же формы, что и PostgREST (через алиасы к `Database[...]`, без ручного дублирования списка колонок).
-- **`core/entities`** — расширяют `public*RowSchema` через `.extend()` / `.refine()`; **camelCase через `.transform()`** — только по осознанной причине (сейчас так сделан `Profile` для удобства UI).
+- **`core/entities`** — расширяют `public*RowSchema` через `.extend()` / `.refine()`; без обязательного `.transform()` в camelCase.
 
 ### 4.5. Generated types и Zod-схемы из Supabase
 

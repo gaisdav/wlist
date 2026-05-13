@@ -59,7 +59,6 @@ React импортируется **только** в `hooks/`. `services/` и `e
 
 - Берём `public*RowSchema` из `@wlist/api/generated/database.zod`, затем `.extend()` / `.refine()` под инварианты, которых нет в CHECK (URL ссылки, список валют и т.п.).
 - **По умолчанию не делаем `.transform()` в camelCase** — тип строки совпадает с `Database['public']['Tables'][…]['Row']`, меньше дублирования и расхождений после `db:codegen`.
-- **Исключение:** осознанный `.transform()` в camelCase (сейчас: `Profile` для Telegram-полей в UI).
 - Не описывай табличную строку «с нуля» (`z.object({ … })`) — сначала generated row-схема, потом узкие правки.
 
 ```ts

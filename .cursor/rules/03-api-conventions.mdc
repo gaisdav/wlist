@@ -34,7 +34,7 @@ src/
 ## Именование полей
 
 - PostgREST и `database.types` — **snake_case**.
-- Переименование в camelCase для UI — **не обязательно**; по умолчанию держим snake_case до границы компонента (см. `02-core-conventions.mdc`). Исключения документируются рядом со схемой (например, `Profile`).
+- Переименование в camelCase для UI — **не обязательно**; по умолчанию держим snake_case до границы компонента (см. `02-core-conventions.mdc`).
 
 ```ts
 // modules/wishes.ts (пример; фактический код может жить в SupabaseApiClient)

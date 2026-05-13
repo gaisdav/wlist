@@ -4,19 +4,21 @@ import { getDisplayName, profileSchema } from './profile';
 
 describe('getDisplayName', () => {
   it('prefers @username when present and non-empty', () => {
-    expect(getDisplayName({ username: 'durov', firstName: 'Pavel', telegramId: 1 })).toBe('@durov');
+    expect(getDisplayName({ username: 'durov', first_name: 'Pavel', telegram_id: 1 })).toBe(
+      '@durov',
+    );
   });
 
   it('falls back to first_name when username is null', () => {
-    expect(getDisplayName({ username: null, firstName: 'Pavel', telegramId: 1 })).toBe('Pavel');
+    expect(getDisplayName({ username: null, first_name: 'Pavel', telegram_id: 1 })).toBe('Pavel');
   });
 
   it('falls back to first_name when username is empty string', () => {
-    expect(getDisplayName({ username: '', firstName: 'Pavel', telegramId: 1 })).toBe('Pavel');
+    expect(getDisplayName({ username: '', first_name: 'Pavel', telegram_id: 1 })).toBe('Pavel');
   });
 
-  it('falls back to user_<telegramId> when both username and first_name are missing', () => {
-    expect(getDisplayName({ username: null, firstName: '', telegramId: 42 })).toBe('user_42');
+  it('falls back to user_<telegram_id> when both username and first_name are missing', () => {
+    expect(getDisplayName({ username: null, first_name: '', telegram_id: 42 })).toBe('user_42');
   });
 });
 
@@ -34,21 +36,21 @@ describe('profileSchema', () => {
     updated_at: '2026-05-12T12:00:00Z',
   };
 
-  it('maps snake_case → camelCase and parses dates', () => {
+  it('parses a row and keeps snake_case keys and ISO timestamps', () => {
     const profile = profileSchema.parse(dbRow);
 
     expect(profile).toMatchObject({
       id: dbRow.id,
-      telegramId: 1234567,
+      telegram_id: 1234567,
       username: 'durov',
-      firstName: 'Pavel',
-      lastName: 'Durov',
-      photoUrl: dbRow.photo_url,
-      languageCode: 'en',
-      isPremium: true,
+      first_name: 'Pavel',
+      last_name: 'Durov',
+      photo_url: dbRow.photo_url,
+      language_code: 'en',
+      is_premium: true,
+      created_at: dbRow.created_at,
+      updated_at: dbRow.updated_at,
     });
-    expect(profile.createdAt).toBeInstanceOf(Date);
-    expect(profile.updatedAt).toBeInstanceOf(Date);
   });
 
   it('accepts null for optional fields', () => {
@@ -61,9 +63,9 @@ describe('profileSchema', () => {
     });
 
     expect(profile.username).toBeNull();
-    expect(profile.lastName).toBeNull();
-    expect(profile.photoUrl).toBeNull();
-    expect(profile.languageCode).toBeNull();
+    expect(profile.last_name).toBeNull();
+    expect(profile.photo_url).toBeNull();
+    expect(profile.language_code).toBeNull();
   });
 
   it('rejects a non-URL photo_url', () => {
