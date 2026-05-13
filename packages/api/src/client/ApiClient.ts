@@ -5,6 +5,8 @@
 // As we add features in plans 01–04 we extend each domain block here.
 // See docs/architecture.md §4.
 
+import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
+
 /**
  * Authenticated session from the platform's perspective. Intentionally narrow:
  * we expose only what `@wlist/core` legitimately needs — the user id (for
@@ -88,10 +90,27 @@ export interface ProfilesApi {
   getCurrent(): Promise<ProfileRow | null>;
 }
 
+/**
+ * Signed upload hand-off for the private `wish-photos` bucket (plan 02).
+ * Client uploads bytes via `supabase.storage.uploadToSignedUrl(...)`.
+ */
+export interface WishPhotoSignedUpload {
+  uploadUrl: string;
+  storagePath: string;
+  token: string;
+}
+
+export interface StorageApi {
+  requestWishPhotoUpload(input: {
+    wishId: string;
+    mime: WishPhotoUploadMime;
+  }): Promise<WishPhotoSignedUpload>;
+}
+
 export interface ApiClient {
   auth: AuthApi;
   profiles: ProfilesApi;
-  // wishes.list / get / create / update / archive → plan 02
-  // slots.list / book / cancel / myBookings → plan 03
-  // storage.uploadWishImage → plan 02
+  storage: StorageApi;
+  // wishes.* → plan 02 (next PR)
+  // slots.* → plan 03
 }

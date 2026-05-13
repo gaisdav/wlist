@@ -17,6 +17,7 @@ import {
   authTelegramErrorSchema,
   authTelegramResponseSchema,
 } from '../edge-contracts/auth-telegram.js';
+import { wishPhotoUploadResponseSchema } from '../edge-contracts/wish-photo-upload.js';
 import { type Database } from '../generated/database.types.js';
 
 import {
@@ -26,6 +27,8 @@ import {
   type ProfileRow,
   type ProfilesApi,
   type SignInWithTelegramResult,
+  type StorageApi,
+  type WishPhotoSignedUpload,
 } from './ApiClient.js';
 import { SignInError } from './SignInError.js';
 
@@ -47,6 +50,7 @@ export class SupabaseApiClient implements ApiClient {
 
   readonly auth: AuthApi;
   readonly profiles: ProfilesApi;
+  readonly storage: StorageApi;
 
   constructor({ url, anonKey }: SupabaseApiClientOptions) {
     this.supabase = createClient<Database>(url, anonKey, {
@@ -65,6 +69,7 @@ export class SupabaseApiClient implements ApiClient {
 
     this.auth = createAuthApi(this.supabase, url, anonKey);
     this.profiles = createProfilesApi(this.supabase);
+    this.storage = createStorageApi(this.supabase);
   }
 }
 
@@ -230,5 +235,45 @@ const createProfilesApi = (sb: SupabaseClientLike): ProfilesApi => ({
       .maybeSingle();
     if (error) throw error;
     return (data as ProfileRow | null) ?? null;
+  },
+});
+
+// =============================================================================
+// storage (Edge Function hand-offs)
+// =============================================================================
+
+const createStorageApi = (sb: SupabaseClientLike): StorageApi => ({
+  async requestWishPhotoUpload({ wishId, mime }): Promise<WishPhotoSignedUpload> {
+    let res: Awaited<ReturnType<typeof sb.functions.invoke>>;
+    try {
+      res = await sb.functions.invoke('wish-photo-upload', { body: { wishId, mime } });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Network error calling wish-photo-upload';
+      throw new Error(message, { cause: e });
+    }
+
+    if (res.error || res.data == null) {
+      const err = res.error;
+      const base = err instanceof Error ? err.message : 'wish-photo-upload failed';
+      if (err && typeof err === 'object' && 'context' in err) {
+        const ctx = (err as { context?: { json?: () => Promise<unknown> } }).context;
+        if (ctx?.json) {
+          try {
+            const body = await ctx.json();
+            const parsedErr = body as { message?: string };
+            throw new Error(parsedErr.message ?? base);
+          } catch (e) {
+            if (e instanceof Error && e.message !== base) throw e;
+          }
+        }
+      }
+      throw new Error(base);
+    }
+
+    const parsed = wishPhotoUploadResponseSchema.safeParse(res.data);
+    if (!parsed.success) {
+      throw new Error(`wish-photo-upload: invalid response: ${parsed.error.message}`);
+    }
+    return parsed.data;
   },
 });

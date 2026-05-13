@@ -38,7 +38,7 @@ UI: раздел «Мои списки» в профиле — создание,
 
 ### 3. RLS — пересмотр всех политик
 
-Это важнейшая часть этапа: **каждая существующая RLS-политика на `wishes`, `wish_photos`, `wish_slots`, `wish_comments`, `feed_events` должна учитывать видимость.**
+Это важнейшая часть этапа: **каждая существующая RLS-политика на `wishes`, `wish_slots`, `wish_comments`, `feed_events` (и Storage для фото желаний) должна учитывать видимость.**
 
 SQL-функция `can_view_wish(viewer uuid, wish_id uuid) returns boolean`:
 

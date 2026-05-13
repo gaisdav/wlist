@@ -68,6 +68,56 @@ export type Database = {
         }
         Relationships: []
       }
+      wishes: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_archived: boolean
+          link: string | null
+          owner_id: string
+          photo_storage_path: string | null
+          price: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean
+          link?: string | null
+          owner_id: string
+          photo_storage_path?: string | null
+          price?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean
+          link?: string | null
+          owner_id?: string
+          photo_storage_path?: string | null
+          price?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishes_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
