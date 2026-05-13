@@ -1,6 +1,12 @@
 import { useCurrentUser } from '@wlist/core/hooks/auth';
-import { useArchiveWish, useDeleteWish, useUnarchiveWish, useWish } from '@wlist/core/hooks/wishes';
-import { Loader2, X } from 'lucide-react';
+import {
+  useArchiveWish,
+  useDeleteWish,
+  useUnarchiveWish,
+  useUserWishes,
+  useWish,
+} from '@wlist/core/hooks/wishes';
+import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
@@ -18,6 +24,7 @@ export const WishDetailPage = (): React.JSX.Element => {
   const [, setLocation] = useLocation();
   const profile = useCurrentUser(api);
   const wish = useWish(api, wishId);
+  const ownerWishes = useUserWishes(api, wish.data?.owner_id);
   const archive = useArchiveWish(api);
   const unarchive = useUnarchiveWish(api);
   const del = useDeleteWish(api);
@@ -52,6 +59,18 @@ export const WishDetailPage = (): React.JSX.Element => {
   const w = wish.data;
   const isOwner = profile.data?.id === w.owner_id;
   const hasUploadedPhoto = Boolean(w.photo_storage_path);
+
+  const list = ownerWishes.data;
+  const listReady = Boolean(
+    list && !ownerWishes.isLoading && !ownerWishes.isError,
+  );
+  const indexInList = listReady && list ? list.findIndex((item) => item.id === wishId) : -1;
+  const prevWishId =
+    listReady && list && indexInList > 0 ? list[indexInList - 1]?.id : undefined;
+  const nextWishId =
+    listReady && list && indexInList >= 0 && indexInList < list.length - 1
+      ? list[indexInList + 1]?.id
+      : undefined;
 
   const onArchive = async (): Promise<void> => {
     await archive.mutateAsync(w.id);
@@ -107,6 +126,36 @@ export const WishDetailPage = (): React.JSX.Element => {
       ) : null}
 
       <article className="flex flex-col gap-4 p-4">
+        {prevWishId || nextWishId ? (
+          <nav
+            className="flex w-full items-center justify-between gap-2"
+            aria-label={t('wishes.detail.sibling_nav')}
+          >
+            <div className="flex min-w-0 flex-1 justify-start">
+              {prevWishId ? (
+                <Link
+                  to={`/wish/${prevWishId}`}
+                  className="inline-flex items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
+                  aria-label={t('wishes.detail.prev_wish')}
+                >
+                  <ChevronLeft className="h-5 w-5" strokeWidth={2} aria-hidden />
+                </Link>
+              ) : null}
+            </div>
+            <div className="flex min-w-0 flex-1 justify-end">
+              {nextWishId ? (
+                <Link
+                  to={`/wish/${nextWishId}`}
+                  className="inline-flex items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
+                  aria-label={t('wishes.detail.next_wish')}
+                >
+                  <ChevronRight className="h-5 w-5" strokeWidth={2} aria-hidden />
+                </Link>
+              ) : null}
+            </div>
+          </nav>
+        ) : null}
+
         <WishDetailHero
           hasUploadedPhoto={hasUploadedPhoto}
           photoSrc={photoSrc}
@@ -114,12 +163,7 @@ export const WishDetailPage = (): React.JSX.Element => {
           t={t}
         />
 
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">{w.title}</h1>
-          {isOwner ? (
-            <p className="mt-1 text-xs text-muted">{t('wishes.detail.owner_hint')}</p>
-          ) : null}
-        </div>
+        <h1 className="text-2xl font-semibold text-foreground">{w.title}</h1>
 
         {w.description ? (
           <section>

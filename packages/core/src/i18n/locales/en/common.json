@@ -60,7 +60,9 @@
       "unarchive": "Restore to list",
       "photo_lightbox": "Wish photo",
       "delete_confirm": "Delete this wish? This cannot be undone.",
-      "owner_hint": "You own this wish."
+      "prev_wish": "Previous wish",
+      "next_wish": "Next wish",
+      "sibling_nav": "Other wishes in this list"
     },
     "form": {
       "create_title": "New wish",
