@@ -12,12 +12,12 @@ export const wishPhotoUploadMimeSchema = z.enum([
 ]);
 
 export const wishPhotoUploadRequestSchema = z.object({
-  wishId: z.string().uuid(),
+  wishId: z.uuid(),
   mime: wishPhotoUploadMimeSchema,
 });
 
 export const wishPhotoUploadResponseSchema = z.object({
-  uploadUrl: z.string().url(),
+  uploadUrl: z.url(),
   storagePath: z.string().min(1),
   token: z.string().min(1),
 });

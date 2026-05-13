@@ -21,7 +21,7 @@ export const wishPhotoUploadMimeSchema = z.enum([
 export type WishPhotoUploadMime = z.infer<typeof wishPhotoUploadMimeSchema>;
 
 export const wishPhotoUploadRequestSchema = z.object({
-  wishId: z.string().uuid(),
+  wishId: z.uuid(),
   mime: wishPhotoUploadMimeSchema,
 });
 
@@ -29,7 +29,7 @@ export type WishPhotoUploadRequest = z.infer<typeof wishPhotoUploadRequestSchema
 
 export const wishPhotoUploadResponseSchema = z.object({
   /** URL to `PUT` the raw bytes to (see supabase-js `uploadToSignedUrl`). */
-  uploadUrl: z.string().url(),
+  uploadUrl: z.url(),
   /** Path inside bucket `wish-photos` (format `<wishId>/<uuid>.<ext>`). */
   storagePath: z.string().min(1),
   /** Opaque token required by `uploadToSignedUrl` alongside `storagePath`. */

@@ -30,10 +30,10 @@ const route = <S extends RouteSchema>(pattern: string, paramsSchema: S): Route<S
 export const routes = {
   home: route('/', z.object({})),
   myWishlist: route('/me', z.object({})),
-  userWishlist: route('/u/:userId', z.object({ userId: z.string().uuid() })),
-  wish: route('/wish/:wishId', z.object({ wishId: z.string().uuid() })),
+  userWishlist: route('/u/:userId', z.object({ userId: z.uuid() })),
+  wish: route('/wish/:wishId', z.object({ wishId: z.uuid() })),
   wishCreate: route('/wish/new', z.object({})),
-  wishEdit: route('/wish/:wishId/edit', z.object({ wishId: z.string().uuid() })),
+  wishEdit: route('/wish/:wishId/edit', z.object({ wishId: z.uuid() })),
   myBookings: route('/me/bookings', z.object({})),
   profile: route('/me/profile', z.object({})),
 } as const;

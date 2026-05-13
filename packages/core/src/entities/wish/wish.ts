@@ -10,7 +10,7 @@ import { isWishCurrencyCode } from '../../lib/wishConstraints.js';
  * Prefer this over hand-maintained mirrors of `database.types.ts`.
  */
 export const wishSchema = publicWishesRowSchema.extend({
-  link: z.union([z.string().url(), z.null()]),
+  link: z.url().nullable(),
   currency: z.string().refine(isWishCurrencyCode, 'invalid wish currency'),
 });
 
