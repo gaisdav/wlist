@@ -35,7 +35,8 @@
   "nav": {
     "my_wishes": "My wishes",
     "add_wish": "Add wish",
-    "public_preview": "Public list preview"
+    "public_preview": "Public list preview",
+    "back_to_my_wishes": "Back to my wishes"
   },
   "wishes": {
     "list": {

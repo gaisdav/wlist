@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'wouter';
 
 import { useApiClient } from '../providers/ApiClientProvider';
+import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
 
 import { WishCard } from './WishCard';
 
@@ -13,6 +14,11 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const api = useApiClient();
   const profile = useCurrentUser(api);
   const wishes = useUserWishes(api, userId);
+
+  const goBack = (): void => {
+    window.history.back();
+  };
+  useTelegramBackButton(goBack, Boolean(userId));
 
   const isSelf = Boolean(profile.data?.id && userId && profile.data.id === userId);
 
@@ -31,13 +37,24 @@ export const UserWishlistPage = (): React.JSX.Element => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <header className="flex items-center justify-between gap-2 border-b border-border pb-4">
-        <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.user_title')}</h1>
+      <header className="flex flex-col gap-3 border-b border-border pb-4">
         {isSelf ? (
-          <Link to="/wish/new" className="text-sm font-medium text-primary underline">
-            {t('nav.add_wish')}
-          </Link>
+          <button
+            type="button"
+            onClick={goBack}
+            className="self-start text-sm font-medium text-primary underline"
+          >
+            {t('nav.back_to_my_wishes')}
+          </button>
         ) : null}
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.user_title')}</h1>
+          {isSelf ? (
+            <Link to="/wish/new" className="text-sm font-medium text-primary underline">
+              {t('nav.add_wish')}
+            </Link>
+          ) : null}
+        </div>
       </header>
 
       {wishes.isError ? (
