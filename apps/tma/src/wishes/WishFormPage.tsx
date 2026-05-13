@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { WishPhotoUploadMime } from '@wlist/api/edge-contracts';
 import {
   defaultWishDraftFormValues,
   wishDraftSchema,
@@ -12,6 +11,7 @@ import {
   persistLastWishCurrency,
   readLastWishCurrency,
   SUPPORTED_WISH_CURRENCIES,
+  WISH_PHOTO_MAX_UPLOAD_BYTES,
 } from '@wlist/core/lib';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -19,17 +19,13 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
 
+import {
+  PrepareWishPhotoError,
+  prepareWishPhotoUpload,
+  wishPhotoMimeForApi,
+} from '../lib/prepareWishPhotoUpload';
 import { useApiClient } from '../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
-
-const fileToMime = (file: File): WishPhotoUploadMime | null => {
-  const t = file.type;
-  if (t === 'image/jpeg' || t === 'image/jpg') return 'image/jpeg';
-  if (t === 'image/png') return 'image/png';
-  if (t === 'image/webp') return 'image/webp';
-  if (t === 'image/gif') return 'image/gif';
-  return null;
-};
 
 interface WishFormPageProps {
   mode: 'create' | 'edit';
@@ -40,7 +36,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const { wishId } = useParams<{ wishId?: string }>();
   const api = useApiClient();
   const [, setLocation] = useLocation();
+  const photoMaxMb = String(Math.round(WISH_PHOTO_MAX_UPLOAD_BYTES / (1024 * 1024)));
   const [photo, setPhoto] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
@@ -80,7 +78,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   useTelegramBackButton(goBack, true);
 
   const uploadPhotoIfNeeded = async (id: string, file: File): Promise<void> => {
-    const mime = fileToMime(file);
+    const mime = wishPhotoMimeForApi(file);
     if (!mime) throw new Error('unsupported_image_type');
     const signed = await api.storage.requestWishPhotoUpload({ wishId: id, mime });
     await api.storage.completeWishPhotoUpload({
@@ -249,10 +247,43 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            className="text-sm text-muted"
-            onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+            disabled={isSaving}
+            className="text-sm text-muted disabled:opacity-50"
+            onChange={(e) => {
+              const input = e.target;
+              const f = input.files?.[0];
+              input.value = '';
+              void (async () => {
+                if (!f) {
+                  setPhoto(null);
+                  setPhotoError(null);
+                  return;
+                }
+                setPhotoError(null);
+                try {
+                  const prepared = await prepareWishPhotoUpload(f);
+                  setPhoto(prepared);
+                } catch (err) {
+                  setPhoto(null);
+                  if (err instanceof PrepareWishPhotoError) {
+                    if (err.code === 'too_large') {
+                      setPhotoError(t('wishes.form.errors.photo_too_large', { maxMb: photoMaxMb }));
+                    } else if (err.code === 'decode_failed') {
+                      setPhotoError(t('wishes.form.errors.photo_decode_failed'));
+                    } else {
+                      setPhotoError(t('wishes.form.errors.photo_unsupported_type'));
+                    }
+                  } else {
+                    setPhotoError(t('states.error'));
+                  }
+                }
+              })();
+            }}
           />
-          <span className="text-xs text-muted">{t('wishes.form.photo_hint')}</span>
+          <span className="text-xs text-muted">
+            {t('wishes.form.photo_hint', { maxMb: photoMaxMb })}
+          </span>
+          {photoError ? <span className="text-xs text-destructive">{photoError}</span> : null}
         </label>
 
         <button

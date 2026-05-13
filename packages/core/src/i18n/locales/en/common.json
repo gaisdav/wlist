@@ -71,14 +71,17 @@
       "currency_placeholder": "Select currency",
       "link_label": "Link (optional)",
       "photo_label": "Photo (optional)",
-      "photo_hint": "JPEG, PNG, WebP, or GIF — one image.",
+      "photo_hint": "JPEG, PNG, or WebP — large files are resized automatically. GIF keeps animation; max {{maxMb}} MB.",
       "submit_create": "Create wish",
       "submit_edit": "Save changes",
       "errors": {
         "invalid_price": "Enter a valid non-negative number.",
         "invalid_currency": "Pick a supported currency.",
         "currency_without_price": "Currency applies only when a price is set.",
-        "invalid_link": "Enter a valid https URL or leave empty."
+        "invalid_link": "Enter a valid https URL or leave empty.",
+        "photo_too_large": "This file is too large (max {{maxMb}} MB for GIF, or we could not compress it enough). Try a smaller image.",
+        "photo_decode_failed": "Could not read this image. Try another file.",
+        "photo_unsupported_type": "Use JPEG, PNG, WebP, or GIF."
       }
     }
   }

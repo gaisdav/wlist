@@ -2,3 +2,4 @@
 // May be called from any runtime — including Edge Functions.
 export * from './lastWishCurrencyPreference.js';
 export * from './wishConstraints.js';
+export * from './wishPhotoLimits.js';
