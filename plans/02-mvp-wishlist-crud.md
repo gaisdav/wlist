@@ -19,7 +19,7 @@
 - `title` (`text`, not null, 1..200)
 - `description` (`text`, nullable, до **1000** символов — лимит в БД и в форме; в списке карточек UI обрезает превью)
 - `price` (`numeric`, nullable)
-- `currency` (`text`, default `'USD'`) — UI на старте только EN
+- `currency` (`text`, **nullable**) — must be **null** when `price` is null; with a price, one of the supported codes (UI defaults to **USD** or the last currency picked in this browser, see `@wlist/core/lib` `lastWishCurrencyPreference`).
 - `link` (`text`, nullable, валидный URL)
 - `photo_storage_path` (`text`, nullable) — один объект в bucket `wish-photos` (`<wish_id>/<file>`); null = без фото
 - `is_archived` (`boolean`, default false) — для скрытия выполненных, без удаления

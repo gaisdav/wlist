@@ -2,7 +2,7 @@
  * Wish list field limits and allowed currencies (Stage 02).
  *
  * Values MUST stay in sync with:
- *   - `supabase/migrations/*wishes*.sql` CHECK constraints on `wishes`
+ *   - `supabase/migrations/*wishes*.sql` CHECK constraints on `wishes` (pair with `price`)
  *   - `plans/02-mvp-wishlist-crud.md`
  */
 export const WISH_TITLE_MAX_CHARS = 200;

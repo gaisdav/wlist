@@ -37,13 +37,20 @@ export const WishCard = ({ wish }: WishCardProps): React.JSX.Element => {
         </p>
         {wish.price != null ? (
           <p className="mt-1 text-xs text-muted">
-            {t('wishes.card.price', {
-              amount: wish.price.toLocaleString(undefined, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-              }),
-              currency: wish.currency,
-            })}
+            {wish.currency
+              ? t('wishes.card.price', {
+                  amount: wish.price.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
+                  }),
+                  currency: wish.currency,
+                })
+              : t('wishes.card.price_no_currency', {
+                  amount: wish.price.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
+                  }),
+                })}
           </p>
         ) : null}
         {wish.is_archived ? (

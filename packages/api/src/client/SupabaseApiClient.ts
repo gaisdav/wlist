@@ -334,7 +334,7 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
       owner_id: userData.user.id,
       description: input.description ?? null,
       price: input.price ?? null,
-      currency: input.currency ?? 'USD',
+      currency: input.currency ?? null,
       link: input.link ?? null,
       photo_storage_path: input.photo_storage_path ?? null,
     };

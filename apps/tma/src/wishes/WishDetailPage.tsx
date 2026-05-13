@@ -54,6 +54,17 @@ export const WishDetailPage = (): React.JSX.Element => {
     setLocation('/me');
   };
 
+  let priceLine: string | null = null;
+  if (w.price != null) {
+    const amountStr = w.price.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+    priceLine = w.currency
+      ? `${amountStr} ${w.currency}`
+      : t('wishes.card.price_no_currency', { amount: amountStr });
+  }
+
   return (
     <article className="flex flex-col gap-4 p-4">
       <div className="overflow-hidden rounded-lg border border-border bg-surface">
@@ -80,14 +91,10 @@ export const WishDetailPage = (): React.JSX.Element => {
         </section>
       ) : null}
 
-      {w.price != null ? (
+      {priceLine != null ? (
         <p className="text-sm text-foreground">
           <span className="text-muted">{t('wishes.detail.price')}: </span>
-          {w.price.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-          })}{' '}
-          {w.currency}
+          {priceLine}
         </p>
       ) : null}
 

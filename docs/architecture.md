@@ -216,13 +216,16 @@ packages/core/src/
 
 - **`entities/`** — валидация и узкие уточнения поверх автогенерированных row-схем из `@wlist/api/generated/database.zod.ts` (см. §4.5). **Ключи остаются как в Postgres (`snake_case`)**, чтобы не дублировать форму строки из `database.types.ts` и не расходиться с ней при миграциях.
   ```ts
-  // packages/core/src/entities/wish/wish.ts
+  // packages/core/src/entities/wish/wish.ts — nullable `currency` when `price` is null (DB CHECK + superRefine)
   import { publicWishesRowSchema } from '@wlist/api/generated/database.zod';
 
-  export const wishSchema = publicWishesRowSchema.extend({
-    link: z.url().nullable(),
-    currency: z.string().refine(isWishCurrencyCode),
-  });
+  export const wishSchema = publicWishesRowSchema
+    .omit({ link: true, currency: true })
+    .extend({
+      link: z.url().nullable(),
+      currency: z.string().nullable(),
+    })
+    .superRefine(/* enforce: price null ⇒ currency null; price set ⇒ supported code */);
 
   export type Wish = z.infer<typeof wishSchema>;
   ```

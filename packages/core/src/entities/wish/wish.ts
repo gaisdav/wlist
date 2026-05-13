@@ -9,9 +9,28 @@ import { isWishCurrencyCode } from '../../lib/wishConstraints.js';
  *
  * Prefer this over hand-maintained mirrors of `database.types.ts`.
  */
-export const wishSchema = publicWishesRowSchema.extend({
-  link: z.url().nullable(),
-  currency: z.string().refine(isWishCurrencyCode, 'invalid wish currency'),
-});
+export const wishSchema = publicWishesRowSchema
+  .omit({ link: true, currency: true })
+  .extend({
+    link: z.url().nullable(),
+    currency: z.string().nullable(),
+  })
+  .superRefine((row, ctx) => {
+    if (row.price == null) {
+      if (row.currency != null) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['currency'],
+          message: 'currency_without_price',
+        });
+      }
+    } else if (row.currency == null || !isWishCurrencyCode(row.currency)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['currency'],
+        message: 'invalid wish currency',
+      });
+    }
+  });
 
 export type Wish = z.infer<typeof wishSchema>;

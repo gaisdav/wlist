@@ -75,7 +75,7 @@ export const publicProfilesUpdateSchema = z.object({
 
 export const publicWishesRowSchema = z.object({
   created_at: z.string(),
-  currency: z.string(),
+  currency: z.string().nullable(),
   description: z.string().nullable(),
   id: z.string(),
   is_archived: z.boolean(),
@@ -89,7 +89,7 @@ export const publicWishesRowSchema = z.object({
 
 export const publicWishesInsertSchema = z.object({
   created_at: z.string().optional(),
-  currency: z.string().optional(),
+  currency: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   id: z.string().optional(),
   is_archived: z.boolean().optional(),
@@ -103,7 +103,7 @@ export const publicWishesInsertSchema = z.object({
 
 export const publicWishesUpdateSchema = z.object({
   created_at: z.string().optional(),
-  currency: z.string().optional(),
+  currency: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
   id: z.string().optional(),
   is_archived: z.boolean().optional(),
