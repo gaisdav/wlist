@@ -1,40 +1,14 @@
-/**
- * Raw `public.wishes` row — snake_case, matches Postgres + `WishRow` in
- * `database.types.ts`. Parsed in `@wlist/core/entities/wish` into domain `Wish`.
- */
-export interface WishRow {
-  id: string;
-  owner_id: string;
-  title: string;
-  description: string | null;
-  price: number | null;
-  currency: string;
-  link: string | null;
-  photo_storage_path: string | null;
-  is_archived: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import type { Database } from '../generated/database.types.js';
 
-/** Insert payload; `owner_id` is set by `SupabaseApiClient` from the session. */
-export interface WishCreateInput {
-  title: string;
-  description?: string | null;
-  price?: number | null;
-  /** Defaults to `USD` in the database when omitted. */
-  currency?: string;
-  link?: string | null;
-  photo_storage_path?: string | null;
-}
+type WishesRow = Database['public']['Tables']['wishes']['Row'];
+type WishesInsert = Database['public']['Tables']['wishes']['Insert'];
+type WishesUpdate = Database['public']['Tables']['wishes']['Update'];
 
-/** Partial update by `id` — only provided fields are written. */
-export interface WishUpdateInput {
-  id: string;
-  title?: string;
-  description?: string | null;
-  price?: number | null;
-  currency?: string;
-  link?: string | null;
-  photo_storage_path?: string | null;
-  is_archived?: boolean;
-}
+/** Single source of truth: Postgres row shape after `pnpm db:types`. */
+export type WishRow = WishesRow;
+
+/** Caller payload; `owner_id` is filled by `SupabaseApiClient` from the session. */
+export type WishCreateInput = Omit<WishesInsert, 'owner_id'>;
+
+/** Partial update keyed by row `id`. */
+export type WishUpdateInput = { id: string } & WishesUpdate;

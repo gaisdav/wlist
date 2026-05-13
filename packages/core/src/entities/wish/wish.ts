@@ -1,28 +1,17 @@
 import { publicWishesRowSchema } from '@wlist/api/generated/database.zod';
 import { z } from 'zod';
 
-import { isWishCurrencyCode, type WishCurrencyCode } from '../../lib/wishConstraints.js';
+import { isWishCurrencyCode } from '../../lib/wishConstraints.js';
 
 /**
- * Domain wish — camelCase, parsed from `public.wishes` via `publicWishesRowSchema`.
+ * Validated wish row: same keys as `public.wishes` (snake_case), stricter
+ * `link` / `currency` than the raw generated row schema.
+ *
+ * Prefer this over hand-maintained mirrors of `database.types.ts`.
  */
-export const wishSchema = publicWishesRowSchema
-  .extend({
-    link: z.union([z.string().url(), z.null()]),
-    currency: z.string().refine(isWishCurrencyCode, 'invalid wish currency'),
-  })
-  .transform((row) => ({
-    id: row.id,
-    ownerId: row.owner_id,
-    title: row.title,
-    description: row.description,
-    price: row.price,
-    currency: row.currency as WishCurrencyCode,
-    link: row.link,
-    photoStoragePath: row.photo_storage_path,
-    isArchived: row.is_archived,
-    createdAt: new Date(row.created_at),
-    updatedAt: new Date(row.updated_at),
-  }));
+export const wishSchema = publicWishesRowSchema.extend({
+  link: z.union([z.string().url(), z.null()]),
+  currency: z.string().refine(isWishCurrencyCode, 'invalid wish currency'),
+});
 
 export type Wish = z.infer<typeof wishSchema>;
