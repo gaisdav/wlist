@@ -72,6 +72,8 @@ export const WishDetailPage = (): React.JSX.Element => {
       ? list[indexInList + 1]?.id
       : undefined;
 
+  const showSiblingNav = Boolean(prevWishId || nextWishId);
+
   const onArchive = async (): Promise<void> => {
     await archive.mutateAsync(w.id);
     setLocation('/me');
@@ -125,37 +127,11 @@ export const WishDetailPage = (): React.JSX.Element => {
         </div>
       ) : null}
 
-      <article className="flex flex-col gap-4 p-4">
-        {prevWishId || nextWishId ? (
-          <nav
-            className="flex w-full items-center justify-between gap-2"
-            aria-label={t('wishes.detail.sibling_nav')}
-          >
-            <div className="flex min-w-0 flex-1 justify-start">
-              {prevWishId ? (
-                <Link
-                  to={`/wish/${prevWishId}`}
-                  className="inline-flex items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
-                  aria-label={t('wishes.detail.prev_wish')}
-                >
-                  <ChevronLeft className="h-5 w-5" strokeWidth={2} aria-hidden />
-                </Link>
-              ) : null}
-            </div>
-            <div className="flex min-w-0 flex-1 justify-end">
-              {nextWishId ? (
-                <Link
-                  to={`/wish/${nextWishId}`}
-                  className="inline-flex items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
-                  aria-label={t('wishes.detail.next_wish')}
-                >
-                  <ChevronRight className="h-5 w-5" strokeWidth={2} aria-hidden />
-                </Link>
-              ) : null}
-            </div>
-          </nav>
-        ) : null}
-
+      <article
+        className={`flex flex-col gap-4 p-4${
+          showSiblingNav ? ' pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : ''
+        }`}
+      >
         <WishDetailHero
           hasUploadedPhoto={hasUploadedPhoto}
           photoSrc={photoSrc}
@@ -228,6 +204,36 @@ export const WishDetailPage = (): React.JSX.Element => {
           </div>
         ) : null}
       </article>
+
+      {showSiblingNav ? (
+        <nav
+          className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-4 border-t border-border bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur supports-[backdrop-filter]:bg-background/80"
+          aria-label={t('wishes.detail.sibling_nav')}
+        >
+          <div className="flex min-w-0 flex-1 justify-start">
+            {prevWishId ? (
+              <Link
+                to={`/wish/${prevWishId}`}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
+                aria-label={t('wishes.detail.prev_wish')}
+              >
+                <ChevronLeft className="h-6 w-6" strokeWidth={2} aria-hidden />
+              </Link>
+            ) : null}
+          </div>
+          <div className="flex min-w-0 flex-1 justify-end">
+            {nextWishId ? (
+              <Link
+                to={`/wish/${nextWishId}`}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
+                aria-label={t('wishes.detail.next_wish')}
+              >
+                <ChevronRight className="h-6 w-6" strokeWidth={2} aria-hidden />
+              </Link>
+            ) : null}
+          </div>
+        </nav>
+      ) : null}
     </>
   );
 };
