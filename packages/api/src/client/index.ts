@@ -6,7 +6,11 @@ export type {
   ProfilesApi,
   SignInWithTelegramResult,
   StorageApi,
+  WishCreateInput,
   WishPhotoSignedUpload,
+  WishRow,
+  WishesApi,
+  WishUpdateInput,
 } from './ApiClient.js';
 export { SignInError, type SignInErrorCode } from './SignInError.js';
 export {

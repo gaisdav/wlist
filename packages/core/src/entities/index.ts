@@ -3,3 +3,4 @@
 // See docs/architecture.md §3 — every entity has its own folder (schema +
 // tests + helpers); this file just re-exports each domain barrel.
 export * from './profile/index.js';
+export * from './wish/index.js';

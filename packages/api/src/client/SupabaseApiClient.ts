@@ -28,7 +28,11 @@ import {
   type ProfilesApi,
   type SignInWithTelegramResult,
   type StorageApi,
+  type WishCreateInput,
   type WishPhotoSignedUpload,
+  type WishRow,
+  type WishesApi,
+  type WishUpdateInput,
 } from './ApiClient.js';
 import { SignInError } from './SignInError.js';
 
@@ -51,6 +55,7 @@ export class SupabaseApiClient implements ApiClient {
   readonly auth: AuthApi;
   readonly profiles: ProfilesApi;
   readonly storage: StorageApi;
+  readonly wishes: WishesApi;
 
   constructor({ url, anonKey }: SupabaseApiClientOptions) {
     this.supabase = createClient<Database>(url, anonKey, {
@@ -70,6 +75,7 @@ export class SupabaseApiClient implements ApiClient {
     this.auth = createAuthApi(this.supabase, url, anonKey);
     this.profiles = createProfilesApi(this.supabase);
     this.storage = createStorageApi(this.supabase);
+    this.wishes = createWishesApi(this.supabase);
   }
 }
 
@@ -275,5 +281,89 @@ const createStorageApi = (sb: SupabaseClientLike): StorageApi => ({
       throw new Error(`wish-photo-upload: invalid response: ${parsed.error.message}`);
     }
     return parsed.data;
+  },
+});
+
+// =============================================================================
+// wishes
+// =============================================================================
+
+const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
+  async listByOwner(ownerId) {
+    const { data, error } = await sb
+      .from('wishes')
+      .select('*')
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as WishRow[];
+  },
+
+  async get(id) {
+    const { data, error } = await sb.from('wishes').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return (data as WishRow | null) ?? null;
+  },
+
+  async create(input: WishCreateInput) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+
+    const insert: Database['public']['Tables']['wishes']['Insert'] = {
+      title: input.title,
+      owner_id: userData.user.id,
+      description: input.description ?? null,
+      price: input.price ?? null,
+      currency: input.currency ?? 'USD',
+      link: input.link ?? null,
+      photo_storage_path: input.photo_storage_path ?? null,
+    };
+
+    const { data, error } = await sb.from('wishes').insert(insert).select('*').single();
+    if (error) throw error;
+    return data as WishRow;
+  },
+
+  async update(input: WishUpdateInput) {
+    const { id, ...rest } = input;
+    const patch: Database['public']['Tables']['wishes']['Update'] = {};
+    if (rest.title !== undefined) patch.title = rest.title;
+    if (rest.description !== undefined) patch.description = rest.description;
+    if (rest.price !== undefined) patch.price = rest.price;
+    if (rest.currency !== undefined) patch.currency = rest.currency;
+    if (rest.link !== undefined) patch.link = rest.link;
+    if (rest.photo_storage_path !== undefined) patch.photo_storage_path = rest.photo_storage_path;
+    if (rest.is_archived !== undefined) patch.is_archived = rest.is_archived;
+
+    if (Object.keys(patch).length === 0) {
+      const { data: existing, error: getErr } = await sb
+        .from('wishes')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      if (getErr) throw getErr;
+      if (!existing) throw new Error('Wish not found');
+      return existing as WishRow;
+    }
+
+    const { data, error } = await sb.from('wishes').update(patch).eq('id', id).select('*').single();
+    if (error) throw error;
+    return data as WishRow;
+  },
+
+  async archive(id) {
+    const { data, error } = await sb
+      .from('wishes')
+      .update({ is_archived: true })
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as WishRow;
+  },
+
+  async delete(id) {
+    const { error } = await sb.from('wishes').delete().eq('id', id);
+    if (error) throw error;
   },
 });
