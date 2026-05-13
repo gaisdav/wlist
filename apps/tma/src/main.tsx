@@ -7,6 +7,7 @@ import './i18n';
 import { ApiClientProvider } from './providers/ApiClientProvider';
 import { QueryProvider } from './providers/QueryProvider';
 import { TelegramProvider } from './providers/TelegramProvider';
+import { ToastProvider } from './providers/ToastProvider';
 import { AppRouter } from './router';
 import './styles/globals.css';
 
@@ -18,13 +19,15 @@ const apiClient = createApiClient();
 createRoot(rootEl).render(
   <StrictMode>
     <TelegramProvider>
-      <ApiClientProvider client={apiClient}>
-        <QueryProvider>
-          <AuthGate>
-            <AppRouter />
-          </AuthGate>
-        </QueryProvider>
-      </ApiClientProvider>
+      <ToastProvider>
+        <ApiClientProvider client={apiClient}>
+          <QueryProvider>
+            <AuthGate>
+              <AppRouter />
+            </AuthGate>
+          </QueryProvider>
+        </ApiClientProvider>
+      </ToastProvider>
     </TelegramProvider>
   </StrictMode>,
 );

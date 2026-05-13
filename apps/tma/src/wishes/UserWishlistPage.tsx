@@ -3,6 +3,7 @@ import { useUserWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'wouter';
 
+import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
 import { useApiClient } from '../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
 
@@ -14,6 +15,9 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const api = useApiClient();
   const profile = useCurrentUser(api);
   const wishes = useUserWishes(api, userId);
+
+  useQueryErrorToast(Boolean(userId) && wishes.isError && !wishes.isLoading, t('states.error'));
+  useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
 
   const goBack = (): void => {
     window.history.back();

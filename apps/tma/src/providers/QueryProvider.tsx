@@ -1,8 +1,16 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type PropsWithChildren, useState } from 'react';
+
+import { showErrorToast } from '../lib/errorToast';
 
 const makeQueryClient = (): QueryClient =>
   new QueryClient({
+    mutationCache: new MutationCache({
+      onError(_error, _variables, _context, mutation) {
+        if (mutation.meta?.suppressErrorToast === true) return;
+        showErrorToast();
+      },
+    }),
     defaultOptions: {
       queries: {
         // TMA spends a lot of time in background → don't aggressively refetch

@@ -19,6 +19,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
 
+import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
 import {
   PrepareWishPhotoError,
   prepareWishPhotoUpload,
@@ -44,6 +45,11 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
   const createMut = useCreateWish(api);
   const updateMut = useUpdateWish(api);
+
+  useQueryErrorToast(
+    mode === 'edit' && Boolean(wishId) && existing.isError,
+    t('states.error'),
+  );
 
   const form = useForm<WishDraftFormInput, unknown, WishDraftPayload>({
     resolver: zodResolver(wishDraftSchema),

@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
+import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
 import { useApiClient } from '../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
 
@@ -29,6 +30,13 @@ export const WishDetailPage = (): React.JSX.Element => {
   const unarchive = useUnarchiveWish(api);
   const del = useDeleteWish(api);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useQueryErrorToast(Boolean(wishId) && wish.isError, t('states.error'));
+  useQueryErrorToast(
+    Boolean(wish.data?.owner_id) && ownerWishes.isError,
+    t('states.error'),
+  );
+  useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
 
   const photoSrc = useWishPhotoSignedUrl(
     wish.data?.photo_storage_path ? wish.data.photo_storage_path : null,

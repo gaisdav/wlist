@@ -4,6 +4,7 @@ import { useMyWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
+import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
 import { useApiClient } from '../providers/ApiClientProvider';
 
 import { WishCard } from './WishCard';
@@ -13,6 +14,12 @@ export const MyWishlistPage = (): React.JSX.Element => {
   const api = useApiClient();
   const profile = useCurrentUser(api);
   const wishes = useMyWishes(api, profile.data?.id);
+
+  useQueryErrorToast(
+    wishes.isError && !wishes.isLoading && Boolean(profile.data?.id),
+    t('states.error'),
+  );
+  useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
 
   if (profile.isLoading || wishes.isLoading) {
     return (
