@@ -34,10 +34,16 @@ export const WishDetailPage = (): React.JSX.Element => {
     wish.data?.photo_storage_path ? wish.data.photo_storage_path : null,
   );
 
-  const goBack = (): void => {
-    window.history.back();
+  const goTelegramBack = (): void => {
+    const data = wish.data;
+    if (!data) {
+      window.history.back();
+      return;
+    }
+    const listPath = profile.data?.id === data.owner_id ? '/me' : `/u/${data.owner_id}`;
+    setLocation(listPath, { replace: true });
   };
-  useTelegramBackButton(goBack, Boolean(wishId));
+  useTelegramBackButton(goTelegramBack, Boolean(wishId));
 
   if (!wishId) {
     return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
