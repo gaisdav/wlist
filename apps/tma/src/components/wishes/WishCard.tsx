@@ -61,6 +61,11 @@ export const WishCard = ({ wish }: WishCardProps): React.JSX.Element => {
                 })}
           </p>
         ) : null}
+        {wish.is_collaborative && !wish.is_archived ? (
+          <span className="mt-1 inline-block rounded bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary">
+            {t('wishes.card.collaborative')}
+          </span>
+        ) : null}
         {wish.is_archived ? (
           <span className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
             {t('wishes.list.archived')}
