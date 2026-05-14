@@ -16,6 +16,7 @@ import {
   WISH_PHOTO_MAX_UPLOAD_BYTES,
   WISH_SLOTS_DEFAULT_CAP,
 } from '@wlist/core/lib';
+import { Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -298,6 +299,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
               disabled={isSaving}
               onClick={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
             >
+              <Plus className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
               {t('wishes.form.add_copy_line')}
             </Button>
           ) : null}

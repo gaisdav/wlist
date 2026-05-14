@@ -17,6 +17,7 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
+    "validate": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test",
     "prepare": "husky",
     "db:link": "supabase link --project-ref \"$SUPABASE_PROJECT_REF\"",
     "db:start": "supabase start",

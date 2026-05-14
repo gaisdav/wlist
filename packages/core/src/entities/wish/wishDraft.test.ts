@@ -52,4 +52,16 @@ describe('wishDraftSchema', () => {
       }),
     ).toThrow();
   });
+
+  it('persists copy_lines when not collaborative', () => {
+    const out = wishDraftSchema.parse({
+      ...defaultWishDraftFormValues(),
+      title: 'Gift',
+      isCollaborative: false,
+      copyLines: ['Line one', '', '', '', ''],
+    });
+    expect(out.is_collaborative).toBe(false);
+    expect(out.copy_lines).toEqual(['Line one']);
+    expect(out.max_slots).toBeNull();
+  });
 });

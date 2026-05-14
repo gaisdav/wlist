@@ -79,9 +79,7 @@ export const wishDraftSchema = z
       const maxSlots = isCollaborative && maxTrim !== '' ? Number(maxTrim) : null;
       const trimmedLines = copyLines.map((s) => s.trim()).filter((s) => s !== '');
       const copy_lines =
-        isCollaborative && trimmedLines.length > 0
-          ? trimmedLines.slice(0, WISH_COPY_LINES_MAX)
-          : null;
+        trimmedLines.length > 0 ? trimmedLines.slice(0, WISH_COPY_LINES_MAX) : null;
       return {
         title,
         description: description.trim() === '' ? null : description.trim(),
