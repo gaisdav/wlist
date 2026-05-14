@@ -34,6 +34,7 @@
   },
   "nav": {
     "my_wishes": "My wishes",
+    "my_bookings": "My bookings",
     "add_wish": "Add wish",
     "public_preview": "Public list preview",
     "back_to_my_wishes": "Back to my wishes"
@@ -49,7 +50,8 @@
       "no_description": "No description",
       "price": "{{amount}} {{currency}}",
       "price_no_currency": "{{amount}}",
-      "has_product_link": "Includes a product link"
+      "has_product_link": "Includes a product link",
+      "collaborative": "Group gift"
     },
     "detail": {
       "title": "Wish",
@@ -63,7 +65,9 @@
       "delete_confirm": "Delete this wish? This cannot be undone.",
       "prev_wish": "Previous wish",
       "next_wish": "Next wish",
-      "sibling_nav": "Other wishes in this list"
+      "sibling_nav": "Other wishes in this list",
+      "copy_lines": "What to write on the gift",
+      "copy_line": "Copy text"
     },
     "form": {
       "create_title": "New wish",
@@ -82,6 +86,11 @@
       "photo_hint": "JPEG, PNG, or WebP — large files are resized automatically. GIF keeps animation; max {{maxMb}} MB.",
       "submit_create": "Create wish",
       "submit_edit": "Save changes",
+      "collaborative_label": "Group gift (others can book slots)",
+      "max_slots_label": "Max participants (optional)",
+      "max_slots_hint": "Leave empty to use the default cap ({{cap}}).",
+      "copy_lines_label": "Suggested messages (optional, up to 5)",
+      "copy_line_placeholder": "Line {{n}}",
       "errors": {
         "invalid_price": "Enter a valid non-negative number.",
         "invalid_currency": "Pick a supported currency.",
@@ -89,8 +98,28 @@
         "invalid_link": "Enter a valid https URL or leave empty.",
         "photo_too_large": "This file is too large (max {{maxMb}} MB for GIF, or we could not compress it enough). Try a smaller image.",
         "photo_decode_failed": "Could not read this image. Try another file.",
-        "photo_unsupported_type": "Use JPEG, PNG, WebP, or GIF."
+        "photo_unsupported_type": "Use JPEG, PNG, WebP, or GIF.",
+        "invalid_max_slots": "Enter a whole number from 1 to 500, or leave empty."
       }
+    },
+    "slots": {
+      "title": "Gift slots",
+      "filled": "{{active}} / {{cap}} booked",
+      "your_slots": "Your slots: {{count}}",
+      "book_one": "Book 1 slot",
+      "book_remaining": "Book all remaining ({{n}})",
+      "book_failed": "Could not book slots. They may be full or this wish is no longer open.",
+      "cancel": "Cancel slot",
+      "cancel_failed": "Could not cancel this slot.",
+      "loading": "Loading slots…"
+    },
+    "bookings": {
+      "title": "My bookings",
+      "empty": "You have not booked any gift slots yet.",
+      "untitled_wish": "Wish",
+      "archived": "Archived wish",
+      "status_active": "Active",
+      "status_cancelled": "Cancelled"
     }
   }
 }

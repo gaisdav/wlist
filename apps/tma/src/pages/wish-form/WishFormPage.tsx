@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  copyLinesToFormTuple,
   defaultWishDraftFormValues,
   wishDraftSchema,
   type WishDraftFormInput,
@@ -12,6 +13,7 @@ import {
   readLastWishCurrency,
   SUPPORTED_WISH_CURRENCIES,
   WISH_PHOTO_MAX_UPLOAD_BYTES,
+  WISH_SLOTS_DEFAULT_CAP,
 } from '@wlist/core/lib';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -62,6 +64,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const { register, handleSubmit, formState, reset, watch, setValue, getValues } = form;
 
   const priceStr = watch('priceStr');
+  const isCollaborative = watch('isCollaborative');
   const hasPrice = priceStr.trim() !== '';
 
   useEffect(() => {
@@ -78,6 +81,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
             : readLastWishCurrency()
           : '',
       linkStr: d.link ?? '',
+      isCollaborative: d.is_collaborative,
+      maxSlotsStr: d.max_slots != null ? String(d.max_slots) : '',
+      copyLines: copyLinesToFormTuple(d.copy_lines),
     });
   }, [existing.data, reset]);
 
@@ -121,6 +127,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         price: payload.price,
         currency: payload.currency,
         link: payload.link,
+        is_collaborative: payload.is_collaborative,
+        max_slots: payload.max_slots,
+        copy_lines: payload.copy_lines,
       };
 
       if (mode === 'create') {
@@ -263,6 +272,48 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
             <span className="text-xs text-destructive">{t('wishes.form.errors.invalid_link')}</span>
           ) : null}
         </label>
+
+        <label className="flex cursor-pointer items-start gap-2">
+          <input type="checkbox" className="mt-1 h-4 w-4 shrink-0" {...register('isCollaborative')} />
+          <span className="text-sm font-medium text-foreground">{t('wishes.form.collaborative_label')}</span>
+        </label>
+
+        {isCollaborative ? (
+          <>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-foreground">
+                {t('wishes.form.max_slots_label')}
+              </span>
+              <input
+                inputMode="numeric"
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                {...register('maxSlotsStr')}
+              />
+              <span className="text-xs text-muted">
+                {t('wishes.form.max_slots_hint', { cap: WISH_SLOTS_DEFAULT_CAP })}
+              </span>
+              {formState.errors.maxSlotsStr ? (
+                <span className="text-xs text-destructive">
+                  {formState.errors.maxSlotsStr.message === 'invalid_max_slots'
+                    ? t('wishes.form.errors.invalid_max_slots')
+                    : formState.errors.maxSlotsStr.message}
+                </span>
+              ) : null}
+            </label>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-foreground">{t('wishes.form.copy_lines_label')}</span>
+              {([0, 1, 2, 3, 4] as const).map((i) => (
+                <input
+                  key={i}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  placeholder={t('wishes.form.copy_line_placeholder', { n: i + 1 })}
+                  {...register(`copyLines.${i}`)}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
 
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">
