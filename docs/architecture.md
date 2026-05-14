@@ -313,6 +313,8 @@ export interface ApiClient {
 }
 ```
 
+Социальный слой (этап 05, `plans/05-social.md`): фактический `ApiClient` также включает `profiles` (в т.ч. поиск), `follows`, `feed`, `wishLikes` — см. исходный контракт в `packages/api/src/client/ApiClient.ts`.
+
 Реализация `SupabaseApiClient`:
 
 - Создаётся **один раз** в корне приложения (`apps/tma/src/main.tsx`) с конфигом из env.
@@ -365,7 +367,10 @@ flowchart LR
 Таблицы и поля, описанные в [`plans/05-social.md`](../../plans/05-social.md):
 
 - **`public.wish_likes`** — лайк пользователя на чужое желание; PK `(user_id, wish_id)`; каскад при удалении `wishes` / `profiles`.
-- **`wishes.reposted_from_id`** — ссылка на оригинал при создании желания через репост; **immutable** после `INSERT` (триггер); `ON DELETE SET NULL` на оригинале.
+- **`wishes.reposted_from_id`** — ссылка на оригинал при создании желания через репост; **immutable** после `INSERT` (кроме `NULL` при `ON DELETE SET NULL`); `ON DELETE SET NULL` на оригинале.
+- **`public.follows`** — подписка `follower_id` → `followee_id`.
+- **`public.feed_events`** — append-only лента; строки пишут **триггеры** через `SECURITY DEFINER` (`append_feed_event`), клиент только **читает** с RLS (свои события + события тех, на кого подписан).
+- **`wishes.likes_count` / `wishes.reposts_count`** — денормализованные счётчики, поддерживаются триггерами.
 
 Типы и Zod для этих объектов генерируются из Postgres (`pnpm db:codegen`); клиентский слой следует инвариантам RLS из миграций.
 

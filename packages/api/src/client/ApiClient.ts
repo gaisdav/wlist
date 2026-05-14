@@ -8,6 +8,7 @@
 import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
 
 import type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
+import type { FeedEventRow } from './socialTypes.js';
 import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 
 /**
@@ -91,6 +92,15 @@ export interface ProfilesApi {
    * should wait for the next session refresh and retry).
    */
   getCurrent(): Promise<ProfileRow | null>;
+
+  /** Any profile visible under current RLS (stage 05). */
+  getById(id: string): Promise<ProfileRow | null>;
+
+  /**
+   * Case-insensitive search on `username` and `first_name` (OR), max 20 rows.
+   * Empty / whitespace query yields `[]`.
+   */
+  searchUsers(query: string): Promise<ProfileRow[]>;
 }
 
 /**
@@ -129,6 +139,26 @@ export interface StorageApi {
   deleteWishPhoto(storagePath: string): Promise<void>;
 }
 
+export interface FollowsApi {
+  follow(followeeId: string): Promise<void>;
+  unfollow(followeeId: string): Promise<void>;
+  isFollowing(followeeId: string): Promise<boolean>;
+  getCounts(userId: string): Promise<{ following: number; followers: number }>;
+  listFollowing(userId: string): Promise<ProfileRow[]>;
+  listFollowers(userId: string): Promise<ProfileRow[]>;
+}
+
+export interface FeedApi {
+  /** Offset pagination (stable under concurrent inserts). */
+  list(params: { limit?: number; offset?: number }): Promise<FeedEventRow[]>;
+}
+
+export interface WishLikesApi {
+  getState(wishId: string): Promise<{ count: number; likedByMe: boolean }>;
+  /** Idempotent: `liked === true` inserts, `false` deletes (no error if row missing). */
+  setLiked(wishId: string, liked: boolean): Promise<void>;
+}
+
 export interface WishesApi {
   /** All wishes visible to the caller for this owner (RLS applies). */
   listByOwner(ownerId: string): Promise<WishRow[]>;
@@ -152,6 +182,9 @@ export interface SlotsApi {
 export interface ApiClient {
   auth: AuthApi;
   profiles: ProfilesApi;
+  follows: FollowsApi;
+  feed: FeedApi;
+  wishLikes: WishLikesApi;
   storage: StorageApi;
   wishes: WishesApi;
   slots: SlotsApi;
@@ -159,3 +192,4 @@ export interface ApiClient {
 
 export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 export type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
+export type { FeedCursor, FeedEventKind, FeedEventRow } from './socialTypes.js';

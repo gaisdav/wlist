@@ -8,7 +8,7 @@ import {
   useWish,
 } from '@wlist/core/hooks/wishes';
 import { wishSlotCap } from '@wlist/core/lib';
-import { ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
@@ -17,6 +17,7 @@ import { PhotoLightbox } from '../../components/overlays';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useWishPhotoSignedUrl } from '../../components/wishes';
+import { WishSocialStrip } from '../../components/wishes/WishSocialStrip';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
@@ -228,6 +229,18 @@ export const WishDetailPage = (): React.JSX.Element => {
               ))}
             </ul>
           </section>
+        ) : null}
+
+        <WishSocialStrip wish={w} isOwner={isOwner} />
+
+        {!isOwner && !w.is_archived ? (
+          <Link
+            to={`/wish/new?repostFrom=${w.id}`}
+            className="inline-flex items-center gap-2 self-start rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground"
+          >
+            <Repeat2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+            {t('social.repost')}
+          </Link>
         ) : null}
 
         {slotsWishId ? (

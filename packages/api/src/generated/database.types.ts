@@ -29,6 +29,89 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_events: {
+        Row: {
+          actor_id: string
+          created_at: string
+          id: string
+          kind:
+            | 'wish_created'
+            | 'wish_reposted'
+            | 'wish_collected'
+            | 'slot_booked_public'
+            | 'event_created'
+          payload: Json
+          subject_id: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          id?: string
+          kind:
+            | 'wish_created'
+            | 'wish_reposted'
+            | 'wish_collected'
+            | 'slot_booked_public'
+            | 'event_created'
+          payload?: Json
+          subject_id: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          id?: string
+          kind?:
+            | 'wish_created'
+            | 'wish_reposted'
+            | 'wish_collected'
+            | 'slot_booked_public'
+            | 'event_created'
+          payload?: Json
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'feed_events_actor_id_fkey'
+            columns: ['actor_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'follows_followee_id_fkey'
+            columns: ['followee_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'follows_follower_id_fkey'
+            columns: ['follower_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -153,11 +236,13 @@ export type Database = {
           is_archived: boolean
           is_collaborative: boolean
           link: string | null
+          likes_count: number
           max_slots: number | null
           owner_id: string
           photo_storage_path: string | null
           price: number | null
           reposted_from_id: string | null
+          reposts_count: number
           title: string
           updated_at: string
         }
@@ -170,11 +255,13 @@ export type Database = {
           is_archived?: boolean
           is_collaborative?: boolean
           link?: string | null
+          likes_count?: number
           max_slots?: number | null
           owner_id: string
           photo_storage_path?: string | null
           price?: number | null
           reposted_from_id?: string | null
+          reposts_count?: number
           title: string
           updated_at?: string
         }
@@ -187,11 +274,13 @@ export type Database = {
           is_archived?: boolean
           is_collaborative?: boolean
           link?: string | null
+          likes_count?: number
           max_slots?: number | null
           owner_id?: string
           photo_storage_path?: string | null
           price?: number | null
           reposted_from_id?: string | null
+          reposts_count?: number
           title?: string
           updated_at?: string
         }
@@ -230,6 +319,12 @@ export type Database = {
       }
     }
     Enums: {
+      feed_event_kind:
+        | 'wish_created'
+        | 'wish_reposted'
+        | 'wish_collected'
+        | 'slot_booked_public'
+        | 'event_created'
       wish_slot_status: 'active' | 'cancelled'
     }
     CompositeTypes: {

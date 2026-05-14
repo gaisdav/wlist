@@ -34,6 +34,86 @@ export const publicAuthTelegramUsedInitDataUpdateSchema = z.object({
   used_at: z.string().optional(),
 });
 
+export const feedEventKindSchema = z.enum([
+  "wish_created",
+  "wish_reposted",
+  "wish_collected",
+  "slot_booked_public",
+  "event_created",
+]);
+
+export const publicFeedEventsRowSchema = z.object({
+  actor_id: z.string(),
+  created_at: z.string(),
+  id: z.string(),
+  kind: feedEventKindSchema,
+  payload: jsonSchema,
+  subject_id: z.string(),
+});
+
+export const publicFeedEventsInsertSchema = z.object({
+  actor_id: z.string(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  kind: feedEventKindSchema,
+  payload: jsonSchema.optional(),
+  subject_id: z.string(),
+});
+
+export const publicFeedEventsUpdateSchema = z.object({
+  actor_id: z.string().optional(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  kind: feedEventKindSchema.optional(),
+  payload: jsonSchema.optional(),
+  subject_id: z.string().optional(),
+});
+
+export const publicFeedEventsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("feed_events_actor_id_fkey"),
+    columns: z.tuple([z.literal("actor_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
+export const publicFollowsRowSchema = z.object({
+  created_at: z.string(),
+  followee_id: z.string(),
+  follower_id: z.string(),
+});
+
+export const publicFollowsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  followee_id: z.string(),
+  follower_id: z.string(),
+});
+
+export const publicFollowsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  followee_id: z.string().optional(),
+  follower_id: z.string().optional(),
+});
+
+export const publicFollowsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("follows_followee_id_fkey"),
+    columns: z.tuple([z.literal("followee_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("follows_follower_id_fkey"),
+    columns: z.tuple([z.literal("follower_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
 export const publicProfilesRowSchema = z.object({
   created_at: z.string(),
   first_name: z.string(),
@@ -117,11 +197,13 @@ export const publicWishesRowSchema = z.object({
   is_archived: z.boolean(),
   is_collaborative: z.boolean(),
   link: z.string().nullable(),
+  likes_count: z.number(),
   max_slots: z.number().nullable(),
   owner_id: z.string(),
   photo_storage_path: z.string().nullable(),
   price: z.number().nullable(),
   reposted_from_id: z.string().nullable(),
+  reposts_count: z.number(),
   title: z.string(),
   updated_at: z.string(),
 });
@@ -135,11 +217,13 @@ export const publicWishesInsertSchema = z.object({
   is_archived: z.boolean().optional(),
   is_collaborative: z.boolean().optional(),
   link: z.string().optional().nullable(),
+  likes_count: z.number().optional(),
   max_slots: z.number().optional().nullable(),
   owner_id: z.string(),
   photo_storage_path: z.string().optional().nullable(),
   price: z.number().optional().nullable(),
   reposted_from_id: z.string().optional().nullable(),
+  reposts_count: z.number().optional(),
   title: z.string(),
   updated_at: z.string().optional(),
 });
@@ -153,11 +237,13 @@ export const publicWishesUpdateSchema = z.object({
   is_archived: z.boolean().optional(),
   is_collaborative: z.boolean().optional(),
   link: z.string().optional().nullable(),
+  likes_count: z.number().optional(),
   max_slots: z.number().optional().nullable(),
   owner_id: z.string().optional(),
   photo_storage_path: z.string().optional().nullable(),
   price: z.number().optional().nullable(),
   reposted_from_id: z.string().optional().nullable(),
+  reposts_count: z.number().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
 });

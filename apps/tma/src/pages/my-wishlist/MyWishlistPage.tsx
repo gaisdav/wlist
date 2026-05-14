@@ -42,6 +42,18 @@ export const MyWishlistPage = (): React.JSX.Element => {
           <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.title')}</h1>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
             <Link
+              to="/feed"
+              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground"
+            >
+              {t('nav.feed')}
+            </Link>
+            <Link
+              to="/search"
+              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground"
+            >
+              {t('nav.search_users')}
+            </Link>
+            <Link
               to="/me/bookings"
               className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground"
             >
@@ -71,7 +83,7 @@ export const MyWishlistPage = (): React.JSX.Element => {
         <ul className="flex flex-col gap-2">
           {wishes.data.map((w) => (
             <li key={w.id}>
-              <WishCard wish={w} />
+              <WishCard wish={w} isOwner />
             </li>
           ))}
         </ul>
