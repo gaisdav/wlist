@@ -4,10 +4,10 @@ import { useMyWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
-import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
-import { useApiClient } from '../providers/ApiClientProvider';
-
-import { WishCard } from './WishCard';
+import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { WishCard } from '../../components/wishes';
+import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
+import { useApiClient } from '../../providers/ApiClientProvider';
 
 export const MyWishlistPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -23,11 +23,11 @@ export const MyWishlistPage = (): React.JSX.Element => {
 
   if (profile.isLoading || wishes.isLoading) {
     return (
-      <div className="flex flex-col gap-3 p-4">
-        <div className="h-10 animate-pulse rounded-lg bg-muted" />
-        <div className="h-24 animate-pulse rounded-lg bg-muted" />
-        <div className="h-24 animate-pulse rounded-lg bg-muted" />
-      </div>
+      <PageLoadingPlaceholder>
+        <Skeleton className="h-10 rounded-lg" />
+        <Skeleton className="h-24 rounded-lg" />
+        <Skeleton className="h-24 rounded-lg" />
+      </PageLoadingPlaceholder>
     );
   }
 

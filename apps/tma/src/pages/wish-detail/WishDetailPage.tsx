@@ -6,17 +6,20 @@ import {
   useUserWishes,
   useWish,
 } from '@wlist/core/hooks/wishes';
-import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
-import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
-import { useApiClient } from '../providers/ApiClientProvider';
-import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
+import { PhotoLightbox } from '../../components/overlays';
+import { Button } from '../../components/primitives/button';
+import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { useWishPhotoSignedUrl } from '../../components/wishes';
+import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
+import { useApiClient } from '../../providers/ApiClientProvider';
+import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
-import { WISH_NO_PHOTO_EMOJI } from './constants';
-import { useWishPhotoSignedUrl } from './useWishPhotoSignedUrl';
+import { WishDetailHero } from './WishDetailHero';
 
 export const WishDetailPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -59,10 +62,10 @@ export const WishDetailPage = (): React.JSX.Element => {
 
   if (wish.isLoading) {
     return (
-      <div className="flex flex-col gap-3 p-4">
-        <div className="h-40 animate-pulse rounded-lg bg-muted" />
-        <div className="h-6 w-2/3 animate-pulse rounded bg-muted" />
-      </div>
+      <PageLoadingPlaceholder>
+        <Skeleton className="h-40 rounded-lg" />
+        <Skeleton className="h-6 w-2/3 rounded" />
+      </PageLoadingPlaceholder>
     );
   }
 
@@ -116,30 +119,13 @@ export const WishDetailPage = (): React.JSX.Element => {
 
   return (
     <>
-      {lightboxOpen && photoSrc ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={t('wishes.detail.photo_lightbox')}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <button
-            type="button"
-            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-            onClick={() => setLightboxOpen(false)}
-            aria-label={t('actions.close')}
-          >
-            <X className="h-5 w-5" strokeWidth={2} />
-          </button>
-          <img
-            src={photoSrc}
-            alt=""
-            className="max-h-full max-w-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      ) : null}
+      <PhotoLightbox
+        open={lightboxOpen}
+        src={photoSrc}
+        ariaLabel={t('wishes.detail.photo_lightbox')}
+        closeLabel={t('actions.close')}
+        onClose={() => setLightboxOpen(false)}
+      />
 
       <article
         className={`flex flex-col gap-4 p-4${
@@ -189,32 +175,35 @@ export const WishDetailPage = (): React.JSX.Element => {
               {t('actions.edit')}
             </Link>
             {w.is_archived ? (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 disabled={unarchive.isPending}
                 onClick={() => void onUnarchive()}
-                className="rounded-lg border border-border px-3 py-2 text-sm font-medium"
               >
                 {t('wishes.detail.unarchive')}
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 disabled={archive.isPending}
                 onClick={() => void onArchive()}
-                className="rounded-lg border border-border px-3 py-2 text-sm font-medium"
               >
                 {t('wishes.detail.archive')}
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               type="button"
+              variant="destructive"
+              size="sm"
               disabled={del.isPending}
               onClick={() => void onDelete()}
-              className="rounded-lg border border-destructive/50 px-3 py-2 text-sm font-medium text-destructive"
             >
               {t('actions.delete')}
-            </button>
+            </Button>
           </div>
         ) : null}
       </article>
@@ -251,48 +240,3 @@ export const WishDetailPage = (): React.JSX.Element => {
     </>
   );
 };
-
-function WishDetailHero({
-  hasUploadedPhoto,
-  photoSrc,
-  onOpenLightbox,
-  t,
-}: {
-  hasUploadedPhoto: boolean;
-  photoSrc: string | null;
-  onOpenLightbox: () => void;
-  t: (key: string) => string;
-}): React.JSX.Element {
-  return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface">
-      <div className="relative aspect-video w-full bg-muted">
-        {hasUploadedPhoto ? (
-          photoSrc ? (
-            <button
-              type="button"
-              onClick={onOpenLightbox}
-              className="relative block h-full w-full cursor-zoom-in overflow-hidden p-0 text-left"
-            >
-              <img src={photoSrc} alt="" className="h-full w-full object-cover" />
-            </button>
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center"
-              aria-busy="true"
-              aria-label={t('states.loading')}
-            >
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" strokeWidth={2} />
-            </div>
-          )
-        ) : (
-          <div
-            className="flex h-full w-full select-none items-center justify-center text-5xl"
-            aria-hidden
-          >
-            {WISH_NO_PHOTO_EMOJI}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

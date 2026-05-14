@@ -10,7 +10,7 @@ alwaysApply: true
 ## Структура
 
 ```
-apps/tma/              # Telegram Mini App
+apps/tma/              # Telegram Mini App (`src/pages/`, `src/components/` — см. architecture §8.7)
 packages/core/         # @wlist/core — бизнес-логика, hooks, токены, маршруты
 packages/api/          # @wlist/api  — Supabase клиент, типы из БД, edge-contracts
 packages/config/       # @wlist/config — eslint/tsconfig/prettier/tailwind preset

@@ -29,7 +29,7 @@
 
 - Bucket `wish-photos` (private).
 - Политика: загружать может только владелец wish; читать — все авторизованные (видимость по подпискам появится в этапе 08).
-- Лимит размера загрузки **3 MiB** (`@wlist/core/lib` `wishPhotoLimits`): JPEG/PNG/WebP на клиенте даунскейлятся (длинная сторона до 2048px) и перекодируются под лимит; **GIF** не трогаем (анимация) — только проверка размера. Реализация: `apps/tma/src/lib/prepareWishPhotoUpload.ts`.
+- Лимит размера загрузки **3 MiB** (`@wlist/core/lib` `wishPhotoLimits`): JPEG/PNG/WebP на клиенте даунскейлятся (длинная сторона до 2048px) и перекодируются под лимит; **GIF** не трогаем (анимация) — только проверка размера. Реализация: `apps/tma/src/pages/wish-form/prepareWishPhotoUpload.ts`.
 
 ### 3. RLS
 

@@ -3,11 +3,12 @@ import { useUserWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'wouter';
 
-import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
-import { useApiClient } from '../providers/ApiClientProvider';
-import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
-
-import { WishCard } from './WishCard';
+import { Button } from '../../components/primitives/button';
+import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { WishCard } from '../../components/wishes';
+import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
+import { useApiClient } from '../../providers/ApiClientProvider';
+import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 export const UserWishlistPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -32,10 +33,10 @@ export const UserWishlistPage = (): React.JSX.Element => {
 
   if (wishes.isLoading) {
     return (
-      <div className="flex flex-col gap-3 p-4">
-        <div className="h-10 animate-pulse rounded-lg bg-muted" />
-        <div className="h-24 animate-pulse rounded-lg bg-muted" />
-      </div>
+      <PageLoadingPlaceholder>
+        <Skeleton className="h-10 rounded-lg" />
+        <Skeleton className="h-24 rounded-lg" />
+      </PageLoadingPlaceholder>
     );
   }
 
@@ -43,13 +44,9 @@ export const UserWishlistPage = (): React.JSX.Element => {
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-3 border-b border-border pb-4">
         {isSelf ? (
-          <button
-            type="button"
-            onClick={goBack}
-            className="self-start text-sm font-medium text-primary underline"
-          >
+          <Button type="button" variant="link" className="self-start" onClick={goBack}>
             {t('nav.back_to_my_wishes')}
-          </button>
+          </Button>
         ) : null}
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.user_title')}</h1>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useApiClient } from '../providers/ApiClientProvider';
+import { useApiClient } from '../../providers/ApiClientProvider';
 
 /**
  * Resolves a short-lived signed read URL for `wish-photos`, or `null` while loading / on error / no path.

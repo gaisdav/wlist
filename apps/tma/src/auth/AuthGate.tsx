@@ -2,6 +2,8 @@ import { type SignInErrorCode } from '@wlist/api';
 import { type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '../components/primitives/button';
+
 import { useAuthBootstrap } from './useAuthBootstrap';
 
 /**
@@ -66,13 +68,9 @@ const Splash = ({ heading, detail, spinner, retry, retryLabel }: SplashProps) =>
     <p className="text-base font-medium text-foreground">{heading}</p>
     {detail ? <p className="text-xs text-muted">{detail}</p> : null}
     {retry ? (
-      <button
-        type="button"
-        onClick={retry}
-        className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground"
-      >
+      <Button type="button" variant="secondary" size="md" onClick={retry}>
         {retryLabel}
-      </button>
+      </Button>
     ) : null}
   </main>
 );

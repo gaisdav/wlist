@@ -1,10 +1,10 @@
 import { Redirect, Route, Router, Switch } from 'wouter';
 
 import { AppLayout } from './layout/AppLayout';
-import { MyWishlistPage } from './wishes/MyWishlistPage';
-import { UserWishlistPage } from './wishes/UserWishlistPage';
-import { WishDetailPage } from './wishes/WishDetailPage';
-import { WishFormPage } from './wishes/WishFormPage';
+import { MyWishlistPage } from './pages/my-wishlist/MyWishlistPage';
+import { UserWishlistPage } from './pages/user-wishlist/UserWishlistPage';
+import { WishDetailPage } from './pages/wish-detail/WishDetailPage';
+import { WishFormPage } from './pages/wish-form/WishFormPage';
 
 export const AppRouter = (): React.JSX.Element => (
   <Router>

@@ -400,7 +400,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-  Page["WishlistPage (apps/tma)"] -->|useUserWishes(ownerId)| Hook["useUserWishes (core/hooks)"]
+  Page["UserWishlistPage (apps/tma/pages)"] -->|useUserWishes(ownerId)| Hook["useUserWishes (core/hooks)"]
   Hook -->|useApiClient()| Ctx[ApiClientContext]
   Hook -->|useQuery + queryKeys.wishes.byOwner(ownerId)| Query[TanStack Query]
   Query -->|cache miss| Service["wishesService.listByOwner(api, ownerId)"]
@@ -576,6 +576,20 @@ export type ButtonVariants = VariantProps<typeof button>;
 
 - На web (этап 12) — те же `tokens` + Tailwind, новый набор компонентов под десктоп.
 - На RN (этап 12) — решение между NativeWind (`tailwind.config` шарим напрямую) и `StyleSheet` поверх токенов принимаем по итогам опыта с TMA. До тех пор: **никакого UI-кода в `core`**.
+
+### 8.7. Структура UI-слоя TMA (`apps/tma/src`)
+
+**Маршрутные страницы** — одна страница = одна папка под `pages/<route-name>/`: корневой файл страницы (например `WishFormPage.tsx`) плюс всё, что нужно **только** этой странице (локальные подкомпоненты, хуки, утилиты вроде клиентской подготовки файла к загрузке). Если кусок UI или логики понадобится с другой страницы — выносим в общий слой.
+
+**Общие компоненты приложения** — `components/` с **подпапками по уровню сложности**, чтобы не смешивать примитивы и тяжёлые оболочки:
+
+| Папка | Назначение |
+| ----- | ---------- |
+| `components/primitives/` | Мелкие атомы: кнопки, скелетоны, типографика без бизнес-смысла. Подпапка на виджет (`primitives/button/`, `primitives/skeleton/`). |
+| `components/overlays/` | Сложные оболочки: модалки, полноэкранные lightbox, drawer. |
+| `components/<domain>/` | Переиспользуемый UI по домену продукта (например `components/wishes/` — карточка списка, превью фото), если он используется с **нескольких** страниц. |
+
+Остальное в `apps/tma/src` без изменений по смыслу: `layout/`, `providers/`, `hooks/` общего назначения, `auth/`, `telegram/`, `api/`, `lib/` (кросс-страничные утилиты без привязки к одному экрану), `router.tsx`, `main.tsx`.
 
 ---
 

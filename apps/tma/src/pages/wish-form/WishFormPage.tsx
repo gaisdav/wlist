@@ -13,20 +13,22 @@ import {
   SUPPORTED_WISH_CURRENCIES,
   WISH_PHOTO_MAX_UPLOAD_BYTES,
 } from '@wlist/core/lib';
-import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
 
-import { useQueryErrorToast } from '../hooks/useQueryErrorToast';
+import { Button } from '../../components/primitives/button';
+import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
+import { useApiClient } from '../../providers/ApiClientProvider';
+import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+
 import {
   PrepareWishPhotoError,
   prepareWishPhotoUpload,
   wishPhotoMimeForApi,
-} from '../lib/prepareWishPhotoUpload';
-import { useApiClient } from '../providers/ApiClientProvider';
-import { useTelegramBackButton } from '../telegram/useTelegramBackButton';
+} from './prepareWishPhotoUpload';
 
 interface WishFormPageProps {
   mode: 'create' | 'edit';
@@ -139,10 +141,10 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
   if (mode === 'edit' && (existing.isLoading || !wishId)) {
     return (
-      <div className="flex flex-col gap-3 p-4">
-        <div className="h-10 animate-pulse rounded-lg bg-muted" />
-        <div className="h-32 animate-pulse rounded-lg bg-muted" />
-      </div>
+      <PageLoadingPlaceholder>
+        <Skeleton className="h-10 rounded-lg" />
+        <Skeleton className="h-32 rounded-lg" />
+      </PageLoadingPlaceholder>
     );
   }
 
@@ -307,16 +309,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           {photoError ? <span className="text-xs text-destructive">{photoError}</span> : null}
         </label>
 
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin" strokeWidth={2} aria-hidden />
-          ) : null}
+        <Button type="submit" isLoading={isSaving}>
           {mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit')}
-        </button>
+        </Button>
       </fieldset>
     </form>
   );
