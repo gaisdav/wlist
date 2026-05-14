@@ -73,6 +73,41 @@ export const publicProfilesUpdateSchema = z.object({
   username: z.string().optional().nullable(),
 });
 
+export const publicWishLikesRowSchema = z.object({
+  created_at: z.string(),
+  user_id: z.string(),
+  wish_id: z.string(),
+});
+
+export const publicWishLikesInsertSchema = z.object({
+  created_at: z.string().optional(),
+  user_id: z.string(),
+  wish_id: z.string(),
+});
+
+export const publicWishLikesUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  user_id: z.string().optional(),
+  wish_id: z.string().optional(),
+});
+
+export const publicWishLikesRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("wish_likes_user_id_fkey"),
+    columns: z.tuple([z.literal("user_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("wish_likes_wish_id_fkey"),
+    columns: z.tuple([z.literal("wish_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
 export const publicWishesRowSchema = z.object({
   copy_lines: jsonSchema.nullable(),
   created_at: z.string(),
@@ -86,6 +121,7 @@ export const publicWishesRowSchema = z.object({
   owner_id: z.string(),
   photo_storage_path: z.string().nullable(),
   price: z.number().nullable(),
+  reposted_from_id: z.string().nullable(),
   title: z.string(),
   updated_at: z.string(),
 });
@@ -103,6 +139,7 @@ export const publicWishesInsertSchema = z.object({
   owner_id: z.string(),
   photo_storage_path: z.string().optional().nullable(),
   price: z.number().optional().nullable(),
+  reposted_from_id: z.string().optional().nullable(),
   title: z.string(),
   updated_at: z.string().optional(),
 });
@@ -120,6 +157,7 @@ export const publicWishesUpdateSchema = z.object({
   owner_id: z.string().optional(),
   photo_storage_path: z.string().optional().nullable(),
   price: z.number().optional().nullable(),
+  reposted_from_id: z.string().optional().nullable(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
 });
@@ -130,6 +168,13 @@ export const publicWishesRelationshipsSchema = z.tuple([
     columns: z.tuple([z.literal("owner_id")]),
     isOneToOne: z.literal(false),
     referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("wishes_reposted_from_id_fkey"),
+    columns: z.tuple([z.literal("reposted_from_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
     referencedColumns: z.tuple([z.literal("id")]),
   }),
 ]);

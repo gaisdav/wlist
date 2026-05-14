@@ -68,6 +68,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wish_likes: {
+        Row: {
+          created_at: string
+          user_id: string
+          wish_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          wish_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'wish_likes_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'wish_likes_wish_id_fkey'
+            columns: ['wish_id']
+            isOneToOne: false
+            referencedRelation: 'wishes'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       wish_slots: {
         Row: {
           booked_by: string
@@ -124,6 +157,7 @@ export type Database = {
           owner_id: string
           photo_storage_path: string | null
           price: number | null
+          reposted_from_id: string | null
           title: string
           updated_at: string
         }
@@ -140,6 +174,7 @@ export type Database = {
           owner_id: string
           photo_storage_path?: string | null
           price?: number | null
+          reposted_from_id?: string | null
           title: string
           updated_at?: string
         }
@@ -156,6 +191,7 @@ export type Database = {
           owner_id?: string
           photo_storage_path?: string | null
           price?: number | null
+          reposted_from_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -166,6 +202,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: 'wishes_reposted_from_id_fkey'
+            columns: ['reposted_from_id']
+            isOneToOne: false
+            referencedRelation: 'wishes'
+            referencedColumns: ['id']
           },
         ]
       }
