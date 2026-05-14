@@ -7,7 +7,6 @@ import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
-import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 const feedKindLabelKey = (kind: FeedEventKind): string => {
   switch (kind) {
@@ -37,11 +36,6 @@ export const FeedPage = (): React.JSX.Element => {
   const feed = useInfiniteFeed(api);
 
   useQueryErrorToast(feed.isError && !feed.isLoading, t('states.error'));
-
-  const goBack = (): void => {
-    window.history.back();
-  };
-  useTelegramBackButton(goBack, true);
 
   const flat = feed.data?.pages.flat() ?? [];
 

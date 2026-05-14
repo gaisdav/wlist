@@ -39,7 +39,14 @@
     "public_preview": "Public list preview",
     "back_to_my_wishes": "Back to my wishes",
     "feed": "Feed",
-    "search_users": "Find people"
+    "search_users": "Find people",
+    "tabs": {
+      "aria": "Main navigation",
+      "feed": "Feed",
+      "profile": "Profile",
+      "bookings": "Bookings",
+      "find_people": "Find people"
+    }
   },
   "wishes": {
     "list": {

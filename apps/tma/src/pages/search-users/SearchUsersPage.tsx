@@ -8,7 +8,6 @@ import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
-import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 export const SearchUsersPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -18,11 +17,6 @@ export const SearchUsersPage = (): React.JSX.Element => {
   const search = useUserSearch(api, submitted);
 
   useQueryErrorToast(search.isError && submitted.length >= 2, t('states.error'));
-
-  const goBack = (): void => {
-    window.history.back();
-  };
-  useTelegramBackButton(goBack, true);
 
   const onSubmit = (e: React.FormEvent): void => {
     e.preventDefault();

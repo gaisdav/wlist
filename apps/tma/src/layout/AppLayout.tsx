@@ -1,8 +1,10 @@
 import { getDisplayName } from '@wlist/core/entities/profile';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
+import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 
+import { BottomTabBar, shouldShowBottomTabBar } from '../components/nav';
 import { useApiClient } from '../providers/ApiClientProvider';
 
 interface AppLayoutProps {
@@ -13,6 +15,8 @@ export const AppLayout = ({ children }: AppLayoutProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const api = useApiClient();
   const profile = useCurrentUser(api);
+  const [location] = useLocation();
+  const tabBar = shouldShowBottomTabBar(location);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -26,7 +30,15 @@ export const AppLayout = ({ children }: AppLayoutProps): React.JSX.Element => {
           </span>
         ) : null}
       </header>
-      <main className="flex-1 pb-8">{children}</main>
+      <main
+        className={clsx(
+          'flex-1',
+          tabBar ? 'pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]' : 'pb-8',
+        )}
+      >
+        {children}
+      </main>
+      <BottomTabBar />
     </div>
   );
 };

@@ -2,13 +2,12 @@ import type { WishSlotBookingRow } from '@wlist/api';
 import { useCancelSlot, useMySlotBookings } from '@wlist/core/hooks/slots';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
-import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 const embeddedWish = (row: WishSlotBookingRow) => {
   const w = row.wishes;
@@ -19,17 +18,11 @@ const embeddedWish = (row: WishSlotBookingRow) => {
 export const MyBookingsPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
   const api = useApiClient();
-  const [, setLocation] = useLocation();
   const bookings = useMySlotBookings(api);
   const cancelSlot = useCancelSlot(api);
   const [actionError, setActionError] = useState<string | null>(null);
 
   useQueryErrorToast(bookings.isError && !bookings.isLoading, t('states.error'));
-
-  const goBack = (): void => {
-    setLocation('/me');
-  };
-  useTelegramBackButton(goBack, true);
 
   if (bookings.isLoading) {
     return (
