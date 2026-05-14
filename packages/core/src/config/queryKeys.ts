@@ -29,6 +29,9 @@ export const queryKeys = {
   wishes: {
     all: () => [...queryKeys.all, 'wishes'] as const,
     byOwner: (ownerId: string) => [...queryKeys.wishes.all(), 'byOwner', ownerId] as const,
+    /** Stable key for a set of wish ids (sorted, comma-separated). */
+    byIds: (ids: string[]) =>
+      [...queryKeys.wishes.all(), 'byIds', [...ids].sort().join(',')] as const,
     one: (wishId: string) => [...queryKeys.wishes.all(), 'one', wishId] as const,
   },
 

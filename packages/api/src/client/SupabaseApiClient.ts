@@ -494,6 +494,20 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
     return (data ?? []) as WishRow[];
   },
 
+  async listByIds(ids) {
+    const unique = [...new Set(ids.filter(Boolean))];
+    if (unique.length === 0) return [];
+    const chunkSize = 100;
+    const out: WishRow[] = [];
+    for (let i = 0; i < unique.length; i += chunkSize) {
+      const chunk = unique.slice(i, i + chunkSize);
+      const { data, error } = await sb.from('wishes').select('*').in('id', chunk);
+      if (error) throw error;
+      out.push(...((data ?? []) as WishRow[]));
+    }
+    return out;
+  },
+
   async get(id) {
     const { data, error } = await sb.from('wishes').select('*').eq('id', id).maybeSingle();
     if (error) throw error;

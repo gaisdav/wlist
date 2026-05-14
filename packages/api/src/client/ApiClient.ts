@@ -162,6 +162,11 @@ export interface WishLikesApi {
 export interface WishesApi {
   /** All wishes visible to the caller for this owner (RLS applies). */
   listByOwner(ownerId: string): Promise<WishRow[]>;
+  /**
+   * Batch fetch by primary key (RLS applies per row). Empty `ids` yields `[]`.
+   * Dedupes internally; order of returned rows is not guaranteed to match `ids`.
+   */
+  listByIds(ids: string[]): Promise<WishRow[]>;
   get(id: string): Promise<WishRow | null>;
   create(input: WishCreateInput): Promise<WishRow>;
   update(input: WishUpdateInput): Promise<WishRow>;

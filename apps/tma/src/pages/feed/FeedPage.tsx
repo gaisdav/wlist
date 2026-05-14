@@ -1,10 +1,14 @@
 import type { FeedEventRow } from '@wlist/api';
+import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
+import { useWishesByIds } from '@wlist/core/hooks/wishes';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { WishCard } from '../../components/wishes/WishCard';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 
@@ -16,11 +20,15 @@ const titleFromPayload = (row: FeedEventRow): string => {
 export const FeedPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
   const api = useApiClient();
+  const profile = useCurrentUser(api);
   const feed = useInfiniteFeed(api);
 
-  useQueryErrorToast(feed.isError && !feed.isLoading, t('states.error'));
-
   const flat = feed.data?.pages.flat() ?? [];
+  const subjectIds = useMemo(() => flat.map((r) => r.subject_id), [flat]);
+  const wishMap = useWishesByIds(api, subjectIds);
+
+  useQueryErrorToast(feed.isError && !feed.isLoading, t('states.error'));
+  useQueryErrorToast(wishMap.isError && !wishMap.isLoading, t('states.error'));
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -39,22 +47,33 @@ export const FeedPage = (): React.JSX.Element => {
       ) : flat.length === 0 ? (
         <p className="text-sm text-muted">{t('social.feed.empty')}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-3">
           {flat.map((row) => {
-            const title = titleFromPayload(row);
-            const wishHref = `/wish/${row.subject_id}`;
+            const wish = wishMap.data?.[row.subject_id];
+            const viewerId = profile.data?.id;
+            const rowSkeleton = wishMap.isFetching && !wish;
+
             return (
-              <li
-                key={row.id}
-                className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-foreground"
-              >
-                <p className="text-xs text-muted">
+              <li key={row.id} className="flex flex-col gap-1">
+                <p className="px-1 text-xs text-muted">
                   {t('social.feed.wish_created')} · {new Date(row.created_at).toLocaleString()}
                 </p>
-                <p className="mt-1 font-medium">{title || t('social.feed.no_title')}</p>
-                <Link className="mt-2 inline-block text-primary underline" to={wishHref}>
-                  {t('social.feed.open_wish')}
-                </Link>
+                {wish ? (
+                  <WishCard wish={wish} isOwner={Boolean(viewerId && wish.owner_id === viewerId)} />
+                ) : rowSkeleton ? (
+                  <Skeleton className="h-28 rounded-lg" />
+                ) : (
+                  <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted">
+                    <p>{titleFromPayload(row) || t('social.feed.no_title')}</p>
+                    <p className="mt-2">{t('social.feed.wish_unavailable')}</p>
+                    <Link
+                      className="mt-2 inline-block text-primary underline"
+                      to={`/wish/${row.subject_id}`}
+                    >
+                      {t('social.feed.open_wish')}
+                    </Link>
+                  </div>
+                )}
               </li>
             );
           })}

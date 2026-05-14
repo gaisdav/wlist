@@ -8,13 +8,20 @@ import { WISH_NO_PHOTO_EMOJI } from './constants';
 import { WishPhoto } from './WishPhoto';
 import { WishSocialStrip } from './WishSocialStrip';
 
+/** List-style wish tile (my list, user list, feed). Feed loads rows via `wishes.listByIds` then passes the same `Wish` shape here. */
 interface WishCardProps {
   wish: Wish;
   /** When true, like toggle is hidden (cannot like own wish). */
   isOwner?: boolean;
+  /** Reserved for future use (e.g. comments preview under likes/reposts). */
+  footerSlot?: React.ReactNode;
 }
 
-export const WishCard = ({ wish, isOwner = false }: WishCardProps): React.JSX.Element => {
+export const WishCard = ({
+  wish,
+  isOwner = false,
+  footerSlot,
+}: WishCardProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const preview = truncateWishDescriptionForList(wish.description);
   const hasPhoto = Boolean(wish.photo_storage_path);
@@ -86,6 +93,7 @@ export const WishCard = ({ wish, isOwner = false }: WishCardProps): React.JSX.El
         ) : null}
       </Link>
       <WishSocialStrip wish={wish} isOwner={isOwner} />
+      {footerSlot ? <div className="border-t border-border px-3 py-2">{footerSlot}</div> : null}
     </div>
   );
 };

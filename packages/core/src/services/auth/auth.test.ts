@@ -61,6 +61,7 @@ const buildApi = (overrides: {
     },
     wishes: {
       listByOwner: vi.fn(),
+      listByIds: vi.fn().mockResolvedValue([]),
       get: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
