@@ -34,12 +34,7 @@ export type Database = {
           actor_id: string
           created_at: string
           id: string
-          kind:
-            | 'wish_created'
-            | 'wish_reposted'
-            | 'wish_collected'
-            | 'slot_booked_public'
-            | 'event_created'
+          kind: Database["public"]["Enums"]["feed_event_kind"]
           payload: Json
           subject_id: string
         }
@@ -47,12 +42,7 @@ export type Database = {
           actor_id: string
           created_at?: string
           id?: string
-          kind:
-            | 'wish_created'
-            | 'wish_reposted'
-            | 'wish_collected'
-            | 'slot_booked_public'
-            | 'event_created'
+          kind: Database["public"]["Enums"]["feed_event_kind"]
           payload?: Json
           subject_id: string
         }
@@ -60,22 +50,17 @@ export type Database = {
           actor_id?: string
           created_at?: string
           id?: string
-          kind?:
-            | 'wish_created'
-            | 'wish_reposted'
-            | 'wish_collected'
-            | 'slot_booked_public'
-            | 'event_created'
+          kind?: Database["public"]["Enums"]["feed_event_kind"]
           payload?: Json
           subject_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'feed_events_actor_id_fkey'
-            columns: ['actor_id']
+            foreignKeyName: "feed_events_actor_id_fkey"
+            columns: ["actor_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -97,18 +82,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'follows_followee_id_fkey'
-            columns: ['followee_id']
+            foreignKeyName: "follows_followee_id_fkey"
+            columns: ["followee_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'follows_follower_id_fkey'
-            columns: ['follower_id']
+            foreignKeyName: "follows_follower_id_fkey"
+            columns: ["follower_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -169,18 +154,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: 'wish_likes_user_id_fkey'
-            columns: ['user_id']
+            foreignKeyName: "wish_likes_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'wish_likes_wish_id_fkey'
-            columns: ['wish_id']
+            foreignKeyName: "wish_likes_wish_id_fkey"
+            columns: ["wish_id"]
             isOneToOne: false
-            referencedRelation: 'wishes'
-            referencedColumns: ['id']
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -190,7 +175,7 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           id: string
-          status: 'active' | 'cancelled'
+          status: Database["public"]["Enums"]["wish_slot_status"]
           wish_id: string
         }
         Insert: {
@@ -198,7 +183,7 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           id?: string
-          status?: 'active' | 'cancelled'
+          status?: Database["public"]["Enums"]["wish_slot_status"]
           wish_id: string
         }
         Update: {
@@ -206,23 +191,23 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           id?: string
-          status?: 'active' | 'cancelled'
+          status?: Database["public"]["Enums"]["wish_slot_status"]
           wish_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'wish_slots_booked_by_fkey'
-            columns: ['booked_by']
+            foreignKeyName: "wish_slots_booked_by_fkey"
+            columns: ["booked_by"]
             isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'wish_slots_wish_id_fkey'
-            columns: ['wish_id']
+            foreignKeyName: "wish_slots_wish_id_fkey"
+            columns: ["wish_id"]
             isOneToOne: false
-            referencedRelation: 'wishes'
-            referencedColumns: ['id']
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -235,8 +220,8 @@ export type Database = {
           id: string
           is_archived: boolean
           is_collaborative: boolean
-          link: string | null
           likes_count: number
+          link: string | null
           max_slots: number | null
           owner_id: string
           photo_storage_path: string | null
@@ -254,8 +239,8 @@ export type Database = {
           id?: string
           is_archived?: boolean
           is_collaborative?: boolean
-          link?: string | null
           likes_count?: number
+          link?: string | null
           max_slots?: number | null
           owner_id: string
           photo_storage_path?: string | null
@@ -273,8 +258,8 @@ export type Database = {
           id?: string
           is_archived?: boolean
           is_collaborative?: boolean
-          link?: string | null
           likes_count?: number
+          link?: string | null
           max_slots?: number | null
           owner_id?: string
           photo_storage_path?: string | null
@@ -293,11 +278,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: 'wishes_reposted_from_id_fkey'
-            columns: ['reposted_from_id']
+            foreignKeyName: "wishes_reposted_from_id_fkey"
+            columns: ["reposted_from_id"]
             isOneToOne: false
-            referencedRelation: 'wishes'
-            referencedColumns: ['id']
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -306,26 +291,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      append_feed_event: {
+        Args: {
+          p_actor_id: string
+          p_kind: Database["public"]["Enums"]["feed_event_kind"]
+          p_payload: Json
+          p_subject_id: string
+        }
+        Returns: undefined
+      }
       book_wish_slots: {
         Args: { p_count: number; p_wish_id: string }
         Returns: {
-          id: string
-          wish_id: string
           booked_by: string
-          status: 'active' | 'cancelled'
-          created_at: string
           cancelled_at: string | null
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["wish_slot_status"]
+          wish_id: string
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "wish_slots"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
+      wishes_copy_lines_is_valid: { Args: { lines: Json }; Returns: boolean }
     }
     Enums: {
       feed_event_kind:
-        | 'wish_created'
-        | 'wish_reposted'
-        | 'wish_collected'
-        | 'slot_booked_public'
-        | 'event_created'
-      wish_slot_status: 'active' | 'cancelled'
+        | "wish_created"
+        | "wish_reposted"
+        | "wish_collected"
+        | "slot_booked_public"
+        | "event_created"
+      wish_slot_status: "active" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -452,6 +453,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      feed_event_kind: [
+        "wish_created",
+        "wish_reposted",
+        "wish_collected",
+        "slot_booked_public",
+        "event_created",
+      ],
+      wish_slot_status: ["active", "cancelled"],
+    },
   },
 } as const
