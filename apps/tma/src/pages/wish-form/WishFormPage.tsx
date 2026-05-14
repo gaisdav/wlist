@@ -281,7 +281,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         </label>
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-foreground">{t('wishes.form.copy_lines_label')}</span>
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.copy_lines_label')}
+          </span>
           {([0, 1, 2, 3, 4] as const).slice(0, copyLinesVisible).map((i) => (
             <input
               key={i}
