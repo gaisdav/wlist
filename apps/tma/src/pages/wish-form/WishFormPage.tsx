@@ -49,10 +49,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const createMut = useCreateWish(api);
   const updateMut = useUpdateWish(api);
 
-  useQueryErrorToast(
-    mode === 'edit' && Boolean(wishId) && existing.isError,
-    t('states.error'),
-  );
+  useQueryErrorToast(mode === 'edit' && Boolean(wishId) && existing.isError, t('states.error'));
 
   const form = useForm<WishDraftFormInput, unknown, WishDraftPayload>({
     resolver: zodResolver(wishDraftSchema),
@@ -100,10 +97,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       contentType: mime,
     });
     await updateMut.mutateAsync({ id, photo_storage_path: signed.storagePath });
-    if (
-      previousStoragePath &&
-      previousStoragePath !== signed.storagePath
-    ) {
+    if (previousStoragePath && previousStoragePath !== signed.storagePath) {
       try {
         await api.storage.deleteWishPhoto(previousStoragePath);
       } catch {
@@ -318,7 +312,10 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
             </Button>
             {photo ? (
               <>
-                <span className="min-w-0 max-w-full flex-1 truncate text-sm text-foreground" title={photo.name}>
+                <span
+                  className="min-w-0 max-w-full flex-1 truncate text-sm text-foreground"
+                  title={photo.name}
+                >
                   {t('wishes.form.photo_selected', { fileName: photo.name })}
                 </span>
                 <Button

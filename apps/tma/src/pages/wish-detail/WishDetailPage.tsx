@@ -35,10 +35,7 @@ export const WishDetailPage = (): React.JSX.Element => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useQueryErrorToast(Boolean(wishId) && wish.isError, t('states.error'));
-  useQueryErrorToast(
-    Boolean(wish.data?.owner_id) && ownerWishes.isError,
-    t('states.error'),
-  );
+  useQueryErrorToast(Boolean(wish.data?.owner_id) && ownerWishes.isError, t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
 
   const photoSrc = useWishPhotoSignedUrl(
@@ -78,12 +75,9 @@ export const WishDetailPage = (): React.JSX.Element => {
   const hasUploadedPhoto = Boolean(w.photo_storage_path);
 
   const list = ownerWishes.data;
-  const listReady = Boolean(
-    list && !ownerWishes.isLoading && !ownerWishes.isError,
-  );
+  const listReady = Boolean(list && !ownerWishes.isLoading && !ownerWishes.isError);
   const indexInList = listReady && list ? list.findIndex((item) => item.id === wishId) : -1;
-  const prevWishId =
-    listReady && list && indexInList > 0 ? list[indexInList - 1]?.id : undefined;
+  const prevWishId = listReady && list && indexInList > 0 ? list[indexInList - 1]?.id : undefined;
   const nextWishId =
     listReady && list && indexInList >= 0 && indexInList < list.length - 1
       ? list[indexInList + 1]?.id
