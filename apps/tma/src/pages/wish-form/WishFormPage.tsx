@@ -268,8 +268,14 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         </label>
 
         <label className="flex cursor-pointer items-start gap-2">
-          <input type="checkbox" className="mt-1 h-4 w-4 shrink-0" {...register('isCollaborative')} />
-          <span className="text-sm font-medium text-foreground">{t('wishes.form.collaborative_label')}</span>
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 shrink-0"
+            {...register('isCollaborative')}
+          />
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.collaborative_label')}
+          </span>
         </label>
 
         {isCollaborative ? (
@@ -296,7 +302,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
             </label>
 
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-foreground">{t('wishes.form.copy_lines_label')}</span>
+              <span className="text-sm font-medium text-foreground">
+                {t('wishes.form.copy_lines_label')}
+              </span>
               {([0, 1, 2, 3, 4] as const).map((i) => (
                 <input
                   key={i}

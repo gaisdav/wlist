@@ -98,8 +98,7 @@ export const WishDetailPage = (): React.JSX.Element => {
   const activeCount = activeSlots.length;
   const remaining = Math.max(0, cap - activeCount);
   const viewerId = profile.data?.id;
-  const myActiveSlots =
-    viewerId != null ? activeSlots.filter((s) => s.booked_by === viewerId) : [];
+  const myActiveSlots = viewerId != null ? activeSlots.filter((s) => s.booked_by === viewerId) : [];
 
   const tryBookSlots = async (count: number): Promise<void> => {
     setSlotActionError(null);
@@ -214,7 +213,9 @@ export const WishDetailPage = (): React.JSX.Element => {
                   key={`${idx}-${line.slice(0, 12)}`}
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface px-3 py-2"
                 >
-                  <p className="min-w-0 flex-1 whitespace-pre-wrap text-sm text-foreground">{line}</p>
+                  <p className="min-w-0 flex-1 whitespace-pre-wrap text-sm text-foreground">
+                    {line}
+                  </p>
                   <Button
                     type="button"
                     variant="outline"

@@ -18,7 +18,10 @@ export const wishSchema = publicWishesRowSchema
   .extend({
     link: z.url().nullable(),
     currency: z.string().nullable(),
-    copy_lines: z.array(z.string().max(WISH_COPY_LINE_MAX_CHARS)).max(WISH_COPY_LINES_MAX).nullable(),
+    copy_lines: z
+      .array(z.string().max(WISH_COPY_LINE_MAX_CHARS))
+      .max(WISH_COPY_LINES_MAX)
+      .nullable(),
   })
   .superRefine((row, ctx) => {
     if (row.price == null) {

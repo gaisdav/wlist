@@ -7,5 +7,4 @@ export const WISH_COPY_LINE_MAX_CHARS = 256;
 /** Max number of strings in `wishes.copy_lines` JSON array. */
 export const WISH_COPY_LINES_MAX = 5;
 
-export const wishSlotCap = (maxSlots: number | null): number =>
-  maxSlots ?? WISH_SLOTS_DEFAULT_CAP;
+export const wishSlotCap = (maxSlots: number | null): number => maxSlots ?? WISH_SLOTS_DEFAULT_CAP;

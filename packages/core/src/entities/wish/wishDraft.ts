@@ -61,27 +61,39 @@ export const wishDraftSchema = z
       }
     }
   })
-  .transform(({ title, description, priceStr, currency, linkStr, isCollaborative, maxSlotsStr, copyLines }) => {
-    const priceTrim = priceStr.trim();
-    const price = priceTrim === '' ? null : Number(priceTrim.replace(',', '.'));
-    const linkTrim = linkStr.trim();
-    const maxTrim = maxSlotsStr.trim();
-    const maxSlots =
-      isCollaborative && maxTrim !== '' ? Number(maxTrim) : null;
-    const trimmedLines = copyLines.map((s) => s.trim()).filter((s) => s !== '');
-    const copy_lines =
-      isCollaborative && trimmedLines.length > 0 ? trimmedLines.slice(0, WISH_COPY_LINES_MAX) : null;
-    return {
+  .transform(
+    ({
       title,
-      description: description.trim() === '' ? null : description.trim(),
-      price,
-      currency: price == null ? null : currency,
-      link: linkTrim === '' ? null : linkTrim,
-      is_collaborative: isCollaborative,
-      max_slots: isCollaborative ? maxSlots : null,
-      copy_lines,
-    };
-  });
+      description,
+      priceStr,
+      currency,
+      linkStr,
+      isCollaborative,
+      maxSlotsStr,
+      copyLines,
+    }) => {
+      const priceTrim = priceStr.trim();
+      const price = priceTrim === '' ? null : Number(priceTrim.replace(',', '.'));
+      const linkTrim = linkStr.trim();
+      const maxTrim = maxSlotsStr.trim();
+      const maxSlots = isCollaborative && maxTrim !== '' ? Number(maxTrim) : null;
+      const trimmedLines = copyLines.map((s) => s.trim()).filter((s) => s !== '');
+      const copy_lines =
+        isCollaborative && trimmedLines.length > 0
+          ? trimmedLines.slice(0, WISH_COPY_LINES_MAX)
+          : null;
+      return {
+        title,
+        description: description.trim() === '' ? null : description.trim(),
+        price,
+        currency: price == null ? null : currency,
+        link: linkTrim === '' ? null : linkTrim,
+        is_collaborative: isCollaborative,
+        max_slots: isCollaborative ? maxSlots : null,
+        copy_lines,
+      };
+    },
+  );
 
 export type WishDraftFormInput = z.input<typeof wishDraftSchema>;
 
@@ -99,7 +111,9 @@ export const defaultWishDraftFormValues = (): WishDraftFormInput => ({
 });
 
 /** Pad DB `copy_lines` to five inputs for the form. */
-export const copyLinesToFormTuple = (lines: string[] | null | undefined): WishDraftFormInput['copyLines'] => {
+export const copyLinesToFormTuple = (
+  lines: string[] | null | undefined,
+): WishDraftFormInput['copyLines'] => {
   const base = lines?.slice(0, WISH_COPY_LINES_MAX) ?? [];
   const out: string[] = [...base];
   while (out.length < WISH_COPY_LINES_MAX) out.push('');

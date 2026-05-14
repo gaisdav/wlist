@@ -1,7 +1,4 @@
-import {
-  WISH_COPY_LINE_MAX_CHARS,
-  WISH_COPY_LINES_MAX,
-} from './wishSlotsConstants.js';
+import { WISH_COPY_LINE_MAX_CHARS, WISH_COPY_LINES_MAX } from './wishSlotsConstants.js';
 
 /**
  * Normalizes `wishes.copy_lines` from DB jsonb into `string[] | null` for Zod parsing.

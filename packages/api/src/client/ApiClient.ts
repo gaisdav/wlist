@@ -7,10 +7,7 @@
 
 import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
 
-import type {
-  WishSlotBookingRow,
-  WishSlotRow,
-} from './slotTypes.js';
+import type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
 import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 
 /**

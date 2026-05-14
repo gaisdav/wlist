@@ -82,7 +82,9 @@ export const MyBookingsPage = (): React.JSX.Element => {
                       isActive ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    {isActive ? t('wishes.bookings.status_active') : t('wishes.bookings.status_cancelled')}
+                    {isActive
+                      ? t('wishes.bookings.status_active')
+                      : t('wishes.bookings.status_cancelled')}
                   </span>
                 </div>
                 {w?.is_archived ? (
