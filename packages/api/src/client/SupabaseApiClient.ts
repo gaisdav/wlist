@@ -350,6 +350,7 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
       is_collaborative: input.is_collaborative ?? false,
       max_slots: input.max_slots ?? null,
       copy_lines: input.copy_lines ?? null,
+      reposted_from_id: input.reposted_from_id ?? null,
     };
 
     const { data, error } = await sb.from('wishes').insert(insert).select('*').single();
