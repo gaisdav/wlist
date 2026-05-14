@@ -40,22 +40,21 @@ API/UI:
 
 ### 3. Лента (Feed)
 
-Таблица `public.feed_events` (event sourcing):
+Таблица `public.feed_events` (append-only, **только появление желания**):
 
 - `id` (`uuid`, PK)
-- `actor_id` (`uuid`, FK → `profiles.id`)
-- `kind` (`enum`: `wish_created` | `wish_reposted` | `wish_collected` | `slot_booked_public` | `event_created` …)
-- `subject_id` (`uuid`) — ID связанной сущности (wish/event)
-- `payload` (`jsonb`) — сериализованный снимок данных для рендера
+- `actor_id` (`uuid`, FK → `profiles.id`) — владелец нового желания
+- `subject_id` (`uuid`) — **`wishes.id`** новой строки
+- `payload` (`jsonb`) — снимок для рендера (`title`, `wish_id`, `owner_id`, `reposted_from_id`, …)
 - `created_at`
 
 RLS: пользователь видит только события тех, на кого подписан, плюс свои.
 
 UI:
 
-- Экран «Лента» — бесконечный скролл (cursor-pagination).
+- Экран «Лента» — бесконечный скролл (offset-pagination).
 
-Триггеры в БД создают записи `feed_events` при действиях пользователей.
+Триггер в БД на **`INSERT` в `wishes`** (включая репост) создаёт одну строку `feed_events` через `append_feed_event(actor_id, subject_id, payload)`.
 
 ### 4. Репосты
 
@@ -92,7 +91,7 @@ API/UI:
 - [x] Миграция: `wish_likes` + `wishes.reposted_from_id` + RLS лайков + триггер неизменности `reposted_from_id` + политика INSERT `wishes` с проверкой источника репоста
 - [x] Миграция: `follows`, `feed_events` + денормализованные `likes_count` / `reposts_count` + триггеры ленты и счётчиков
 - [x] RLS-политики (follows, feed_events)
-- [x] Триггеры создания событий ленты (желания, слоты, collected)
+- [x] Триггер ленты: только **`INSERT` в `wishes`** (включая репост); без слотов / collected в `feed_events`
 - [x] API: follow/unfollow, search users, feed pagination; лайки (toggle + count); создание желания с `reposted_from_id`; счётчики на строке `wishes`
 - [x] UI: профиль (подписаться, счётчики)
 - [x] UI: списки подписок/подписчиков

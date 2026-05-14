@@ -1,4 +1,4 @@
-import type { FeedEventKind, FeedEventRow } from '@wlist/api';
+import type { FeedEventRow } from '@wlist/api';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
@@ -7,23 +7,6 @@ import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
-
-const feedKindLabelKey = (kind: FeedEventKind): string => {
-  switch (kind) {
-    case 'wish_created':
-      return 'social.feed.wish_created';
-    case 'wish_reposted':
-      return 'social.feed.wish_reposted';
-    case 'wish_collected':
-      return 'social.feed.wish_collected';
-    case 'slot_booked_public':
-      return 'social.feed.slot_booked';
-    case 'event_created':
-      return 'social.feed.event_created';
-    default:
-      return 'social.feed.generic';
-  }
-};
 
 const titleFromPayload = (row: FeedEventRow): string => {
   const p = row.payload as { title?: unknown };
@@ -59,28 +42,19 @@ export const FeedPage = (): React.JSX.Element => {
         <ul className="flex flex-col gap-2">
           {flat.map((row) => {
             const title = titleFromPayload(row);
-            const label = t(feedKindLabelKey(row.kind));
-            const wishHref =
-              row.kind === 'wish_created' ||
-              row.kind === 'wish_reposted' ||
-              row.kind === 'wish_collected' ||
-              row.kind === 'slot_booked_public'
-                ? `/wish/${row.subject_id}`
-                : null;
+            const wishHref = `/wish/${row.subject_id}`;
             return (
               <li
                 key={row.id}
                 className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-foreground"
               >
                 <p className="text-xs text-muted">
-                  {label} · {new Date(row.created_at).toLocaleString()}
+                  {t('social.feed.wish_created')} · {new Date(row.created_at).toLocaleString()}
                 </p>
                 <p className="mt-1 font-medium">{title || t('social.feed.no_title')}</p>
-                {wishHref ? (
-                  <Link className="mt-2 inline-block text-primary underline" to={wishHref}>
-                    {t('social.feed.open_wish')}
-                  </Link>
-                ) : null}
+                <Link className="mt-2 inline-block text-primary underline" to={wishHref}>
+                  {t('social.feed.open_wish')}
+                </Link>
               </li>
             );
           })}

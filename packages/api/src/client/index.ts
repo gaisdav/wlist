@@ -3,7 +3,6 @@ export type {
   AuthApi,
   AuthSession,
   FeedCursor,
-  FeedEventKind,
   FeedEventRow,
   ProfileRow,
   ProfilesApi,

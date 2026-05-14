@@ -7,14 +7,6 @@
 import { z } from "zod";
 import { type Json } from "./database.types";
 
-export const publicFeedEventKindSchema = z.enum([
-  "wish_created",
-  "wish_reposted",
-  "wish_collected",
-  "slot_booked_public",
-  "event_created",
-]);
-
 export const publicWishSlotStatusSchema = z.enum(["active", "cancelled"]);
 
 export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
@@ -48,7 +40,6 @@ export const publicFeedEventsRowSchema = z.object({
   actor_id: z.string(),
   created_at: z.string(),
   id: z.string(),
-  kind: publicFeedEventKindSchema,
   payload: jsonSchema,
   subject_id: z.string(),
 });
@@ -57,7 +48,6 @@ export const publicFeedEventsInsertSchema = z.object({
   actor_id: z.string(),
   created_at: z.string().optional(),
   id: z.string().optional(),
-  kind: publicFeedEventKindSchema,
   payload: jsonSchema.optional(),
   subject_id: z.string(),
 });
@@ -66,7 +56,6 @@ export const publicFeedEventsUpdateSchema = z.object({
   actor_id: z.string().optional(),
   created_at: z.string().optional(),
   id: z.string().optional(),
-  kind: publicFeedEventKindSchema.optional(),
   payload: jsonSchema.optional(),
   subject_id: z.string().optional(),
 });
@@ -313,7 +302,6 @@ export const publicWishesRelationshipsSchema = z.tuple([
 
 export const publicAppendFeedEventArgsSchema = z.object({
   p_actor_id: z.string(),
-  p_kind: publicFeedEventKindSchema,
   p_payload: jsonSchema,
   p_subject_id: z.string(),
 });

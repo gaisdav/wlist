@@ -34,7 +34,6 @@ export type Database = {
           actor_id: string
           created_at: string
           id: string
-          kind: Database["public"]["Enums"]["feed_event_kind"]
           payload: Json
           subject_id: string
         }
@@ -42,7 +41,6 @@ export type Database = {
           actor_id: string
           created_at?: string
           id?: string
-          kind: Database["public"]["Enums"]["feed_event_kind"]
           payload?: Json
           subject_id: string
         }
@@ -50,7 +48,6 @@ export type Database = {
           actor_id?: string
           created_at?: string
           id?: string
-          kind?: Database["public"]["Enums"]["feed_event_kind"]
           payload?: Json
           subject_id?: string
         }
@@ -292,12 +289,7 @@ export type Database = {
     }
     Functions: {
       append_feed_event: {
-        Args: {
-          p_actor_id: string
-          p_kind: Database["public"]["Enums"]["feed_event_kind"]
-          p_payload: Json
-          p_subject_id: string
-        }
+        Args: { p_actor_id: string; p_payload: Json; p_subject_id: string }
         Returns: undefined
       }
       book_wish_slots: {
@@ -320,12 +312,6 @@ export type Database = {
       wishes_copy_lines_is_valid: { Args: { lines: Json }; Returns: boolean }
     }
     Enums: {
-      feed_event_kind:
-        | "wish_created"
-        | "wish_reposted"
-        | "wish_collected"
-        | "slot_booked_public"
-        | "event_created"
       wish_slot_status: "active" | "cancelled"
     }
     CompositeTypes: {
@@ -454,13 +440,6 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      feed_event_kind: [
-        "wish_created",
-        "wish_reposted",
-        "wish_collected",
-        "slot_booked_public",
-        "event_created",
-      ],
       wish_slot_status: ["active", "cancelled"],
     },
   },

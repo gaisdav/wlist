@@ -192,4 +192,4 @@ export interface ApiClient {
 
 export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 export type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
-export type { FeedCursor, FeedEventKind, FeedEventRow } from './socialTypes.js';
+export type { FeedCursor, FeedEventRow } from './socialTypes.js';

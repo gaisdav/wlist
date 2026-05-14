@@ -369,7 +369,7 @@ flowchart LR
 - **`public.wish_likes`** — лайк пользователя на чужое желание; PK `(user_id, wish_id)`; каскад при удалении `wishes` / `profiles`.
 - **`wishes.reposted_from_id`** — ссылка на оригинал при создании желания через репост; **immutable** после `INSERT` (кроме `NULL` при `ON DELETE SET NULL`); `ON DELETE SET NULL` на оригинале.
 - **`public.follows`** — подписка `follower_id` → `followee_id`.
-- **`public.feed_events`** — append-only лента; строки пишут **триггеры** через `SECURITY DEFINER` (`append_feed_event`), клиент только **читает** с RLS (свои события + события тех, на кого подписан).
+- **`public.feed_events`** — append-only лента **только новых желаний** (одна строка на `INSERT` в `wishes`, включая репост); `subject_id` = `wishes.id`. Строки пишут **триггер** через `SECURITY DEFINER` (`append_feed_event`), клиент только **читает** с RLS (свои + подписанные авторы).
 - **`wishes.likes_count` / `wishes.reposts_count`** — денормализованные счётчики, поддерживаются триггерами.
 
 Типы и Zod для этих объектов генерируются из Postgres (`pnpm db:codegen`); клиентский слой следует инвариантам RLS из миграций.

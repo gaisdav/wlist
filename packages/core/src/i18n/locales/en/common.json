@@ -147,14 +147,9 @@
     },
     "feed": {
       "title": "Feed",
-      "subtitle": "Updates from people you follow (and your own).",
-      "empty": "No activity yet. Follow someone or create a wish.",
+      "subtitle": "New wishes from people you follow (and your own).",
+      "empty": "No wishes in your feed yet. Follow someone or add a wish.",
       "wish_created": "New wish",
-      "wish_reposted": "Reposted wish",
-      "wish_collected": "Wish fully booked",
-      "slot_booked": "Slot booked",
-      "event_created": "Event",
-      "generic": "Update",
       "no_title": "(untitled)",
       "open_wish": "Open wish",
       "load_more": "Load more"

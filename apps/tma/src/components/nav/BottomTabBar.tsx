@@ -28,21 +28,21 @@ export const BottomTabBar = (): React.JSX.Element | null => {
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-between gap-1 px-2">
         <Link
-          to="/feed"
-          className={tabLinkClass(location === '/feed')}
-          aria-current={location === '/feed' ? 'page' : undefined}
-        >
-          <House className={tabIconClass} strokeWidth={1.75} aria-hidden />
-          <span className="max-w-full truncate">{t('nav.tabs.feed')}</span>
-        </Link>
-
-        <Link
           to="/me"
           className={tabLinkClass(location === '/me')}
           aria-current={location === '/me' ? 'page' : undefined}
         >
           <User className={tabIconClass} strokeWidth={1.75} aria-hidden />
           <span className="max-w-full truncate">{t('nav.tabs.profile')}</span>
+        </Link>
+
+        <Link
+          to="/feed"
+          className={tabLinkClass(location === '/feed')}
+          aria-current={location === '/feed' ? 'page' : undefined}
+        >
+          <House className={tabIconClass} strokeWidth={1.75} aria-hidden />
+          <span className="max-w-full truncate">{t('nav.tabs.feed')}</span>
         </Link>
 
         <Link
