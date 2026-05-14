@@ -20,7 +20,7 @@ alwaysApply: false
 - **Tailwind CSS** — основной инструмент (95% случаев).
 - **`tailwind-variants`** (или `cva`) + `clsx` — для типизированных вариантов компонентов.
 - **CSS Modules** — точечно, только для сложной графики (mesh-градиенты, `@keyframes`, layered glassmorphism).
-- **UI-библиотек нет** — все компоненты пишем сами.
+- **UI-библиотек нет** — все компоненты пишем сами. **Исключение:** иконки — только [`lucide-react`](https://lucide.dev/) в `apps/tma` (никаких ручных `<svg>` / `?react` для иконок).
 
 ## Дизайн-токены
 
@@ -90,5 +90,5 @@ toast.error(t('errors.wishesLoadFailed'))
 
 ## Ассеты
 
-- Иконки — inline SVG как React-компоненты (`?react` импорт через Vite). Никаких `<img>` для иконок.
+- **Иконки** — только `lucide-react` (`import { … } from 'lucide-react'`). Цвет и размер через `className` (`text-*`, `h-* w-*`), обводка через `strokeWidth` при необходимости. Не вставляй сырой `<svg>` для UI-иконок.
 - Изображения пользовательского контента — через `<img>` с `loading="lazy"`.

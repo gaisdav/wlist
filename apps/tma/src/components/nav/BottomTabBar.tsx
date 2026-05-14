@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { ClipboardList, House, Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
@@ -10,47 +11,7 @@ const tabLinkClass = (active: boolean): string =>
     active ? 'text-primary' : 'text-muted hover:text-foreground',
   );
 
-const IconFeed = ({ className }: { className?: string }): React.JSX.Element => (
-  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const IconProfile = ({ className }: { className?: string }): React.JSX.Element => (
-  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.75" />
-    <path
-      d="M6 20c0-3.5 2.5-5.5 6-5.5s6 2 6 5.5"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const IconBookings = ({ className }: { className?: string }): React.JSX.Element => (
-  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1v2M6 6h12v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6Z"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinejoin="round"
-    />
-    <path d="M9 11h6M9 15h4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-  </svg>
-);
-
-const IconSearch = ({ className }: { className?: string }): React.JSX.Element => (
-  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <circle cx="10.5" cy="10.5" r="5.25" stroke="currentColor" strokeWidth="1.75" />
-    <path d="m16.5 16.5 5 5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-  </svg>
-);
+const tabIconClass = 'h-[22px] w-[22px] shrink-0';
 
 export const BottomTabBar = (): React.JSX.Element | null => {
   const [location] = useLocation();
@@ -67,21 +28,21 @@ export const BottomTabBar = (): React.JSX.Element | null => {
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-between gap-1 px-2">
         <Link
-          to="/me"
-          className={tabLinkClass(location === '/me')}
-          aria-current={location === '/me' ? 'page' : undefined}
-        >
-          <IconProfile />
-          <span className="max-w-full truncate">{t('nav.tabs.profile')}</span>
-        </Link>
-
-        <Link
           to="/feed"
           className={tabLinkClass(location === '/feed')}
           aria-current={location === '/feed' ? 'page' : undefined}
         >
-          <IconFeed />
+          <House className={tabIconClass} strokeWidth={1.75} aria-hidden />
           <span className="max-w-full truncate">{t('nav.tabs.feed')}</span>
+        </Link>
+
+        <Link
+          to="/me"
+          className={tabLinkClass(location === '/me')}
+          aria-current={location === '/me' ? 'page' : undefined}
+        >
+          <User className={tabIconClass} strokeWidth={1.75} aria-hidden />
+          <span className="max-w-full truncate">{t('nav.tabs.profile')}</span>
         </Link>
 
         <Link
@@ -89,7 +50,7 @@ export const BottomTabBar = (): React.JSX.Element | null => {
           className={tabLinkClass(location === '/me/bookings')}
           aria-current={location === '/me/bookings' ? 'page' : undefined}
         >
-          <IconBookings />
+          <ClipboardList className={tabIconClass} strokeWidth={1.75} aria-hidden />
           <span className="max-w-full truncate">{t('nav.tabs.bookings')}</span>
         </Link>
 
@@ -98,7 +59,7 @@ export const BottomTabBar = (): React.JSX.Element | null => {
           className={tabLinkClass(location === '/search')}
           aria-current={location === '/search' ? 'page' : undefined}
         >
-          <IconSearch />
+          <Search className={tabIconClass} strokeWidth={1.75} aria-hidden />
           <span className="max-w-full truncate">{t('nav.tabs.find_people')}</span>
         </Link>
       </div>

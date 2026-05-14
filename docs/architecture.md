@@ -605,6 +605,11 @@ export type ButtonVariants = VariantProps<typeof button>;
 
 Остальное в `apps/tma/src` без изменений по смыслу: `layout/`, `providers/`, `hooks/` общего назначения, `auth/`, `telegram/`, `api/`, `lib/` (кросс-страничные утилиты без привязки к одному экрану), `router.tsx`, `main.tsx`.
 
+### 8.8. Иконки (TMA)
+
+- В `apps/tma` для **всех** UI-иконок используем только **`lucide-react`**: именованный импорт, размер и цвет через Tailwind (`className`), при необходимости `strokeWidth`.
+- Ручные `<svg>` и импорт `*.svg?react` для иконок в TMA не используем (подробнее — `.cursor/rules/04-tma-ui.mdc`).
+
 ---
 
 ## 9. Edge Functions: контракты и безопасность

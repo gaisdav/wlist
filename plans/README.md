@@ -26,7 +26,7 @@
 | Формы                    | **React Hook Form + Zod**                                          |
 | Runtime-валидация        | **Zod** (формы, ответы API, входы Edge Functions)                  |
 | Роутинг                  | Свой на каждой платформе; маршруты описываем декларативно в `core` |
-| UI / стилизация          | **Tailwind CSS** + точечные CSS Modules для сложной графики; компоненты пишем сами (без UI-библиотеки) |
+| UI / стилизация          | **Tailwind CSS** + точечные CSS Modules для сложной графики; компоненты пишем сами (без UI-библиотеки; иконки в TMA — **lucide-react**) |
 | Дизайн-токены            | Plain TS в `packages/core/tokens` — единый источник для всех платформ                                  |
 | Варианты компонентов     | **`tailwind-variants`** (или `cva`) + `clsx`                       |
 | Структура `core`         | **Layer-based**: `entities/`, `services/`, `hooks/`, `types/`, `tokens/` |

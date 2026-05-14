@@ -24,7 +24,7 @@ MVP — этапы 00–04 (`plans/00-foundation.md` … `plans/04-mvp-release.m
 
 - pnpm workspaces, TypeScript strict, React.
 - TanStack Query, React Hook Form + Zod.
-- Tailwind CSS + `tailwind-variants` + `clsx` (UI-библиотек нет, компоненты пишем сами).
+- Tailwind CSS + `tailwind-variants` + `clsx` (полноценных UI-библиотек нет; иконки в TMA — только `lucide-react`, см. `04-tma-ui.mdc`).
 - Supabase (Postgres + RLS, Auth, Storage, Edge Functions). Своих backend-сервисов в MVP нет.
 - Хостинг: Vercel.
 - Тесты в MVP: только Playwright smoke-E2E перед релизом.
