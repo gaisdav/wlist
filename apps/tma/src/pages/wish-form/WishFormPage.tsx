@@ -12,6 +12,7 @@ import {
   persistLastWishCurrency,
   readLastWishCurrency,
   SUPPORTED_WISH_CURRENCIES,
+  WISH_COPY_LINES_MAX,
   WISH_PHOTO_MAX_UPLOAD_BYTES,
   WISH_SLOTS_DEFAULT_CAP,
 } from '@wlist/core/lib';
@@ -36,6 +37,15 @@ interface WishFormPageProps {
   mode: 'create' | 'edit';
 }
 
+const visibleCopyLineSlots = (tuple: WishDraftFormInput['copyLines']): number => {
+  let highest = 0;
+  for (let i = 0; i < WISH_COPY_LINES_MAX; i++) {
+    const s = tuple[i];
+    if (s != null && s.trim() !== '') highest = i + 1;
+  }
+  return highest;
+};
+
 export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const { wishId } = useParams<{ wishId?: string }>();
@@ -45,6 +55,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [copyLinesVisible, setCopyLinesVisible] = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
@@ -67,6 +78,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   useEffect(() => {
     if (!existing.data) return;
     const d = existing.data;
+    const tuple = copyLinesToFormTuple(d.copy_lines);
     reset({
       title: d.title,
       description: d.description ?? '',
@@ -80,8 +92,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       linkStr: d.link ?? '',
       isCollaborative: d.is_collaborative,
       maxSlotsStr: d.max_slots != null ? String(d.max_slots) : '',
-      copyLines: copyLinesToFormTuple(d.copy_lines),
+      copyLines: tuple,
     });
+    setCopyLinesVisible(visibleCopyLineSlots(tuple));
   }, [existing.data, reset]);
 
   const goBack = (): void => {
@@ -267,6 +280,32 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           ) : null}
         </label>
 
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.copy_lines_label')}
+          </span>
+          {([0, 1, 2, 3, 4] as const).slice(0, copyLinesVisible).map((i) => (
+            <input
+              key={i}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              placeholder={t('wishes.form.copy_line_placeholder', { n: i + 1 })}
+              {...register(`copyLines.${i}`)}
+            />
+          ))}
+          {copyLinesVisible < WISH_COPY_LINES_MAX ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="self-start"
+              disabled={isSaving}
+              onClick={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
+            >
+              {t('wishes.form.add_copy_line')}
+            </Button>
+          ) : null}
+        </div>
+
         <label className="flex cursor-pointer items-start gap-2">
           <input
             type="checkbox"
@@ -279,42 +318,26 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         </label>
 
         {isCollaborative ? (
-          <>
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-foreground">
-                {t('wishes.form.max_slots_label')}
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-foreground">
+              {t('wishes.form.max_slots_label')}
+            </span>
+            <input
+              inputMode="numeric"
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              {...register('maxSlotsStr')}
+            />
+            <span className="text-xs text-muted">
+              {t('wishes.form.max_slots_hint', { cap: WISH_SLOTS_DEFAULT_CAP })}
+            </span>
+            {formState.errors.maxSlotsStr ? (
+              <span className="text-xs text-destructive">
+                {formState.errors.maxSlotsStr.message === 'invalid_max_slots'
+                  ? t('wishes.form.errors.invalid_max_slots')
+                  : formState.errors.maxSlotsStr.message}
               </span>
-              <input
-                inputMode="numeric"
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                {...register('maxSlotsStr')}
-              />
-              <span className="text-xs text-muted">
-                {t('wishes.form.max_slots_hint', { cap: WISH_SLOTS_DEFAULT_CAP })}
-              </span>
-              {formState.errors.maxSlotsStr ? (
-                <span className="text-xs text-destructive">
-                  {formState.errors.maxSlotsStr.message === 'invalid_max_slots'
-                    ? t('wishes.form.errors.invalid_max_slots')
-                    : formState.errors.maxSlotsStr.message}
-                </span>
-              ) : null}
-            </label>
-
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-foreground">
-                {t('wishes.form.copy_lines_label')}
-              </span>
-              {([0, 1, 2, 3, 4] as const).map((i) => (
-                <input
-                  key={i}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  placeholder={t('wishes.form.copy_line_placeholder', { n: i + 1 })}
-                  {...register(`copyLines.${i}`)}
-                />
-              ))}
-            </div>
-          </>
+            ) : null}
+          </label>
         ) : null}
 
         <div className="flex flex-col gap-1">
