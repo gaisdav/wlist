@@ -86,7 +86,6 @@
       "photo_hint": "JPEG, PNG, or WebP — large files are resized automatically. GIF keeps animation; max {{maxMb}} MB.",
       "submit_create": "Create wish",
       "submit_edit": "Save changes",
-      "copy_lines_label": "Suggested messages on the gift (optional)",
       "add_copy_line": "Add copy line",
       "collaborative_label": "Group gift (others can book slots)",
       "max_slots_label": "Max participants (optional)",
