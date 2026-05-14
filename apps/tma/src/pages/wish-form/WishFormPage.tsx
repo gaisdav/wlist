@@ -13,7 +13,7 @@ import {
   SUPPORTED_WISH_CURRENCIES,
   WISH_PHOTO_MAX_UPLOAD_BYTES,
 } from '@wlist/core/lib';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
@@ -43,6 +43,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
   const createMut = useCreateWish(api);
@@ -263,15 +264,17 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           ) : null}
         </label>
 
-        <label className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">
             {t('wishes.form.photo_label')}
           </span>
           <input
+            ref={photoInputRef}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
             disabled={isSaving}
-            className="text-sm text-muted disabled:opacity-50"
+            className="sr-only"
+            aria-label={t('wishes.form.photo_label')}
             onChange={(e) => {
               const input = e.target;
               const f = input.files?.[0];
@@ -303,11 +306,41 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
               })();
             }}
           />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isSaving}
+              onClick={() => photoInputRef.current?.click()}
+            >
+              {photo ? t('wishes.form.photo_change') : t('wishes.form.photo_choose')}
+            </Button>
+            {photo ? (
+              <>
+                <span className="min-w-0 max-w-full flex-1 truncate text-sm text-foreground" title={photo.name}>
+                  {t('wishes.form.photo_selected', { fileName: photo.name })}
+                </span>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="shrink-0"
+                  disabled={isSaving}
+                  onClick={() => {
+                    setPhoto(null);
+                    setPhotoError(null);
+                  }}
+                >
+                  {t('wishes.form.photo_clear')}
+                </Button>
+              </>
+            ) : null}
+          </div>
           <span className="text-xs text-muted">
             {t('wishes.form.photo_hint', { maxMb: photoMaxMb })}
           </span>
           {photoError ? <span className="text-xs text-destructive">{photoError}</span> : null}
-        </label>
+        </div>
 
         <Button type="submit" isLoading={isSaving}>
           {mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit')}
