@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { withParsedCopyLines } from '../../lib/wishCopyLines.js';
+
 import { wishSchema } from './wish.js';
 
 describe('wishSchema', () => {
@@ -14,10 +16,13 @@ describe('wishSchema', () => {
       link: null,
       photo_storage_path: null,
       is_archived: false,
+      is_collaborative: false,
+      max_slots: null,
+      copy_lines: null,
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-02T00:00:00.000Z',
     };
-    const w = wishSchema.parse(row);
+    const w = wishSchema.parse(withParsedCopyLines(row));
     expect(w.owner_id).toBe(row.owner_id);
     expect(w.currency).toBe('EUR');
     expect(w.is_archived).toBe(false);
@@ -34,10 +39,13 @@ describe('wishSchema', () => {
       link: null,
       photo_storage_path: null,
       is_archived: false,
+      is_collaborative: false,
+      max_slots: null,
+      copy_lines: null,
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-02T00:00:00.000Z',
     };
-    const w = wishSchema.parse(row);
+    const w = wishSchema.parse(withParsedCopyLines(row));
     expect(w.price).toBeNull();
     expect(w.currency).toBeNull();
   });
