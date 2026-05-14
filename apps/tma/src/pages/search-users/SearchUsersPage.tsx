@@ -65,9 +65,7 @@ export const SearchUsersPage = (): React.JSX.Element => {
                 className="block rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/10"
               >
                 {getDisplayName(p)}
-                {p.username ? (
-                  <span className="ml-2 text-xs text-muted">@{p.username}</span>
-                ) : null}
+                {p.username ? <span className="ml-2 text-xs text-muted">@{p.username}</span> : null}
               </Link>
             </li>
           ))}

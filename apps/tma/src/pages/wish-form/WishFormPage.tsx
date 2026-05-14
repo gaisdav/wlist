@@ -72,7 +72,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     setRepostFromId(parsed.success ? parsed.data : null);
   }, [mode]);
 
-  const repostSource = useWish(api, mode === 'create' ? repostFromId ?? undefined : undefined);
+  const repostSource = useWish(api, mode === 'create' ? (repostFromId ?? undefined) : undefined);
 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
   const createMut = useCreateWish(api);

@@ -31,7 +31,9 @@ export const UserFollowPage = (): React.JSX.Element => {
   }
 
   const title =
-    mode === 'following' ? t('social.follows.following_title') : t('social.follows.followers_title');
+    mode === 'following'
+      ? t('social.follows.following_title')
+      : t('social.follows.followers_title');
 
   return (
     <div className="flex flex-col gap-4 p-4">

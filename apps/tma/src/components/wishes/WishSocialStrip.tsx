@@ -17,9 +17,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
   const likeState = useWishLikeState(api, isOwner ? undefined : wish.id);
   const toggleLike = useToggleWishLike(api);
 
-  const likesDisplay = isOwner
-    ? wish.likes_count
-    : (likeState.data?.count ?? wish.likes_count);
+  const likesDisplay = isOwner ? wish.likes_count : (likeState.data?.count ?? wish.likes_count);
   const likedByMe = !isOwner && Boolean(likeState.data?.likedByMe);
 
   return (

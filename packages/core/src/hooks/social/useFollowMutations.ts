@@ -4,7 +4,11 @@ import type { ApiClient } from '@wlist/api';
 
 import { queryKeys } from '../../config/index.js';
 
-const invalidateFollowSide = (qc: QueryClient, viewerId: string | undefined, targetId: string): void => {
+const invalidateFollowSide = (
+  qc: QueryClient,
+  viewerId: string | undefined,
+  targetId: string,
+): void => {
   if (viewerId) {
     void qc.invalidateQueries({ queryKey: queryKeys.follows.counts(viewerId) });
     void qc.invalidateQueries({ queryKey: queryKeys.follows.followingList(viewerId) });

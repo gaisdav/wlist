@@ -11,7 +11,8 @@ export const queryKeys = {
 
   follows: {
     counts: (userId: string) => [...queryKeys.all, 'follows', 'counts', userId] as const,
-    isFollowing: (followeeId: string) => [...queryKeys.all, 'follows', 'isFollowing', followeeId] as const,
+    isFollowing: (followeeId: string) =>
+      [...queryKeys.all, 'follows', 'isFollowing', followeeId] as const,
     followingList: (userId: string) => [...queryKeys.all, 'follows', 'following', userId] as const,
     followersList: (userId: string) => [...queryKeys.all, 'follows', 'followers', userId] as const,
   },

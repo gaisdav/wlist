@@ -32,7 +32,10 @@ export const UserWishlistPage = (): React.JSX.Element => {
 
   useQueryErrorToast(Boolean(userId) && wishes.isError && !wishes.isLoading, t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
-  useQueryErrorToast(Boolean(userId) && ownerProfile.isError && !ownerProfile.isLoading, t('states.error'));
+  useQueryErrorToast(
+    Boolean(userId) && ownerProfile.isError && !ownerProfile.isLoading,
+    t('states.error'),
+  );
 
   const goBack = (): void => {
     window.history.back();

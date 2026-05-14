@@ -335,7 +335,10 @@ const createFollowsApi = (sb: SupabaseClientLike): FollowsApi => ({
   },
 
   async listFollowing(userId: string) {
-    const { data: rows, error } = await sb.from('follows').select('followee_id').eq('follower_id', userId);
+    const { data: rows, error } = await sb
+      .from('follows')
+      .select('followee_id')
+      .eq('follower_id', userId);
     if (error) throw error;
     const ids = (rows ?? []).map((r) => r.followee_id);
     if (ids.length === 0) return [];
@@ -345,7 +348,10 @@ const createFollowsApi = (sb: SupabaseClientLike): FollowsApi => ({
   },
 
   async listFollowers(userId: string) {
-    const { data: rows, error } = await sb.from('follows').select('follower_id').eq('followee_id', userId);
+    const { data: rows, error } = await sb
+      .from('follows')
+      .select('follower_id')
+      .eq('followee_id', userId);
     if (error) throw error;
     const ids = (rows ?? []).map((r) => r.follower_id);
     if (ids.length === 0) return [];
@@ -393,13 +399,16 @@ const createWishLikesApi = (sb: SupabaseClientLike): WishLikesApi => ({
     if (userError || !userData.user) throw new Error('Not authenticated');
     const uid = userData.user.id;
     if (liked) {
-      const { error } = await sb.from('wish_likes').upsert(
-        { wish_id: wishId, user_id: uid },
-        { onConflict: 'user_id,wish_id' },
-      );
+      const { error } = await sb
+        .from('wish_likes')
+        .upsert({ wish_id: wishId, user_id: uid }, { onConflict: 'user_id,wish_id' });
       if (error) throw error;
     } else {
-      const { error } = await sb.from('wish_likes').delete().eq('wish_id', wishId).eq('user_id', uid);
+      const { error } = await sb
+        .from('wish_likes')
+        .delete()
+        .eq('wish_id', wishId)
+        .eq('user_id', uid);
       if (error) throw error;
     }
   },
