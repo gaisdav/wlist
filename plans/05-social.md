@@ -90,15 +90,15 @@ API/UI:
 ## Чек-лист задач
 
 - [x] Миграция: `wish_likes` + `wishes.reposted_from_id` + RLS лайков + триггер неизменности `reposted_from_id` + политика INSERT `wishes` с проверкой источника репоста
-- [ ] Миграция: `follows`, `feed_events`
-- [ ] RLS-политики (follows, feed_events)
-- [ ] Триггеры создания событий ленты
-- [ ] API: follow/unfollow, search users, feed pagination; лайки (toggle + count); создание желания с `reposted_from_id`; счётчик репостов для оригинала
-- [ ] UI: профиль (подписаться, счётчики)
-- [ ] UI: списки подписок/подписчиков
-- [ ] UI: экран ленты
-- [ ] UI: репост → форма создания с префиллом; счётчик репостов на оригинале (иконка + число)
-- [ ] UI: лайки (кнопка + счётчик)
+- [x] Миграция: `follows`, `feed_events` + денормализованные `likes_count` / `reposts_count` + триггеры ленты и счётчиков
+- [x] RLS-политики (follows, feed_events)
+- [x] Триггеры создания событий ленты (желания, слоты, collected)
+- [x] API: follow/unfollow, search users, feed pagination; лайки (toggle + count); создание желания с `reposted_from_id`; счётчики на строке `wishes`
+- [x] UI: профиль (подписаться, счётчики)
+- [x] UI: списки подписок/подписчиков
+- [x] UI: экран ленты
+- [x] UI: репост → форма создания с префиллом; счётчик репостов на карточке/детали (иконка + число)
+- [x] UI: лайки (кнопка + счётчик)
 
 ## Definition of Done
 

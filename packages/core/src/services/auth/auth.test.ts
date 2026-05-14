@@ -35,6 +35,23 @@ const buildApi = (overrides: {
     },
     profiles: {
       getCurrent: overrides.getCurrent ?? vi.fn().mockResolvedValue(buildProfileRow()),
+      getById: vi.fn().mockResolvedValue(null),
+      searchUsers: vi.fn().mockResolvedValue([]),
+    },
+    follows: {
+      follow: vi.fn(),
+      unfollow: vi.fn(),
+      isFollowing: vi.fn().mockResolvedValue(false),
+      getCounts: vi.fn().mockResolvedValue({ following: 0, followers: 0 }),
+      listFollowing: vi.fn().mockResolvedValue([]),
+      listFollowers: vi.fn().mockResolvedValue([]),
+    },
+    feed: {
+      list: vi.fn().mockResolvedValue([]),
+    },
+    wishLikes: {
+      getState: vi.fn().mockResolvedValue({ count: 0, likedByMe: false }),
+      setLiked: vi.fn(),
     },
     storage: {
       requestWishPhotoUpload: vi.fn(),

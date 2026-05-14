@@ -37,7 +37,9 @@
     "my_bookings": "My bookings",
     "add_wish": "Add wish",
     "public_preview": "Public list preview",
-    "back_to_my_wishes": "Back to my wishes"
+    "back_to_my_wishes": "Back to my wishes",
+    "feed": "Feed",
+    "search_users": "Find people"
   },
   "wishes": {
     "list": {
@@ -120,6 +122,48 @@
       "archived": "Archived wish",
       "status_active": "Active",
       "status_cancelled": "Cancelled"
+    }
+  },
+  "social": {
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "like": "Like wish",
+    "unlike": "Unlike wish",
+    "likes_count": "Likes",
+    "reposts_count": "Reposts",
+    "repost": "Repost to my list",
+    "repost_prefill": "You are creating a copy from someone else's wish. Edit anything, then save.",
+    "repost_source_unavailable": "This wish cannot be opened for repost (removed or not visible).",
+    "counts": {
+      "following": "Following · {{n}}",
+      "followers": "Followers · {{n}}"
+    },
+    "feed": {
+      "title": "Feed",
+      "subtitle": "Updates from people you follow (and your own).",
+      "empty": "No activity yet. Follow someone or create a wish.",
+      "wish_created": "New wish",
+      "wish_reposted": "Reposted wish",
+      "wish_collected": "Wish fully booked",
+      "slot_booked": "Slot booked",
+      "event_created": "Event",
+      "generic": "Update",
+      "no_title": "(untitled)",
+      "open_wish": "Open wish",
+      "load_more": "Load more"
+    },
+    "search": {
+      "title": "Find people",
+      "placeholder": "Search by name or @username",
+      "submit": "Search",
+      "hint": "Enter at least 2 characters.",
+      "no_results": "No matching profiles."
+    },
+    "follows": {
+      "following_title": "Following",
+      "followers_title": "Followers",
+      "back_to_list": "Back to wishlist",
+      "empty": "No one here yet."
     }
   }
 }

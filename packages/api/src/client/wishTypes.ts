@@ -8,7 +8,10 @@ type WishesUpdate = Database['public']['Tables']['wishes']['Update'];
 export type WishRow = WishesRow;
 
 /** Caller payload; `owner_id` is filled by `SupabaseApiClient` from the session. */
-export type WishCreateInput = Omit<WishesInsert, 'owner_id'>;
+export type WishCreateInput = Omit<WishesInsert, 'owner_id' | 'likes_count' | 'reposts_count'>;
 
 /** Partial update keyed by row `id`. `reposted_from_id` is insert-only (DB trigger). */
-export type WishUpdateInput = { id: string } & Omit<WishesUpdate, 'reposted_from_id'>;
+export type WishUpdateInput = { id: string } & Omit<
+  WishesUpdate,
+  'reposted_from_id' | 'likes_count' | 'reposts_count'
+>;

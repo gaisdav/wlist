@@ -7,6 +7,16 @@
 import { z } from "zod";
 import { type Json } from "./database.types";
 
+export const publicFeedEventKindSchema = z.enum([
+  "wish_created",
+  "wish_reposted",
+  "wish_collected",
+  "slot_booked_public",
+  "event_created",
+]);
+
+export const publicWishSlotStatusSchema = z.enum(["active", "cancelled"]);
+
 export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
   z
     .union([
@@ -33,6 +43,78 @@ export const publicAuthTelegramUsedInitDataUpdateSchema = z.object({
   init_data_hash: z.string().optional(),
   used_at: z.string().optional(),
 });
+
+export const publicFeedEventsRowSchema = z.object({
+  actor_id: z.string(),
+  created_at: z.string(),
+  id: z.string(),
+  kind: publicFeedEventKindSchema,
+  payload: jsonSchema,
+  subject_id: z.string(),
+});
+
+export const publicFeedEventsInsertSchema = z.object({
+  actor_id: z.string(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  kind: publicFeedEventKindSchema,
+  payload: jsonSchema.optional(),
+  subject_id: z.string(),
+});
+
+export const publicFeedEventsUpdateSchema = z.object({
+  actor_id: z.string().optional(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  kind: publicFeedEventKindSchema.optional(),
+  payload: jsonSchema.optional(),
+  subject_id: z.string().optional(),
+});
+
+export const publicFeedEventsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("feed_events_actor_id_fkey"),
+    columns: z.tuple([z.literal("actor_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
+export const publicFollowsRowSchema = z.object({
+  created_at: z.string(),
+  followee_id: z.string(),
+  follower_id: z.string(),
+});
+
+export const publicFollowsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  followee_id: z.string(),
+  follower_id: z.string(),
+});
+
+export const publicFollowsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  followee_id: z.string().optional(),
+  follower_id: z.string().optional(),
+});
+
+export const publicFollowsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("follows_followee_id_fkey"),
+    columns: z.tuple([z.literal("followee_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("follows_follower_id_fkey"),
+    columns: z.tuple([z.literal("follower_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
 
 export const publicProfilesRowSchema = z.object({
   created_at: z.string(),
@@ -108,6 +190,50 @@ export const publicWishLikesRelationshipsSchema = z.tuple([
   }),
 ]);
 
+export const publicWishSlotsRowSchema = z.object({
+  booked_by: z.string(),
+  cancelled_at: z.string().nullable(),
+  created_at: z.string(),
+  id: z.string(),
+  status: publicWishSlotStatusSchema,
+  wish_id: z.string(),
+});
+
+export const publicWishSlotsInsertSchema = z.object({
+  booked_by: z.string(),
+  cancelled_at: z.string().optional().nullable(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  status: publicWishSlotStatusSchema.optional(),
+  wish_id: z.string(),
+});
+
+export const publicWishSlotsUpdateSchema = z.object({
+  booked_by: z.string().optional(),
+  cancelled_at: z.string().optional().nullable(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  status: publicWishSlotStatusSchema.optional(),
+  wish_id: z.string().optional(),
+});
+
+export const publicWishSlotsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("wish_slots_booked_by_fkey"),
+    columns: z.tuple([z.literal("booked_by")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("wish_slots_wish_id_fkey"),
+    columns: z.tuple([z.literal("wish_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
 export const publicWishesRowSchema = z.object({
   copy_lines: jsonSchema.nullable(),
   created_at: z.string(),
@@ -116,12 +242,14 @@ export const publicWishesRowSchema = z.object({
   id: z.string(),
   is_archived: z.boolean(),
   is_collaborative: z.boolean(),
+  likes_count: z.number(),
   link: z.string().nullable(),
   max_slots: z.number().nullable(),
   owner_id: z.string(),
   photo_storage_path: z.string().nullable(),
   price: z.number().nullable(),
   reposted_from_id: z.string().nullable(),
+  reposts_count: z.number(),
   title: z.string(),
   updated_at: z.string(),
 });
@@ -134,12 +262,14 @@ export const publicWishesInsertSchema = z.object({
   id: z.string().optional(),
   is_archived: z.boolean().optional(),
   is_collaborative: z.boolean().optional(),
+  likes_count: z.number().optional(),
   link: z.string().optional().nullable(),
   max_slots: z.number().optional().nullable(),
   owner_id: z.string(),
   photo_storage_path: z.string().optional().nullable(),
   price: z.number().optional().nullable(),
   reposted_from_id: z.string().optional().nullable(),
+  reposts_count: z.number().optional(),
   title: z.string(),
   updated_at: z.string().optional(),
 });
@@ -152,12 +282,14 @@ export const publicWishesUpdateSchema = z.object({
   id: z.string().optional(),
   is_archived: z.boolean().optional(),
   is_collaborative: z.boolean().optional(),
+  likes_count: z.number().optional(),
   link: z.string().optional().nullable(),
   max_slots: z.number().optional().nullable(),
   owner_id: z.string().optional(),
   photo_storage_path: z.string().optional().nullable(),
   price: z.number().optional().nullable(),
   reposted_from_id: z.string().optional().nullable(),
+  reposts_count: z.number().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
 });
@@ -179,48 +311,33 @@ export const publicWishesRelationshipsSchema = z.tuple([
   }),
 ]);
 
-export const wishSlotStatusSchema = z.enum(["active", "cancelled"]);
-
-export const publicWishSlotsRowSchema = z.object({
-  booked_by: z.string(),
-  cancelled_at: z.string().nullable(),
-  created_at: z.string(),
-  id: z.string(),
-  status: wishSlotStatusSchema,
-  wish_id: z.string(),
+export const publicAppendFeedEventArgsSchema = z.object({
+  p_actor_id: z.string(),
+  p_kind: publicFeedEventKindSchema,
+  p_payload: jsonSchema,
+  p_subject_id: z.string(),
 });
 
-export const publicWishSlotsInsertSchema = z.object({
-  booked_by: z.string(),
-  cancelled_at: z.string().optional().nullable(),
-  created_at: z.string().optional(),
-  id: z.string().optional(),
-  status: wishSlotStatusSchema.optional(),
-  wish_id: z.string(),
+export const publicAppendFeedEventReturnsSchema = z.undefined();
+
+export const publicBookWishSlotsArgsSchema = z.object({
+  p_count: z.number(),
+  p_wish_id: z.string(),
 });
 
-export const publicWishSlotsUpdateSchema = z.object({
-  booked_by: z.string().optional(),
-  cancelled_at: z.string().optional().nullable(),
-  created_at: z.string().optional(),
-  id: z.string().optional(),
-  status: wishSlotStatusSchema.optional(),
-  wish_id: z.string().optional(),
-});
-
-export const publicWishSlotsRelationshipsSchema = z.tuple([
+export const publicBookWishSlotsReturnsSchema = z.array(
   z.object({
-    foreignKeyName: z.literal("wish_slots_booked_by_fkey"),
-    columns: z.tuple([z.literal("booked_by")]),
-    isOneToOne: z.literal(false),
-    referencedRelation: z.literal("profiles"),
-    referencedColumns: z.tuple([z.literal("id")]),
+    booked_by: z.string(),
+    cancelled_at: z.string().nullable(),
+    created_at: z.string(),
+    id: z.string(),
+    status: publicWishSlotStatusSchema,
+    wish_id: z.string(),
   }),
-  z.object({
-    foreignKeyName: z.literal("wish_slots_wish_id_fkey"),
-    columns: z.tuple([z.literal("wish_id")]),
-    isOneToOne: z.literal(false),
-    referencedRelation: z.literal("wishes"),
-    referencedColumns: z.tuple([z.literal("id")]),
-  }),
-]);
+);
+
+export const publicWishesCopyLinesIsValidArgsSchema = z.object({
+  lines: jsonSchema,
+});
+
+export const publicWishesCopyLinesIsValidReturnsSchema = z.boolean();

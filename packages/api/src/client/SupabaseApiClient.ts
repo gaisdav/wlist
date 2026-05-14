@@ -24,6 +24,8 @@ import {
   type ApiClient,
   type AuthApi,
   type AuthSession,
+  type FeedApi,
+  type FollowsApi,
   type ProfileRow,
   type ProfilesApi,
   type SignInWithTelegramResult,
@@ -36,8 +38,10 @@ import {
   type SlotsApi,
   type WishSlotRow,
   type WishSlotBookingRow,
+  type WishLikesApi,
 } from './ApiClient.js';
 import { SignInError } from './SignInError.js';
+import type { FeedEventRow } from './socialTypes.js';
 
 export type SupabaseClientLike = SupabaseClient<Database>;
 
@@ -57,6 +61,9 @@ export class SupabaseApiClient implements ApiClient {
 
   readonly auth: AuthApi;
   readonly profiles: ProfilesApi;
+  readonly follows: FollowsApi;
+  readonly feed: FeedApi;
+  readonly wishLikes: WishLikesApi;
   readonly storage: StorageApi;
   readonly wishes: WishesApi;
   readonly slots: SlotsApi;
@@ -78,6 +85,9 @@ export class SupabaseApiClient implements ApiClient {
 
     this.auth = createAuthApi(this.supabase, url, anonKey);
     this.profiles = createProfilesApi(this.supabase);
+    this.follows = createFollowsApi(this.supabase);
+    this.feed = createFeedApi(this.supabase);
+    this.wishLikes = createWishLikesApi(this.supabase);
     this.storage = createStorageApi(this.supabase);
     this.wishes = createWishesApi(this.supabase);
     this.slots = createSlotsApi(this.supabase);
@@ -246,6 +256,161 @@ const createProfilesApi = (sb: SupabaseClientLike): ProfilesApi => ({
       .maybeSingle();
     if (error) throw error;
     return (data as ProfileRow | null) ?? null;
+  },
+
+  async getById(id: string) {
+    const { data, error } = await sb.from('profiles').select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return (data as ProfileRow | null) ?? null;
+  },
+
+  async searchUsers(query: string) {
+    const q = query.trim();
+    if (q.length === 0) return [];
+
+    const pattern = `%${q.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`;
+    const [byUsername, byFirst] = await Promise.all([
+      sb.from('profiles').select('*').ilike('username', pattern).limit(20),
+      sb.from('profiles').select('*').ilike('first_name', pattern).limit(20),
+    ]);
+    if (byUsername.error) throw byUsername.error;
+    if (byFirst.error) throw byFirst.error;
+    const map = new Map<string, ProfileRow>();
+    for (const r of [...(byUsername.data ?? []), ...(byFirst.data ?? [])]) {
+      map.set(r.id, r as ProfileRow);
+    }
+    return [...map.values()].slice(0, 20);
+  },
+});
+
+// =============================================================================
+// follows, feed, wish_likes (stage 05)
+// =============================================================================
+
+const createFollowsApi = (sb: SupabaseClientLike): FollowsApi => ({
+  async follow(followeeId: string) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+    const { error } = await sb.from('follows').insert({
+      follower_id: userData.user.id,
+      followee_id: followeeId,
+    });
+    if (error) throw error;
+  },
+
+  async unfollow(followeeId: string) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+    const { error } = await sb
+      .from('follows')
+      .delete()
+      .eq('follower_id', userData.user.id)
+      .eq('followee_id', followeeId);
+    if (error) throw error;
+  },
+
+  async isFollowing(followeeId: string) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) return false;
+    const { count, error } = await sb
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('follower_id', userData.user.id)
+      .eq('followee_id', followeeId);
+    if (error) throw error;
+    return (count ?? 0) > 0;
+  },
+
+  async getCounts(userId: string) {
+    const [followingRes, followersRes] = await Promise.all([
+      sb.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId),
+      sb.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', userId),
+    ]);
+    if (followingRes.error) throw followingRes.error;
+    if (followersRes.error) throw followersRes.error;
+    return {
+      following: followingRes.count ?? 0,
+      followers: followersRes.count ?? 0,
+    };
+  },
+
+  async listFollowing(userId: string) {
+    const { data: rows, error } = await sb
+      .from('follows')
+      .select('followee_id')
+      .eq('follower_id', userId);
+    if (error) throw error;
+    const ids = (rows ?? []).map((r) => r.followee_id);
+    if (ids.length === 0) return [];
+    const { data: profs, error: pErr } = await sb.from('profiles').select('*').in('id', ids);
+    if (pErr) throw pErr;
+    return (profs ?? []) as ProfileRow[];
+  },
+
+  async listFollowers(userId: string) {
+    const { data: rows, error } = await sb
+      .from('follows')
+      .select('follower_id')
+      .eq('followee_id', userId);
+    if (error) throw error;
+    const ids = (rows ?? []).map((r) => r.follower_id);
+    if (ids.length === 0) return [];
+    const { data: profs, error: pErr } = await sb.from('profiles').select('*').in('id', ids);
+    if (pErr) throw pErr;
+    return (profs ?? []) as ProfileRow[];
+  },
+});
+
+const createFeedApi = (sb: SupabaseClientLike): FeedApi => ({
+  async list(params: { limit?: number; offset?: number }) {
+    const limit = Math.min(Math.max(params.limit ?? 20, 1), 50);
+    const offset = Math.max(params.offset ?? 0, 0);
+    const { data, error } = await sb
+      .from('feed_events')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (error) throw error;
+    return (data ?? []) as FeedEventRow[];
+  },
+});
+
+const createWishLikesApi = (sb: SupabaseClientLike): WishLikesApi => ({
+  async getState(wishId: string) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+    const uid = userData.user.id;
+    const [totalRes, mineRes] = await Promise.all([
+      sb.from('wish_likes').select('*', { count: 'exact', head: true }).eq('wish_id', wishId),
+      sb
+        .from('wish_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('wish_id', wishId)
+        .eq('user_id', uid),
+    ]);
+    if (totalRes.error) throw totalRes.error;
+    if (mineRes.error) throw mineRes.error;
+    return { count: totalRes.count ?? 0, likedByMe: (mineRes.count ?? 0) > 0 };
+  },
+
+  async setLiked(wishId: string, liked: boolean) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+    const uid = userData.user.id;
+    if (liked) {
+      const { error } = await sb
+        .from('wish_likes')
+        .upsert({ wish_id: wishId, user_id: uid }, { onConflict: 'user_id,wish_id' });
+      if (error) throw error;
+    } else {
+      const { error } = await sb
+        .from('wish_likes')
+        .delete()
+        .eq('wish_id', wishId)
+        .eq('user_id', uid);
+      if (error) throw error;
+    }
   },
 });
 

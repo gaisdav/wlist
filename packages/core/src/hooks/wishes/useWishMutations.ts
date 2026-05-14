@@ -10,6 +10,7 @@ export const useCreateWish = (api: ApiClient) => {
     onSuccess: (row) => {
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.byOwner(row.owner_id) });
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(row.id) });
+      void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
     },
   });
 };

@@ -1,4 +1,12 @@
+import { getDisplayName } from '@wlist/core/entities/profile';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
+import {
+  useFollowsCounts,
+  useFollowUser,
+  useIsFollowing,
+  useProfileById,
+  useUnfollowUser,
+} from '@wlist/core/hooks/social';
 import { useUserWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'wouter';
@@ -15,10 +23,19 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const { userId } = useParams<{ userId?: string }>();
   const api = useApiClient();
   const profile = useCurrentUser(api);
+  const ownerProfile = useProfileById(api, userId);
   const wishes = useUserWishes(api, userId);
+  const counts = useFollowsCounts(api, userId);
+  const isFollowing = useIsFollowing(api, userId);
+  const follow = useFollowUser(api, profile.data?.id);
+  const unfollow = useUnfollowUser(api, profile.data?.id);
 
   useQueryErrorToast(Boolean(userId) && wishes.isError && !wishes.isLoading, t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
+  useQueryErrorToast(
+    Boolean(userId) && ownerProfile.isError && !ownerProfile.isLoading,
+    t('states.error'),
+  );
 
   const goBack = (): void => {
     window.history.back();
@@ -31,7 +48,7 @@ export const UserWishlistPage = (): React.JSX.Element => {
     return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
   }
 
-  if (wishes.isLoading) {
+  if (wishes.isLoading || ownerProfile.isLoading) {
     return (
       <PageLoadingPlaceholder>
         <Skeleton className="h-10 rounded-lg" />
@@ -39,6 +56,8 @@ export const UserWishlistPage = (): React.JSX.Element => {
       </PageLoadingPlaceholder>
     );
   }
+
+  const displayName = ownerProfile.data ? getDisplayName(ownerProfile.data) : '…';
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -48,12 +67,47 @@ export const UserWishlistPage = (): React.JSX.Element => {
             {t('nav.back_to_my_wishes')}
           </Button>
         ) : null}
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.user_title')}</h1>
-          {isSelf ? (
-            <Link to="/wish/new" className="text-sm font-medium text-primary underline">
-              {t('nav.add_wish')}
-            </Link>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold text-foreground">{displayName}</h1>
+              <p className="text-sm text-muted">{t('wishes.list.user_title')}</p>
+            </div>
+            {isSelf ? (
+              <Link to="/wish/new" className="shrink-0 text-sm font-medium text-primary underline">
+                {t('nav.add_wish')}
+              </Link>
+            ) : profile.data ? (
+              <Button
+                type="button"
+                size="sm"
+                variant={isFollowing.data ? 'outline' : 'primary'}
+                disabled={
+                  follow.isPending ||
+                  unfollow.isPending ||
+                  isFollowing.isLoading ||
+                  !userId ||
+                  userId === profile.data.id
+                }
+                onClick={() =>
+                  void (isFollowing.data
+                    ? unfollow.mutateAsync(userId)
+                    : follow.mutateAsync(userId))
+                }
+              >
+                {isFollowing.data ? t('social.unfollow') : t('social.follow')}
+              </Button>
+            ) : null}
+          </div>
+          {counts.data ? (
+            <div className="flex flex-wrap gap-3 text-sm text-muted">
+              <Link to={`/u/${userId}/following`} className="underline">
+                {t('social.counts.following', { n: counts.data.following })}
+              </Link>
+              <Link to={`/u/${userId}/followers`} className="underline">
+                {t('social.counts.followers', { n: counts.data.followers })}
+              </Link>
+            </div>
           ) : null}
         </div>
       </header>
@@ -66,7 +120,7 @@ export const UserWishlistPage = (): React.JSX.Element => {
         <ul className="flex flex-col gap-2">
           {wishes.data.map((w) => (
             <li key={w.id}>
-              <WishCard wish={w} />
+              <WishCard wish={w} isOwner={Boolean(profile.data?.id === w.owner_id)} />
             </li>
           ))}
         </ul>

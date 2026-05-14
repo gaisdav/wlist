@@ -21,6 +21,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
+import { z } from 'zod';
 
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
@@ -59,11 +60,29 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const [copyLinesVisible, setCopyLinesVisible] = useState(0);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
+  const [repostFromId, setRepostFromId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mode !== 'create') {
+      setRepostFromId(null);
+      return;
+    }
+    const raw = new URL(window.location.href).searchParams.get('repostFrom');
+    const parsed = z.string().uuid().safeParse(raw);
+    setRepostFromId(parsed.success ? parsed.data : null);
+  }, [mode]);
+
+  const repostSource = useWish(api, mode === 'create' ? (repostFromId ?? undefined) : undefined);
+
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
   const createMut = useCreateWish(api);
   const updateMut = useUpdateWish(api);
 
   useQueryErrorToast(mode === 'edit' && Boolean(wishId) && existing.isError, t('states.error'));
+  useQueryErrorToast(
+    mode === 'create' && Boolean(repostFromId) && repostSource.isError,
+    t('states.error'),
+  );
 
   const form = useForm<WishDraftFormInput, unknown, WishDraftPayload>({
     resolver: zodResolver(wishDraftSchema),
@@ -97,6 +116,28 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     });
     setCopyLinesVisible(visibleCopyLineSlots(tuple));
   }, [existing.data, reset]);
+
+  useEffect(() => {
+    if (mode !== 'create' || !repostFromId || !repostSource.data) return;
+    const d = repostSource.data;
+    const tuple = copyLinesToFormTuple(d.copy_lines);
+    reset({
+      title: d.title,
+      description: d.description ?? '',
+      priceStr: d.price != null ? String(d.price) : '',
+      currency:
+        d.price != null
+          ? d.currency != null && isWishCurrencyCode(d.currency)
+            ? d.currency
+            : readLastWishCurrency()
+          : '',
+      linkStr: d.link ?? '',
+      isCollaborative: d.is_collaborative,
+      maxSlotsStr: d.max_slots != null ? String(d.max_slots) : '',
+      copyLines: tuple,
+    });
+    setCopyLinesVisible(visibleCopyLineSlots(tuple));
+  }, [mode, repostFromId, repostSource.data, reset]);
 
   const goBack = (): void => {
     window.history.back();
@@ -141,7 +182,10 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       };
 
       if (mode === 'create') {
-        const row = await createMut.mutateAsync(body);
+        const row = await createMut.mutateAsync({
+          ...body,
+          ...(repostFromId ? { reposted_from_id: repostFromId } : {}),
+        });
         if (photo) await uploadPhotoIfNeeded(row.id, photo, null);
         setLocation(`/wish/${row.id}`, { replace: true });
         return;
@@ -156,6 +200,19 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       setIsSaving(false);
     }
   };
+
+  if (mode === 'create' && repostFromId && repostSource.isLoading) {
+    return (
+      <PageLoadingPlaceholder>
+        <Skeleton className="h-10 rounded-lg" />
+        <Skeleton className="h-32 rounded-lg" />
+      </PageLoadingPlaceholder>
+    );
+  }
+
+  if (mode === 'create' && repostFromId && !repostSource.isLoading && !repostSource.data) {
+    return <p className="p-4 text-sm text-muted">{t('social.repost_source_unavailable')}</p>;
+  }
 
   if (mode === 'edit' && (existing.isLoading || !wishId)) {
     return (
@@ -175,6 +232,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       <h1 className="text-xl font-semibold text-foreground">
         {mode === 'create' ? t('wishes.form.create_title') : t('wishes.form.edit_title')}
       </h1>
+      {mode === 'create' && repostFromId ? (
+        <p className="text-sm text-muted">{t('social.repost_prefill')}</p>
+      ) : null}
 
       <fieldset
         disabled={isSaving}

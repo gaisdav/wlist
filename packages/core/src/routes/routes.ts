@@ -30,7 +30,11 @@ const route = <S extends RouteSchema>(pattern: string, paramsSchema: S): Route<S
 export const routes = {
   home: route('/', z.object({})),
   myWishlist: route('/me', z.object({})),
+  feed: route('/feed', z.object({})),
+  searchUsers: route('/search', z.object({})),
   userWishlist: route('/u/:userId', z.object({ userId: z.uuid() })),
+  userFollowing: route('/u/:userId/following', z.object({ userId: z.uuid() })),
+  userFollowers: route('/u/:userId/followers', z.object({ userId: z.uuid() })),
   wish: route('/wish/:wishId', z.object({ wishId: z.uuid() })),
   wishCreate: route('/wish/new', z.object({})),
   wishEdit: route('/wish/:wishId/edit', z.object({ wishId: z.uuid() })),
