@@ -181,7 +181,6 @@ export const WishDetailPage = (): React.JSX.Element => {
 
         {w.description ? (
           <section>
-            <h2 className="text-sm font-medium text-muted">{t('wishes.detail.description')}</h2>
             <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{w.description}</p>
           </section>
         ) : null}
@@ -205,8 +204,7 @@ export const WishDetailPage = (): React.JSX.Element => {
         ) : null}
 
         {w.copy_lines && w.copy_lines.length > 0 ? (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-muted">{t('wishes.detail.copy_lines')}</h2>
+          <section className="flex flex-col gap-2" aria-label={t('wishes.detail.copy_lines')}>
             <ul className="flex flex-col gap-2">
               {w.copy_lines.map((line, idx) => (
                 <li
@@ -219,12 +217,12 @@ export const WishDetailPage = (): React.JSX.Element => {
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    size="iconRound"
                     className="shrink-0"
+                    aria-label={t('wishes.detail.copy_line')}
                     onClick={() => void navigator.clipboard.writeText(line)}
                   >
-                    <Copy className="mr-1 h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                    {t('wishes.detail.copy_line')}
+                    <Copy className="h-4 w-4" strokeWidth={2} aria-hidden />
                   </Button>
                 </li>
               ))}
