@@ -5,12 +5,15 @@ export type {
   ProfileRow,
   ProfilesApi,
   SignInWithTelegramResult,
+  SlotsApi,
   StorageApi,
   WishCreateInput,
   WishPhotoSignedUpload,
   WishRow,
   WishesApi,
   WishUpdateInput,
+  WishSlotBookingRow,
+  WishSlotRow,
 } from './ApiClient.js';
 export { SignInError, type SignInErrorCode } from './SignInError.js';
 export {

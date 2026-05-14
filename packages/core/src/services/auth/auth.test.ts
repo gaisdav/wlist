@@ -51,7 +51,13 @@ const buildApi = (overrides: {
       unarchive: vi.fn(),
       delete: vi.fn(),
     },
-  }) as unknown as ApiClient;
+    slots: {
+      listByWish: vi.fn(),
+      book: vi.fn(),
+      cancel: vi.fn(),
+      listMine: vi.fn(),
+    },
+  }) as ApiClient;
 
 describe('loginWithTelegram', () => {
   it('returns parsed Profile and isNewUser flag on the happy path', async () => {
