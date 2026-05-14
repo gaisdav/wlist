@@ -1,2 +1,1 @@
-// Slot hooks: useSlots, useBookSlot, useCancelSlot, useMyBookings (added in plan 03).
-export {};
+export { useBookSlots, useCancelSlot, useMySlotBookings, useSlotsByWish } from './useSlots.js';

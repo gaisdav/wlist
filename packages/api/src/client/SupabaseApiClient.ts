@@ -33,6 +33,9 @@ import {
   type WishRow,
   type WishesApi,
   type WishUpdateInput,
+  type SlotsApi,
+  type WishSlotRow,
+  type WishSlotBookingRow,
 } from './ApiClient.js';
 import { SignInError } from './SignInError.js';
 
@@ -56,6 +59,7 @@ export class SupabaseApiClient implements ApiClient {
   readonly profiles: ProfilesApi;
   readonly storage: StorageApi;
   readonly wishes: WishesApi;
+  readonly slots: SlotsApi;
 
   constructor({ url, anonKey }: SupabaseApiClientOptions) {
     this.supabase = createClient<Database>(url, anonKey, {
@@ -76,6 +80,7 @@ export class SupabaseApiClient implements ApiClient {
     this.profiles = createProfilesApi(this.supabase);
     this.storage = createStorageApi(this.supabase);
     this.wishes = createWishesApi(this.supabase);
+    this.slots = createSlotsApi(this.supabase);
   }
 }
 
@@ -342,6 +347,9 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
       currency: input.currency ?? null,
       link: input.link ?? null,
       photo_storage_path: input.photo_storage_path ?? null,
+      is_collaborative: input.is_collaborative ?? false,
+      max_slots: input.max_slots ?? null,
+      copy_lines: input.copy_lines ?? null,
     };
 
     const { data, error } = await sb.from('wishes').insert(insert).select('*').single();
@@ -358,6 +366,9 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
     if (rest.currency !== undefined) patch.currency = rest.currency;
     if (rest.link !== undefined) patch.link = rest.link;
     if (rest.photo_storage_path !== undefined) patch.photo_storage_path = rest.photo_storage_path;
+    if (rest.is_collaborative !== undefined) patch.is_collaborative = rest.is_collaborative;
+    if (rest.max_slots !== undefined) patch.max_slots = rest.max_slots;
+    if (rest.copy_lines !== undefined) patch.copy_lines = rest.copy_lines;
     if (rest.is_archived !== undefined) patch.is_archived = rest.is_archived;
 
     if (Object.keys(patch).length === 0) {
@@ -414,5 +425,47 @@ const createWishesApi = (sb: SupabaseClientLike): WishesApi => ({
     if (path) {
       await sb.storage.from('wish-photos').remove([path]);
     }
+  },
+});
+
+// =============================================================================
+// wish_slots (plan 03)
+// =============================================================================
+
+const createSlotsApi = (sb: SupabaseClientLike): SlotsApi => ({
+  async listByWish(wishId) {
+    const { data, error } = await sb
+      .from('wish_slots')
+      .select('*')
+      .eq('wish_id', wishId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as WishSlotRow[];
+  },
+
+  async book(wishId, count) {
+    const { data, error } = await sb.rpc('book_wish_slots', {
+      p_wish_id: wishId,
+      p_count: count,
+    });
+    if (error) throw error;
+    return (data ?? []) as WishSlotRow[];
+  },
+
+  async cancel(slotId) {
+    const { error } = await sb.from('wish_slots').update({ status: 'cancelled' }).eq('id', slotId);
+    if (error) throw error;
+  },
+
+  async listMine() {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+    const { data, error } = await sb
+      .from('wish_slots')
+      .select('*, wishes(id, title, is_archived)')
+      .eq('booked_by', userData.user.id)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as WishSlotBookingRow[];
   },
 });

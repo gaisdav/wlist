@@ -83,7 +83,7 @@ export const Button = ({
       ? 'link'
       : variant === 'media'
         ? 'none'
-        : sizeProp ?? (variant === 'overlayIcon' ? 'iconRound' : 'lg');
+        : (sizeProp ?? (variant === 'overlayIcon' ? 'iconRound' : 'lg'));
 
   return (
     <button

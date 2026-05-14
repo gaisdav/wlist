@@ -3,6 +3,7 @@ import type { ApiClient } from '@wlist/api';
 
 import { queryKeys } from '../../config/index.js';
 import { type Wish, wishSchema } from '../../entities/wish/index.js';
+import { withParsedCopyLines } from '../../lib/wishCopyLines.js';
 
 /**
  * Wishes for a profile (`owner_id`), ordered newest first (server-side).
@@ -18,7 +19,7 @@ export const useWishesByOwner = (
       : [...queryKeys.wishes.all(), 'byOwner', 'pending'],
     queryFn: async () => {
       const rows = await api.wishes.listByOwner(ownerId as string);
-      return rows.map((r) => wishSchema.parse(r));
+      return rows.map((r) => wishSchema.parse(withParsedCopyLines(r)));
     },
     enabled: Boolean(ownerId),
   });

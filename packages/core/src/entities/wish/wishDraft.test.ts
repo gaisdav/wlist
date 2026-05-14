@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { wishDraftSchema } from './wishDraft.js';
+import { defaultWishDraftFormValues, wishDraftSchema } from './wishDraft.js';
 
 describe('wishDraftSchema', () => {
   it('allows empty price with empty currency and outputs nulls', () => {
     const out = wishDraftSchema.parse({
+      ...defaultWishDraftFormValues(),
       title: 'Gift',
       description: '',
       priceStr: '  ',
@@ -18,6 +19,7 @@ describe('wishDraftSchema', () => {
   it('requires a supported currency when price is set', () => {
     expect(() =>
       wishDraftSchema.parse({
+        ...defaultWishDraftFormValues(),
         title: 'Gift',
         description: '',
         priceStr: '10',
@@ -27,6 +29,7 @@ describe('wishDraftSchema', () => {
     ).toThrow();
 
     const out = wishDraftSchema.parse({
+      ...defaultWishDraftFormValues(),
       title: 'Gift',
       description: '',
       priceStr: '10',
@@ -40,6 +43,7 @@ describe('wishDraftSchema', () => {
   it('rejects currency without price', () => {
     expect(() =>
       wishDraftSchema.parse({
+        ...defaultWishDraftFormValues(),
         title: 'Gift',
         description: '',
         priceStr: '',

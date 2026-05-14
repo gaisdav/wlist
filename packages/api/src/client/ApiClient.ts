@@ -7,6 +7,7 @@
 
 import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
 
+import type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
 import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 
 /**
@@ -139,12 +140,22 @@ export interface WishesApi {
   delete(id: string): Promise<void>;
 }
 
+export interface SlotsApi {
+  listByWish(wishId: string): Promise<WishSlotRow[]>;
+  /** Atomic multi-slot book (RPC). */
+  book(wishId: string, count: number): Promise<WishSlotRow[]>;
+  cancel(slotId: string): Promise<void>;
+  /** Current user's bookings with embedded wish summary. */
+  listMine(): Promise<WishSlotBookingRow[]>;
+}
+
 export interface ApiClient {
   auth: AuthApi;
   profiles: ProfilesApi;
   storage: StorageApi;
   wishes: WishesApi;
-  // slots.* → plan 03
+  slots: SlotsApi;
 }
 
 export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
+export type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';

@@ -68,14 +68,59 @@ export type Database = {
         }
         Relationships: []
       }
+      wish_slots: {
+        Row: {
+          booked_by: string
+          cancelled_at: string | null
+          created_at: string
+          id: string
+          status: 'active' | 'cancelled'
+          wish_id: string
+        }
+        Insert: {
+          booked_by: string
+          cancelled_at?: string | null
+          created_at?: string
+          id?: string
+          status?: 'active' | 'cancelled'
+          wish_id: string
+        }
+        Update: {
+          booked_by?: string
+          cancelled_at?: string | null
+          created_at?: string
+          id?: string
+          status?: 'active' | 'cancelled'
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'wish_slots_booked_by_fkey'
+            columns: ['booked_by']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'wish_slots_wish_id_fkey'
+            columns: ['wish_id']
+            isOneToOne: false
+            referencedRelation: 'wishes'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       wishes: {
         Row: {
+          copy_lines: Json | null
           created_at: string
           currency: string | null
           description: string | null
           id: string
           is_archived: boolean
+          is_collaborative: boolean
           link: string | null
+          max_slots: number | null
           owner_id: string
           photo_storage_path: string | null
           price: number | null
@@ -83,12 +128,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          copy_lines?: Json | null
           created_at?: string
           currency?: string | null
           description?: string | null
           id?: string
           is_archived?: boolean
+          is_collaborative?: boolean
           link?: string | null
+          max_slots?: number | null
           owner_id: string
           photo_storage_path?: string | null
           price?: number | null
@@ -96,12 +144,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          copy_lines?: Json | null
           created_at?: string
           currency?: string | null
           description?: string | null
           id?: string
           is_archived?: boolean
+          is_collaborative?: boolean
           link?: string | null
+          max_slots?: number | null
           owner_id?: string
           photo_storage_path?: string | null
           price?: number | null
@@ -123,10 +174,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      book_wish_slots: {
+        Args: { p_count: number; p_wish_id: string }
+        Returns: {
+          id: string
+          wish_id: string
+          booked_by: string
+          status: 'active' | 'cancelled'
+          created_at: string
+          cancelled_at: string | null
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      wish_slot_status: 'active' | 'cancelled'
     }
     CompositeTypes: {
       [_ in never]: never
