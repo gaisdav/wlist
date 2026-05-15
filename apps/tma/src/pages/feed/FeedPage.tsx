@@ -54,6 +54,7 @@ export const FeedPage = (): React.JSX.Element => {
                   <WishCard
                     wish={row.wish}
                     isOwner={Boolean(viewerId && row.wish.owner_id === viewerId)}
+                    viewerId={viewerId}
                   />
                 ) : (
                   <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted">

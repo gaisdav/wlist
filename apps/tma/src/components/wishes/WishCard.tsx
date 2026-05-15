@@ -6,6 +6,7 @@ import { Link } from 'wouter';
 
 import { WISH_NO_PHOTO_EMOJI } from './constants';
 import { WishPhoto } from './WishPhoto';
+import { WishReservationBadge } from './WishReservationBadge';
 import { WishSocialStrip } from './WishSocialStrip';
 
 /** List-style wish tile (my list, user list, feed). Feed loads rows via `wishes.listByIds` then passes the same `Wish` shape here. */
@@ -13,6 +14,7 @@ interface WishCardProps {
   wish: Wish;
   /** When true, like toggle is hidden (cannot like own wish). */
   isOwner?: boolean;
+  viewerId?: string;
   /** Reserved for future use (e.g. comments preview under likes/reposts). */
   footerSlot?: React.ReactNode;
 }
@@ -20,6 +22,7 @@ interface WishCardProps {
 export const WishCard = ({
   wish,
   isOwner = false,
+  viewerId,
   footerSlot,
 }: WishCardProps): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -77,6 +80,12 @@ export const WishCard = ({
               {t('wishes.card.collaborative')}
             </span>
           ) : null}
+          <WishReservationBadge
+            wish={wish}
+            isOwner={isOwner}
+            viewerId={viewerId}
+            variant="inline"
+          />
           {wish.is_archived ? (
             <span className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
               {t('wishes.list.archived')}

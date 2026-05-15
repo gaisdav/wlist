@@ -111,6 +111,17 @@
         "invalid_max_slots": "Enter a whole number from 1 to 500, or leave empty."
       }
     },
+    "reservation": {
+      "available": "Available",
+      "reserved": "Reserved",
+      "reserved_by_you": "Your reservation",
+      "slots_filled": "{{active}} / {{cap}} booked",
+      "reserve": "Reserve",
+      "cancel": "Cancel my reservation",
+      "loading": "Loading…",
+      "reserve_failed": "Could not reserve this wish. It may already be taken.",
+      "cancel_failed": "Could not cancel your reservation."
+    },
     "slots": {
       "title": "Gift slots",
       "filled": "{{active}} / {{cap}} booked",

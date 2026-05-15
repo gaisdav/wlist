@@ -120,7 +120,11 @@ export const UserWishlistPage = (): React.JSX.Element => {
         <ul className="flex flex-col gap-2">
           {wishes.data.map((w) => (
             <li key={w.id}>
-              <WishCard wish={w} isOwner={Boolean(profile.data?.id === w.owner_id)} />
+              <WishCard
+                wish={w}
+                isOwner={Boolean(profile.data?.id === w.owner_id)}
+                viewerId={profile.data?.id}
+              />
             </li>
           ))}
         </ul>

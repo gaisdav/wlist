@@ -316,6 +316,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      wish_slots_effective_cap: { Args: { p_wish_id: string }; Returns: number }
       wishes_copy_lines_is_valid: { Args: { lines: Json }; Returns: boolean }
     }
     Enums: {

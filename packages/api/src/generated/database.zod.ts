@@ -331,6 +331,12 @@ export const publicBookWishSlotsReturnsSchema = z.array(
   }),
 );
 
+export const publicWishSlotsEffectiveCapArgsSchema = z.object({
+  p_wish_id: z.string(),
+});
+
+export const publicWishSlotsEffectiveCapReturnsSchema = z.number();
+
 export const publicWishesCopyLinesIsValidArgsSchema = z.object({
   lines: jsonSchema,
 });

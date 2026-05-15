@@ -1,5 +1,4 @@
 import { useCurrentUser } from '@wlist/core/hooks/auth';
-import { useBookSlots, useCancelSlot, useSlotsByWish } from '@wlist/core/hooks/slots';
 import {
   useArchiveWish,
   useDeleteWish,
@@ -7,7 +6,6 @@ import {
   useUserWishes,
   useWish,
 } from '@wlist/core/hooks/wishes';
-import { wishSlotCap } from '@wlist/core/lib';
 import { ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +15,8 @@ import { PhotoLightbox } from '../../components/overlays';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useWishPhotoSignedUrl } from '../../components/wishes';
+import { WishReservationBadge } from '../../components/wishes/WishReservationBadge';
+import { WishReservationSection } from '../../components/wishes/WishReservationSection';
 import { WishSocialStrip } from '../../components/wishes/WishSocialStrip';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -40,23 +40,6 @@ export const WishDetailPage = (): React.JSX.Element => {
   useQueryErrorToast(Boolean(wishId) && wish.isError, t('states.error'));
   useQueryErrorToast(Boolean(wish.data?.owner_id) && ownerWishes.isError, t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
-
-  const slotsWishId =
-    wishId &&
-    wish.data &&
-    profile.data &&
-    profile.data.id !== wish.data.owner_id &&
-    wish.data.is_collaborative &&
-    !wish.data.is_archived
-      ? wishId
-      : undefined;
-
-  const slots = useSlotsByWish(api, slotsWishId);
-  const bookSlots = useBookSlots(api);
-  const cancelSlot = useCancelSlot(api);
-  const [slotActionError, setSlotActionError] = useState<string | null>(null);
-
-  useQueryErrorToast(Boolean(slotsWishId) && slots.isError, t('states.error'));
 
   const photoSrc = useWishPhotoSignedUrl(
     wish.data?.photo_storage_path ? wish.data.photo_storage_path : null,
@@ -92,32 +75,8 @@ export const WishDetailPage = (): React.JSX.Element => {
 
   const w = wish.data;
   const isOwner = profile.data?.id === w.owner_id;
-  const hasUploadedPhoto = Boolean(w.photo_storage_path);
-
-  const cap = wishSlotCap(w.max_slots);
-  const activeSlots = slots.data?.filter((s) => s.status === 'active') ?? [];
-  const activeCount = activeSlots.length;
-  const remaining = Math.max(0, cap - activeCount);
   const viewerId = profile.data?.id;
-  const myActiveSlots = viewerId != null ? activeSlots.filter((s) => s.booked_by === viewerId) : [];
-
-  const tryBookSlots = async (count: number): Promise<void> => {
-    setSlotActionError(null);
-    try {
-      await bookSlots.mutateAsync({ wishId: w.id, count });
-    } catch {
-      setSlotActionError(t('wishes.slots.book_failed'));
-    }
-  };
-
-  const tryCancelSlot = async (slotId: string): Promise<void> => {
-    setSlotActionError(null);
-    try {
-      await cancelSlot.mutateAsync({ slotId, wishId: w.id });
-    } catch {
-      setSlotActionError(t('wishes.slots.cancel_failed'));
-    }
-  };
+  const hasUploadedPhoto = Boolean(w.photo_storage_path);
 
   const list = ownerWishes.data;
   const listReady = Boolean(list && !ownerWishes.isLoading && !ownerWishes.isError);
@@ -178,7 +137,10 @@ export const WishDetailPage = (): React.JSX.Element => {
           t={t}
         />
 
-        <h1 className="text-2xl font-semibold text-foreground">{w.title}</h1>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold text-foreground">{w.title}</h1>
+          <WishReservationBadge wish={w} isOwner={isOwner} viewerId={viewerId} variant="compact" />
+        </div>
 
         {w.description ? (
           <section>
@@ -243,67 +205,8 @@ export const WishDetailPage = (): React.JSX.Element => {
           </Link>
         ) : null}
 
-        {slotsWishId ? (
-          <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3">
-            <h2 className="text-sm font-medium text-muted">{t('wishes.slots.title')}</h2>
-            {slots.isLoading ? (
-              <p className="text-sm text-muted">{t('wishes.slots.loading')}</p>
-            ) : (
-              <>
-                <p className="text-sm text-foreground">
-                  {t('wishes.slots.filled', { active: activeCount, cap })}
-                </p>
-                {myActiveSlots.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm text-foreground">
-                      {t('wishes.slots.your_slots', { count: myActiveSlots.length })}
-                    </p>
-                    <ul className="flex flex-col gap-1">
-                      {myActiveSlots.map((s, i) => (
-                        <li key={s.id} className="flex items-center justify-between gap-2">
-                          <span className="text-sm text-foreground">#{i + 1}</span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={cancelSlot.isPending}
-                            onClick={() => void tryCancelSlot(s.id)}
-                          >
-                            {t('wishes.slots.cancel')}
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={remaining < 1 || bookSlots.isPending}
-                    isLoading={bookSlots.isPending}
-                    onClick={() => void tryBookSlots(1)}
-                  >
-                    {t('wishes.slots.book_one')}
-                  </Button>
-                  {remaining > 1 ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={bookSlots.isPending}
-                      onClick={() => void tryBookSlots(remaining)}
-                    >
-                      {t('wishes.slots.book_remaining', { n: remaining })}
-                    </Button>
-                  ) : null}
-                </div>
-                {slotActionError ? (
-                  <p className="text-xs text-destructive">{slotActionError}</p>
-                ) : null}
-              </>
-            )}
-          </section>
+        {!isOwner && !w.is_archived && viewerId ? (
+          <WishReservationSection wish={w} viewerId={viewerId} />
         ) : null}
 
         {isOwner ? (
