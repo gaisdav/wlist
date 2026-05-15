@@ -194,7 +194,15 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
       if (!wishId) return;
       const previousPhotoPath = existing.data?.photo_storage_path ?? null;
-      await updateMut.mutateAsync({ id: wishId, ...body });
+      await updateMut.mutateAsync({
+        id: wishId,
+        title: body.title,
+        description: body.description,
+        price: body.price,
+        currency: body.currency,
+        link: body.link,
+        copy_lines: body.copy_lines,
+      });
       if (photo) await uploadPhotoIfNeeded(wishId, photo, previousPhotoPath);
       setLocation(`/wish/${wishId}`, { replace: true });
     } finally {
@@ -368,39 +376,50 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           ) : null}
         </div>
 
-        <label className="flex cursor-pointer items-start gap-2">
-          <input
-            type="checkbox"
-            className="mt-1 h-4 w-4 shrink-0"
-            {...register('isCollaborative')}
-          />
-          <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.collaborative_label')}
-          </span>
-        </label>
-
-        {isCollaborative ? (
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('wishes.form.max_slots_label')}
-            </span>
+        <div className={`flex flex-col gap-2${mode === 'edit' ? ' opacity-80' : ''}`}>
+          <label
+            className={`flex items-start gap-2${mode === 'edit' ? ' cursor-default' : ' cursor-pointer'}`}
+          >
             <input
-              inputMode="numeric"
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              {...register('maxSlotsStr')}
+              type="checkbox"
+              className="mt-1 h-4 w-4 shrink-0 disabled:cursor-not-allowed"
+              disabled={mode === 'edit' || isSaving}
+              {...register('isCollaborative')}
             />
-            <span className="text-xs text-muted">
-              {t('wishes.form.max_slots_hint', { cap: WISH_SLOTS_DEFAULT_CAP })}
+            <span className="text-sm font-medium text-foreground">
+              {t('wishes.form.collaborative_label')}
             </span>
-            {formState.errors.maxSlotsStr ? (
-              <span className="text-xs text-destructive">
-                {formState.errors.maxSlotsStr.message === 'invalid_max_slots'
-                  ? t('wishes.form.errors.invalid_max_slots')
-                  : formState.errors.maxSlotsStr.message}
-              </span>
-            ) : null}
           </label>
-        ) : null}
+          {mode === 'edit' ? (
+            <p className="text-xs text-muted">{t('wishes.form.collaborative_locked_hint')}</p>
+          ) : null}
+
+          {isCollaborative ? (
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-foreground">
+                {t('wishes.form.max_slots_label')}
+              </span>
+              <input
+                inputMode="numeric"
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={mode === 'edit' || isSaving}
+                {...register('maxSlotsStr')}
+              />
+              {mode === 'create' ? (
+                <span className="text-xs text-muted">
+                  {t('wishes.form.max_slots_hint', { cap: WISH_SLOTS_DEFAULT_CAP })}
+                </span>
+              ) : null}
+              {formState.errors.maxSlotsStr && mode === 'create' ? (
+                <span className="text-xs text-destructive">
+                  {formState.errors.maxSlotsStr.message === 'invalid_max_slots'
+                    ? t('wishes.form.errors.invalid_max_slots')
+                    : formState.errors.maxSlotsStr.message}
+                </span>
+              ) : null}
+            </label>
+          ) : null}
+        </div>
 
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">

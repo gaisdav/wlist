@@ -97,6 +97,7 @@
       "submit_edit": "Save changes",
       "add_copy_line": "Add copy line",
       "collaborative_label": "Group gift (others can book slots)",
+      "collaborative_locked_hint": "Cannot be changed after the wish is created. Delete this wish and create a new one to use different group-gift settings.",
       "max_slots_label": "Max participants (optional)",
       "max_slots_hint": "Leave empty to use the default cap ({{cap}}).",
       "copy_line_placeholder": "Line {{n}}",
