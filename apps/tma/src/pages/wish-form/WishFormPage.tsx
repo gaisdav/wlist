@@ -12,6 +12,7 @@ import {
   persistLastWishCurrency,
   readLastWishCurrency,
   SUPPORTED_WISH_CURRENCIES,
+  WISH_COPY_LINE_MAX_CHARS,
   WISH_COPY_LINES_MAX,
   WISH_PHOTO_MAX_UPLOAD_BYTES,
   WISH_SLOTS_DEFAULT_CAP,
@@ -343,9 +344,11 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
         <div className="flex flex-col gap-2">
           {([0, 1, 2, 3, 4] as const).slice(0, copyLinesVisible).map((i) => (
-            <input
+            <textarea
               key={i}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              rows={3}
+              maxLength={WISH_COPY_LINE_MAX_CHARS}
+              className="resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm"
               placeholder={t('wishes.form.copy_line_placeholder', { n: i + 1 })}
               {...register(`copyLines.${i}`)}
             />
