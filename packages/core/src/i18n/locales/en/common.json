@@ -159,7 +159,6 @@
     "feed": {
       "title": "Feed",
       "empty": "No wishes in your feed yet. Follow someone or add a wish.",
-      "wish_created": "New wish",
       "wish_unavailable": "This wish is no longer visible.",
       "no_title": "(untitled)",
       "open_wish": "Open wish",

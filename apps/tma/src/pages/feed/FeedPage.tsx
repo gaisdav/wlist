@@ -10,10 +10,20 @@ import { WishCard } from '../../components/wishes/WishCard';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 
+import { FeedItemAuthorLink } from './FeedItemAuthorLink';
+
 const titleFromPayload = (row: FeedEventRow): string => {
   const p = row.payload as { title?: unknown };
   return typeof p.title === 'string' ? p.title : '';
 };
+
+const formatFeedDate = (iso: string): string =>
+  new Date(iso).toLocaleString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
 export const FeedPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -46,10 +56,7 @@ export const FeedPage = (): React.JSX.Element => {
             const viewerId = profile.data?.id;
 
             return (
-              <li key={row.id} className="flex flex-col gap-1">
-                <p className="px-1 text-xs text-muted">
-                  {t('social.feed.wish_created')} · {new Date(row.created_at).toLocaleString()}
-                </p>
+              <li key={row.id} className="flex flex-col gap-1.5">
                 {row.wish ? (
                   <WishCard
                     wish={row.wish}
@@ -68,6 +75,15 @@ export const FeedPage = (): React.JSX.Element => {
                     </Link>
                   </div>
                 )}
+                <div className="flex items-baseline justify-between gap-3 px-0.5">
+                  <FeedItemAuthorLink userId={row.actor_id} />
+                  <time
+                    dateTime={row.created_at}
+                    className="shrink-0 text-xs tabular-nums text-muted"
+                  >
+                    {formatFeedDate(row.created_at)}
+                  </time>
+                </div>
               </li>
             );
           })}
