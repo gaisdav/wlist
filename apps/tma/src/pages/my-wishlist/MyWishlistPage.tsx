@@ -4,6 +4,7 @@ import { useMyWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
+import { buttonVariants } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
@@ -41,7 +42,15 @@ export const MyWishlistPage = (): React.JSX.Element => {
   return (
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-2 border-b border-border pb-4">
-        <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.title')}</h1>
+        <div className="flex items-start justify-between gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.title')}</h1>
+          <Link
+            to="/wish/new"
+            className={buttonVariants({ variant: 'primary', size: 'sm' })}
+          >
+            {t('nav.add_wish')}
+          </Link>
+        </div>
         {counts.data ? (
           <div className="flex flex-wrap gap-3 text-sm text-muted">
             <Link to={`/u/${profile.data.id}/following`} className="underline">
