@@ -8,7 +8,7 @@
 import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
 
 import type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
-import type { FeedEventRow } from './socialTypes.js';
+import type { FeedItemRow } from './socialTypes.js';
 import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 
 /**
@@ -149,8 +149,11 @@ export interface FollowsApi {
 }
 
 export interface FeedApi {
-  /** Offset pagination (stable under concurrent inserts). */
-  list(params: { limit?: number; offset?: number }): Promise<FeedEventRow[]>;
+  /**
+   * Offset pagination (stable under concurrent inserts).
+   * Embeds `wishes` via FK; `wish` is null when RLS hides the row.
+   */
+  list(params: { limit?: number; offset?: number }): Promise<FeedItemRow[]>;
 }
 
 export interface WishLikesApi {
@@ -197,4 +200,4 @@ export interface ApiClient {
 
 export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 export type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
-export type { FeedCursor, FeedEventRow } from './socialTypes.js';
+export type { FeedCursor, FeedEventRow, FeedItemRow } from './socialTypes.js';

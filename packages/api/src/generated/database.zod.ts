@@ -68,6 +68,13 @@ export const publicFeedEventsRelationshipsSchema = z.tuple([
     referencedRelation: z.literal("profiles"),
     referencedColumns: z.tuple([z.literal("id")]),
   }),
+  z.object({
+    foreignKeyName: z.literal("feed_events_subject_id_fkey"),
+    columns: z.tuple([z.literal("subject_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
 ]);
 
 export const publicFollowsRowSchema = z.object({

@@ -4,6 +4,7 @@ export type {
   AuthSession,
   FeedCursor,
   FeedEventRow,
+  FeedItemRow,
   ProfileRow,
   ProfilesApi,
   FollowsApi,

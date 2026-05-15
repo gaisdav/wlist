@@ -147,7 +147,6 @@
     },
     "feed": {
       "title": "Feed",
-      "subtitle": "New wishes from people you follow (and your own).",
       "empty": "No wishes in your feed yet. Follow someone or add a wish.",
       "wish_created": "New wish",
       "wish_unavailable": "This wish is no longer visible.",

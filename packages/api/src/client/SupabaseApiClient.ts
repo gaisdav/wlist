@@ -41,7 +41,7 @@ import {
   type WishLikesApi,
 } from './ApiClient.js';
 import { SignInError } from './SignInError.js';
-import type { FeedEventRow } from './socialTypes.js';
+import type { FeedEventRow, FeedItemRow } from './socialTypes.js';
 
 export type SupabaseClientLike = SupabaseClient<Database>;
 
@@ -361,18 +361,28 @@ const createFollowsApi = (sb: SupabaseClientLike): FollowsApi => ({
   },
 });
 
+type FeedEventWishEmbedRow = FeedEventRow & {
+  wishes: WishRow | WishRow[] | null;
+};
+
+const embedWishFromFeedRow = (row: FeedEventWishEmbedRow): FeedItemRow => {
+  const { wishes: embedded, ...event } = row;
+  const wish = Array.isArray(embedded) ? (embedded[0] ?? null) : (embedded ?? null);
+  return { ...event, wish };
+};
+
 const createFeedApi = (sb: SupabaseClientLike): FeedApi => ({
   async list(params: { limit?: number; offset?: number }) {
     const limit = Math.min(Math.max(params.limit ?? 20, 1), 50);
     const offset = Math.max(params.offset ?? 0, 0);
     const { data, error } = await sb
       .from('feed_events')
-      .select('*')
+      .select('*, wishes!left(*)')
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
       .range(offset, offset + limit - 1);
     if (error) throw error;
-    return (data ?? []) as FeedEventRow[];
+    return (data ?? []).map(embedWishFromFeedRow);
   },
 });
 

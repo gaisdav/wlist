@@ -1,8 +1,6 @@
 import type { FeedEventRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
-import { useWishesByIds } from '@wlist/core/hooks/wishes';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
@@ -24,17 +22,13 @@ export const FeedPage = (): React.JSX.Element => {
   const feed = useInfiniteFeed(api);
 
   const flat = feed.data?.pages.flat() ?? [];
-  const subjectIds = useMemo(() => flat.map((r) => r.subject_id), [flat]);
-  const wishMap = useWishesByIds(api, subjectIds);
 
   useQueryErrorToast(feed.isError && !feed.isLoading, t('states.error'));
-  useQueryErrorToast(wishMap.isError && !wishMap.isLoading, t('states.error'));
 
   return (
     <div className="flex flex-col gap-4 p-4">
       <header className="border-b border-border pb-3">
         <h1 className="text-xl font-semibold text-foreground">{t('social.feed.title')}</h1>
-        <p className="mt-1 text-sm text-muted">{t('social.feed.subtitle')}</p>
       </header>
 
       {feed.isLoading ? (
@@ -49,19 +43,18 @@ export const FeedPage = (): React.JSX.Element => {
       ) : (
         <ul className="flex flex-col gap-3">
           {flat.map((row) => {
-            const wish = wishMap.data?.[row.subject_id];
             const viewerId = profile.data?.id;
-            const rowSkeleton = wishMap.isFetching && !wish;
 
             return (
               <li key={row.id} className="flex flex-col gap-1">
                 <p className="px-1 text-xs text-muted">
                   {t('social.feed.wish_created')} · {new Date(row.created_at).toLocaleString()}
                 </p>
-                {wish ? (
-                  <WishCard wish={wish} isOwner={Boolean(viewerId && wish.owner_id === viewerId)} />
-                ) : rowSkeleton ? (
-                  <Skeleton className="h-28 rounded-lg" />
+                {row.wish ? (
+                  <WishCard
+                    wish={row.wish}
+                    isOwner={Boolean(viewerId && row.wish.owner_id === viewerId)}
+                  />
                 ) : (
                   <div className="rounded-lg border border-border bg-surface px-3 py-3 text-sm text-muted">
                     <p>{titleFromPayload(row) || t('social.feed.no_title')}</p>
