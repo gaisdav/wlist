@@ -40,12 +40,6 @@ export const MyWishlistPage = (): React.JSX.Element => {
       <header className="flex flex-col gap-2 border-b border-border pb-4">
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.title')}</h1>
-          <Link
-            to="/wish/new"
-            className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-          >
-            {t('nav.add_wish')}
-          </Link>
         </div>
         <p className="text-sm text-muted">
           {getDisplayName(profile.data)}{' '}

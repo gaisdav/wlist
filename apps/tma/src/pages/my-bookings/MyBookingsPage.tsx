@@ -43,9 +43,6 @@ export const MyBookingsPage = (): React.JSX.Element => {
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-1 border-b border-border pb-4">
         <h1 className="text-xl font-semibold text-foreground">{t('wishes.bookings.title')}</h1>
-        <Link to="/me" className="text-sm text-primary underline">
-          {t('nav.back_to_my_wishes')}
-        </Link>
       </header>
 
       {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}

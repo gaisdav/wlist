@@ -9,7 +9,7 @@ import {
 } from '@wlist/core/hooks/social';
 import { useUserWishes } from '@wlist/core/hooks/wishes';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'wouter';
+import { Link, Redirect, useParams } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
@@ -42,10 +42,12 @@ export const UserWishlistPage = (): React.JSX.Element => {
   };
   useTelegramBackButton(goBack, Boolean(userId));
 
-  const isSelf = Boolean(profile.data?.id && userId && profile.data.id === userId);
-
   if (!userId) {
     return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
+  }
+
+  if (profile.data?.id === userId) {
+    return <Redirect to="/me" replace />;
   }
 
   if (wishes.isLoading || ownerProfile.isLoading) {
@@ -62,22 +64,13 @@ export const UserWishlistPage = (): React.JSX.Element => {
   return (
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-3 border-b border-border pb-4">
-        {isSelf ? (
-          <Button type="button" variant="link" className="self-start" onClick={goBack}>
-            {t('nav.back_to_my_wishes')}
-          </Button>
-        ) : null}
         <div className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h1 className="text-xl font-semibold text-foreground">{displayName}</h1>
               <p className="text-sm text-muted">{t('wishes.list.user_title')}</p>
             </div>
-            {isSelf ? (
-              <Link to="/wish/new" className="shrink-0 text-sm font-medium text-primary underline">
-                {t('nav.add_wish')}
-              </Link>
-            ) : profile.data ? (
+            {profile.data ? (
               <Button
                 type="button"
                 size="sm"
@@ -86,8 +79,7 @@ export const UserWishlistPage = (): React.JSX.Element => {
                   follow.isPending ||
                   unfollow.isPending ||
                   isFollowing.isLoading ||
-                  !userId ||
-                  userId === profile.data.id
+                  !userId
                 }
                 onClick={() =>
                   void (isFollowing.data

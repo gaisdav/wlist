@@ -39,9 +39,6 @@ export const UserFollowPage = (): React.JSX.Element => {
     <div className="flex flex-col gap-4 p-4">
       <header className="border-b border-border pb-3">
         <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-        <Link to={`/u/${userId}`} className="mt-2 inline-block text-sm text-primary underline">
-          {t('social.follows.back_to_list')}
-        </Link>
       </header>
 
       {list.isLoading ? (
