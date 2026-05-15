@@ -22,6 +22,10 @@ alwaysApply: false
 - **CSS Modules** — точечно, только для сложной графики (mesh-градиенты, `@keyframes`, layered glassmorphism).
 - **UI-библиотек нет** — все компоненты пишем сами. **Исключение:** иконки — только [`lucide-react`](https://lucide.dev/) в `apps/tma` (никаких ручных `<svg>` / `?react` для иконок).
 
+## Даты в UI
+
+Форматирование timestamp'ов — только `@wlist/core/lib` (`formatRelativeTime`, `formatDate`). Передавай `locale: i18n.language`. Не дублируй локальные `formatFeedDate` / `toLocaleString` в страницах.
+
 ## Дизайн-токены
 
 Всегда импортируй из `@wlist/core/tokens`. Никаких хардкод-цветов/отступов в компонентах.

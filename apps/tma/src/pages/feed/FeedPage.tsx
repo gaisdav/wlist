@@ -1,6 +1,7 @@
 import type { FeedEventRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
+import { formatRelativeTime } from '@wlist/core/lib';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
@@ -17,16 +18,8 @@ const titleFromPayload = (row: FeedEventRow): string => {
   return typeof p.title === 'string' ? p.title : '';
 };
 
-const formatFeedDate = (iso: string): string =>
-  new Date(iso).toLocaleString(undefined, {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
 export const FeedPage = (): React.JSX.Element => {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const api = useApiClient();
   const profile = useCurrentUser(api);
   const feed = useInfiniteFeed(api);
@@ -81,7 +74,10 @@ export const FeedPage = (): React.JSX.Element => {
                     dateTime={row.created_at}
                     className="shrink-0 text-xs tabular-nums text-muted"
                   >
-                    {formatFeedDate(row.created_at)}
+                    {formatRelativeTime(row.created_at, {
+                      locale: i18n.language,
+                      fallbackFormat: 'dayMonthYear',
+                    })}
                   </time>
                 </div>
               </li>
