@@ -7,6 +7,7 @@ import {
   useUserWishes,
   useWish,
 } from '@wlist/core/hooks/wishes';
+import { formatDate } from '@wlist/core/lib';
 import { Check, ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -163,6 +164,7 @@ export const WishDetailPage = (): React.JSX.Element => {
                 {events.map((event) => (
                   <Badge key={event.id} size="sm" variant="soft">
                     {event.title}
+                    {event.event_date ? ` (${formatDate(event.event_date, 'short')})` : ''}
                   </Badge>
                 ))}
               </div>

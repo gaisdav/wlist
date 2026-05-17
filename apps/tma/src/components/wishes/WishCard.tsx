@@ -1,6 +1,6 @@
 import { type Wish } from '@wlist/core/entities/wish';
 import { useWishEvents } from '@wlist/core/hooks/events';
-import { truncateWishDescriptionForList } from '@wlist/core/lib';
+import { formatDate, truncateWishDescriptionForList } from '@wlist/core/lib';
 import { Link2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
@@ -102,6 +102,7 @@ export const WishCard = ({
               {events.map((event) => (
                 <Badge key={event.id} size="sm" variant="soft">
                   {event.title}
+                  {event.event_date ? ` (${formatDate(event.event_date, 'short')})` : ''}
                 </Badge>
               ))}
             </div>
