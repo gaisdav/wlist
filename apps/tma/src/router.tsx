@@ -14,9 +14,6 @@ const MyWishlistPage = lazy(() =>
 const SearchUsersPage = lazy(() =>
   import('./pages/search-users/SearchUsersPage').then((m) => ({ default: m.SearchUsersPage })),
 );
-const UserFollowPage = lazy(() =>
-  import('./pages/user-follow/UserFollowPage').then((m) => ({ default: m.UserFollowPage })),
-);
 const UserWishlistPage = lazy(() =>
   import('./pages/user-wishlist/UserWishlistPage').then((m) => ({ default: m.UserWishlistPage })),
 );
@@ -44,8 +41,6 @@ export const AppRouter = (): React.JSX.Element => (
           <Route path="/me" component={MyWishlistPage} />
           <Route path="/feed" component={FeedPage} />
           <Route path="/search" component={SearchUsersPage} />
-          <Route path="/u/:userId/following" component={UserFollowPage} />
-          <Route path="/u/:userId/followers" component={UserFollowPage} />
           <Route path="/u/:userId" component={UserWishlistPage} />
           <Route path="/wish/new">
             <WishFormPage mode="create" />

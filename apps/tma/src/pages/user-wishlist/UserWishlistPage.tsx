@@ -8,11 +8,13 @@ import {
   useUnfollowUser,
 } from '@wlist/core/hooks/social';
 import { useUserWishes } from '@wlist/core/hooks/wishes';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, Redirect, useParams } from 'wouter';
+import { Redirect, useParams } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { UserFollowsBottomSheet } from '../../components/social';
 import { WishCard } from '../../components/wishes';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -29,6 +31,14 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const isFollowing = useIsFollowing(api, userId);
   const follow = useFollowUser(api, profile.data?.id);
   const unfollow = useUnfollowUser(api, profile.data?.id);
+
+  const [followSheet, setFollowSheet] = useState<{
+    isOpen: boolean;
+    initialTab: 'following' | 'followers';
+  }>({
+    isOpen: false,
+    initialTab: 'following',
+  });
 
   useQueryErrorToast(Boolean(userId) && wishes.isError && !wishes.isLoading, t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
@@ -61,6 +71,13 @@ export const UserWishlistPage = (): React.JSX.Element => {
 
   const displayName = ownerProfile.data ? getDisplayName(ownerProfile.data) : '…';
 
+  const openFollowSheet = (tab: 'following' | 'followers') => {
+    setFollowSheet({
+      isOpen: true,
+      initialTab: tab,
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <header className="flex flex-col gap-3 border-b border-border pb-4">
@@ -90,12 +107,20 @@ export const UserWishlistPage = (): React.JSX.Element => {
           </div>
           {counts.data ? (
             <div className="flex flex-wrap gap-3 text-sm text-muted">
-              <Link to={`/u/${userId}/following`} className="underline">
+              <button
+                type="button"
+                onClick={() => openFollowSheet('following')}
+                className="underline hover:text-foreground transition-colors"
+              >
                 {t('social.counts.following', { n: counts.data.following })}
-              </Link>
-              <Link to={`/u/${userId}/followers`} className="underline">
+              </button>
+              <button
+                type="button"
+                onClick={() => openFollowSheet('followers')}
+                className="underline hover:text-foreground transition-colors"
+              >
                 {t('social.counts.followers', { n: counts.data.followers })}
-              </Link>
+              </button>
             </div>
           ) : null}
         </div>
@@ -117,6 +142,15 @@ export const UserWishlistPage = (): React.JSX.Element => {
             </li>
           ))}
         </ul>
+      )}
+
+      {userId && (
+        <UserFollowsBottomSheet
+          userId={userId}
+          isOpen={followSheet.isOpen}
+          initialTab={followSheet.initialTab}
+          onClose={() => setFollowSheet((prev) => ({ ...prev, isOpen: false }))}
+        />
       )}
     </div>
   );
