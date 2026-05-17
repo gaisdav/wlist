@@ -177,5 +177,17 @@
       "back_to_list": "Back to wishlist",
       "empty": "No one here yet."
     }
+  },
+  "comments": {
+    "title": "Comments",
+    "placeholder": "Message...",
+    "send": "Send",
+    "reply": "Reply",
+    "replying": "Replying to thread",
+    "show_to_owner": "Show to author",
+    "confirm_show_owner": "Are you sure you want to make this thread visible to the author? They will see all replies in it.",
+    "you": "You",
+    "empty": "No comments yet.",
+    "visible_to_author": "Visible to author"
   }
 }
