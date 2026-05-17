@@ -6,8 +6,8 @@ import {
   useUserWishes,
   useWish,
 } from '@wlist/core/hooks/wishes';
-import { ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
-import { useState } from 'react';
+import { Check, ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
@@ -36,6 +36,15 @@ export const WishDetailPage = (): React.JSX.Element => {
   const unarchive = useUnarchiveWish(api);
   const del = useDeleteWish(api);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (copiedIndex === null) return;
+    const timer = setTimeout(() => {
+      setCopiedIndex(null);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [copiedIndex]);
 
   useQueryErrorToast(Boolean(wishId) && wish.isError, t('states.error'));
   useQueryErrorToast(Boolean(wish.data?.owner_id) && ownerWishes.isError, t('states.error'));
@@ -183,9 +192,16 @@ export const WishDetailPage = (): React.JSX.Element => {
                     size="iconRound"
                     className="shrink-0"
                     aria-label={t('wishes.detail.copy_line')}
-                    onClick={() => void navigator.clipboard.writeText(line)}
+                    onClick={() => {
+                      void navigator.clipboard.writeText(line);
+                      setCopiedIndex(idx);
+                    }}
                   >
-                    <Copy className="h-4 w-4" strokeWidth={2} aria-hidden />
+                    {copiedIndex === idx ? (
+                      <Check className="h-4 w-4 text-green-500" strokeWidth={2} aria-hidden />
+                    ) : (
+                      <Copy className="h-4 w-4" strokeWidth={2} aria-hidden />
+                    )}
                   </Button>
                 </li>
               ))}

@@ -16,7 +16,7 @@ export function WishDetailHero({
 }): React.JSX.Element {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-surface">
-      <div className="relative aspect-video w-full bg-muted">
+      <div className="relative aspect-video w-full max-h-[512px] bg-muted">
         {hasUploadedPhoto ? (
           photoSrc ? (
             <Button

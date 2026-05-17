@@ -124,12 +124,11 @@ export function CommentsBottomSheet({
           </div>
         )}
         <div className="flex items-center gap-2">
-          <textarea
-            className="max-h-32 min-h-[40px] flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+          <input
+            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             placeholder={t('comments.placeholder')}
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            rows={1}
           />
           <Button
             size="iconRound"
