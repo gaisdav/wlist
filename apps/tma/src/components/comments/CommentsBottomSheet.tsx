@@ -64,12 +64,6 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
         </div>
       </div>
       <div className="ml-8 flex items-center gap-3 text-xs text-muted">
-        <span>
-          {formatRelativeTime(comment.created_at, {
-            locale: i18n.language,
-            fallbackFormat: 'dayMonthYear',
-          })}
-        </span>
         {!comment.parent_id && (
           <button
             type="button"
@@ -94,6 +88,12 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
             </button>
           </>
         )}
+        <span>
+          {formatRelativeTime(comment.created_at, {
+            locale: i18n.language,
+            fallbackFormat: 'dayMonthYear',
+          })}
+        </span>
         {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
           <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
             {t('comments.visible_to_author')}

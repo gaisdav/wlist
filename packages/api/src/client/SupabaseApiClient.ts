@@ -710,7 +710,7 @@ const createCommentsApi = (sb: SupabaseClientLike): CommentsApi => ({
   },
 
   async delete(id) {
-    const { error } = await sb.from('wish_comments').update({ is_deleted: true }).eq('id', id);
+    const { error } = await sb.from('wish_comments').delete().eq('id', id);
     if (error) throw error;
   },
 });
