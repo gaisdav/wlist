@@ -15,6 +15,7 @@
     "./hooks/wishes": "./src/hooks/wishes/index.ts",
     "./hooks/slots": "./src/hooks/slots/index.ts",
     "./hooks/social": "./src/hooks/social/index.ts",
+    "./hooks/comments": "./src/hooks/comments/index.ts",
     "./routes": "./src/routes/index.ts",
     "./tokens": "./src/tokens/index.ts",
     "./i18n": "./src/i18n/index.ts",
