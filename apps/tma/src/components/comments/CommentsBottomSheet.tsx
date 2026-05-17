@@ -89,7 +89,7 @@ const CommentItem = ({
           <span>
             {formatRelativeTime(comment.created_at, {
               locale: i18n.language,
-              fallbackFormat: 'dayMonthYear',
+              fallbackFormat: 'short',
             })}
           </span>
           {comment.updated_at !== comment.created_at && (

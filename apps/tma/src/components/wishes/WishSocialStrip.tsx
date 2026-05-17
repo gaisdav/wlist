@@ -56,7 +56,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
             type="button"
             variant="ghost"
             size="iconRound"
-            className="-ml-2 text-foreground"
+            className="text-foreground"
             aria-label={t('comments.title')}
             onClick={(e) => {
               e.preventDefault();
