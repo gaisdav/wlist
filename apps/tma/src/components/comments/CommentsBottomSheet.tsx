@@ -258,7 +258,7 @@ export function CommentsBottomSheet({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} footerSlot={footer}>
-      <div className="flex flex-col gap-4 p-2">
+      <div className="flex flex-col gap-4 p-2 px-1">
         {isLoading && <div className="text-center text-sm text-muted">{t('states.loading')}</div>}
 
         {comments
