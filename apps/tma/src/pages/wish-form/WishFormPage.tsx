@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
 import { z } from 'zod';
 
+import { badgeVariants } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
@@ -439,36 +440,47 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           ) : null}
         </div>
 
-        {userEvents.data && userEvents.data.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-foreground">
-              {t('events.wish_select.label')}
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {userEvents.data.map((event) => {
-                const isSelected = selectedEventIds.includes(event.id);
-                return (
-                  <button
-                    key={event.id}
-                    type="button"
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
-                      isSelected
-                        ? 'bg-primary border-primary text-primary-foreground shadow-sm'
-                        : 'bg-transparent border-border text-muted hover:bg-muted/10'
-                    }`}
-                    onClick={() => {
-                      setSelectedEventIds((prev) =>
-                        isSelected ? prev.filter((id) => id !== event.id) : [...prev, event.id],
-                      );
-                    }}
-                  >
-                    {event.title}
-                  </button>
-                );
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-foreground">
+            {t('events.wish_select.label')}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {userEvents.data?.map((event) => {
+              const isSelected = selectedEventIds.includes(event.id);
+              return (
+                <button
+                  key={event.id}
+                  type="button"
+                  className={badgeVariants({
+                    variant: isSelected ? 'brand' : 'neutral',
+                    size: 'sm',
+                    className: 'cursor-pointer hover:opacity-90 transition-all',
+                  })}
+                  onClick={() => {
+                    setSelectedEventIds((prev) =>
+                      isSelected ? prev.filter((id) => id !== event.id) : [...prev, event.id],
+                    );
+                  }}
+                >
+                  {event.title}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className={badgeVariants({
+                variant: 'brandOutline',
+                size: 'sm',
+                className:
+                  'border-dashed cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-1',
               })}
-            </div>
+              onClick={() => setLocation('/event/new')}
+            >
+              <span>+</span>
+              <span>{t('events.list.add_event')}</span>
+            </button>
           </div>
-        ) : null}
+        </div>
 
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">
