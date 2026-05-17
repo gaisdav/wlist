@@ -156,7 +156,6 @@ export const publicWishCommentsRowSchema = z.object({
   body: z.string(),
   created_at: z.string(),
   id: z.string(),
-  is_deleted: z.boolean(),
   parent_id: z.string().nullable(),
   updated_at: z.string(),
   visible_to_owner_thread: z.boolean(),
@@ -168,7 +167,6 @@ export const publicWishCommentsInsertSchema = z.object({
   body: z.string(),
   created_at: z.string().optional(),
   id: z.string().optional(),
-  is_deleted: z.boolean().optional(),
   parent_id: z.string().optional().nullable(),
   updated_at: z.string().optional(),
   visible_to_owner_thread: z.boolean().optional(),
@@ -180,7 +178,6 @@ export const publicWishCommentsUpdateSchema = z.object({
   body: z.string().optional(),
   created_at: z.string().optional(),
   id: z.string().optional(),
-  is_deleted: z.boolean().optional(),
   parent_id: z.string().optional().nullable(),
   updated_at: z.string().optional(),
   visible_to_owner_thread: z.boolean().optional(),
@@ -393,6 +390,14 @@ export const publicBookWishSlotsReturnsSchema = z.array(
     wish_id: z.string(),
   }),
 );
+
+export const publicCheckWishCommentParentVisibleArgsSchema = z.object({
+  p_parent_id: z.string(),
+  p_user_id: z.string(),
+  p_wish_owner_id: z.string(),
+});
+
+export const publicCheckWishCommentParentVisibleReturnsSchema = z.boolean();
 
 export const publicWishSlotsEffectiveCapArgsSchema = z.object({
   p_wish_id: z.string(),

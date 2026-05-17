@@ -146,7 +146,6 @@ export type Database = {
           body: string
           created_at: string
           id: string
-          is_deleted: boolean
           parent_id: string | null
           updated_at: string
           visible_to_owner_thread: boolean
@@ -157,7 +156,6 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
-          is_deleted?: boolean
           parent_id?: string | null
           updated_at?: string
           visible_to_owner_thread?: boolean
@@ -168,7 +166,6 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
-          is_deleted?: boolean
           parent_id?: string | null
           updated_at?: string
           visible_to_owner_thread?: boolean
@@ -376,6 +373,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      check_wish_comment_parent_visible: {
+        Args: {
+          p_parent_id: string
+          p_user_id: string
+          p_wish_owner_id: string
+        }
+        Returns: boolean
       }
       wish_slots_effective_cap: { Args: { p_wish_id: string }; Returns: number }
       wishes_copy_lines_is_valid: { Args: { lines: Json }; Returns: boolean }
