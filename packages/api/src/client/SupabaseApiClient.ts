@@ -39,6 +39,8 @@ import {
   type WishSlotRow,
   type WishSlotBookingRow,
   type WishLikesApi,
+  type CommentsApi,
+  type WishCommentRow,
 } from './ApiClient.js';
 import { SignInError } from './SignInError.js';
 import type { FeedEventRow, FeedItemRow } from './socialTypes.js';
@@ -67,6 +69,7 @@ export class SupabaseApiClient implements ApiClient {
   readonly storage: StorageApi;
   readonly wishes: WishesApi;
   readonly slots: SlotsApi;
+  readonly comments: CommentsApi;
 
   constructor({ url, anonKey }: SupabaseApiClientOptions) {
     this.supabase = createClient<Database>(url, anonKey, {
@@ -91,6 +94,7 @@ export class SupabaseApiClient implements ApiClient {
     this.storage = createStorageApi(this.supabase);
     this.wishes = createWishesApi(this.supabase);
     this.slots = createSlotsApi(this.supabase);
+    this.comments = createCommentsApi(this.supabase);
   }
 }
 
@@ -657,5 +661,56 @@ const createSlotsApi = (sb: SupabaseClientLike): SlotsApi => ({
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data ?? []) as WishSlotBookingRow[];
+  },
+});
+
+// =============================================================================
+// wish_comments (plan 06)
+// =============================================================================
+
+const createCommentsApi = (sb: SupabaseClientLike): CommentsApi => ({
+  async listByWish(wishId) {
+    const { data, error } = await sb
+      .from('wish_comments')
+      .select('*')
+      .eq('wish_id', wishId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as WishCommentRow[];
+  },
+
+  async create(input) {
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) throw new Error('Not authenticated');
+
+    const insert: Database['public']['Tables']['wish_comments']['Insert'] = {
+      wish_id: input.wish_id,
+      body: input.body,
+      author_id: userData.user.id,
+      parent_id: input.parent_id ?? null,
+    };
+    if (input.visible_to_owner_thread !== undefined) {
+      insert.visible_to_owner_thread = input.visible_to_owner_thread;
+    }
+
+    const { data, error } = await sb.from('wish_comments').insert(insert).select('*').single();
+    if (error) throw error;
+    return data as WishCommentRow;
+  },
+
+  async update(input) {
+    const { data, error } = await sb
+      .from('wish_comments')
+      .update({ body: input.body })
+      .eq('id', input.id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return data as WishCommentRow;
+  },
+
+  async delete(id) {
+    const { error } = await sb.from('wish_comments').update({ is_deleted: true }).eq('id', id);
+    if (error) throw error;
   },
 });

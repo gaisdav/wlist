@@ -76,10 +76,7 @@ export const UserWishlistPage = (): React.JSX.Element => {
                 size="sm"
                 variant={isFollowing.data ? 'outline' : 'primary'}
                 disabled={
-                  follow.isPending ||
-                  unfollow.isPending ||
-                  isFollowing.isLoading ||
-                  !userId
+                  follow.isPending || unfollow.isPending || isFollowing.isLoading || !userId
                 }
                 onClick={() =>
                   void (isFollowing.data

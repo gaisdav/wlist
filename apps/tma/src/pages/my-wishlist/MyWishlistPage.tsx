@@ -18,10 +18,7 @@ export const MyWishlistPage = (): React.JSX.Element => {
   const wishes = useMyWishes(api, userId);
   const counts = useFollowsCounts(api, userId);
 
-  useQueryErrorToast(
-    wishes.isError && !wishes.isLoading && Boolean(userId),
-    t('states.error'),
-  );
+  useQueryErrorToast(wishes.isError && !wishes.isLoading && Boolean(userId), t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
   useQueryErrorToast(Boolean(userId) && counts.isError && !counts.isLoading, t('states.error'));
 
@@ -44,10 +41,7 @@ export const MyWishlistPage = (): React.JSX.Element => {
       <header className="flex flex-col gap-2 border-b border-border pb-4">
         <div className="flex items-start justify-between gap-2">
           <h1 className="text-xl font-semibold text-foreground">{t('wishes.list.title')}</h1>
-          <Link
-            to="/wish/new"
-            className={buttonVariants({ variant: 'primary', size: 'sm' })}
-          >
+          <Link to="/wish/new" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
             {t('nav.add_wish')}
           </Link>
         </div>

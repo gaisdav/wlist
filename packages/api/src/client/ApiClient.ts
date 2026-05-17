@@ -7,6 +7,11 @@
 
 import type { WishPhotoUploadMime } from '../edge-contracts/wish-photo-upload.js';
 
+import type {
+  WishCommentCreateInput,
+  WishCommentRow,
+  WishCommentUpdateInput,
+} from './commentsTypes.js';
 import type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
 import type { FeedItemRow } from './socialTypes.js';
 import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
@@ -187,6 +192,14 @@ export interface SlotsApi {
   listMine(): Promise<WishSlotBookingRow[]>;
 }
 
+export interface CommentsApi {
+  listByWish(wishId: string): Promise<WishCommentRow[]>;
+  create(input: WishCommentCreateInput): Promise<WishCommentRow>;
+  update(input: WishCommentUpdateInput): Promise<WishCommentRow>;
+  /** Soft deletes the comment */
+  delete(id: string): Promise<void>;
+}
+
 export interface ApiClient {
   auth: AuthApi;
   profiles: ProfilesApi;
@@ -196,8 +209,14 @@ export interface ApiClient {
   storage: StorageApi;
   wishes: WishesApi;
   slots: SlotsApi;
+  comments: CommentsApi;
 }
 
 export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
 export type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
 export type { FeedCursor, FeedEventRow, FeedItemRow } from './socialTypes.js';
+export type {
+  WishCommentRow,
+  WishCommentCreateInput,
+  WishCommentUpdateInput,
+} from './commentsTypes.js';
