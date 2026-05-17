@@ -188,6 +188,7 @@
     "confirm_show_owner": "Are you sure you want to make this thread visible to the author? They will see all replies in it.",
     "you": "You",
     "empty": "No comments yet.",
-    "visible_to_author": "Visible to author"
+    "visible_to_author": "Visible to author",
+    "delete_confirm": "Delete this comment? This cannot be undone."
   }
 }

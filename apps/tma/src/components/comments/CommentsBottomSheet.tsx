@@ -1,9 +1,15 @@
 import type { ApiClient, WishCommentRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
-import { useWishComments, useCreateWishComment } from '@wlist/core/hooks/comments';
+import {
+  useWishComments,
+  useCreateWishComment,
+  useUpdateWishComment,
+  useDeleteWishComment,
+} from '@wlist/core/hooks/comments';
 import { useProfileById } from '@wlist/core/hooks/social';
+import { formatRelativeTime } from '@wlist/core/lib';
 import { Send } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -26,38 +32,145 @@ interface CommentItemProps {
 }
 
 const CommentItem = ({ comment, isOwner, onReply, currentUser, api }: CommentItemProps) => {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { data: profile } = useProfileById(api, comment.author_id);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editBody, setEditBody] = useState(comment.body);
+
+  const updateComment = useUpdateWishComment(api);
+  const deleteComment = useDeleteWishComment(api);
+
+  useEffect(() => {
+    setEditBody(comment.body);
+  }, [comment.body]);
+
   const authorName =
     comment.author_id === currentUser?.id
       ? t('comments.you')
       : profile?.username || profile?.first_name || 'User';
 
+  const handleSave = async () => {
+    if (!editBody.trim()) return;
+    try {
+      await updateComment.mutateAsync({
+        id: comment.id,
+        body: editBody.trim(),
+      });
+      setIsEditing(false);
+    } catch (e) {
+      console.error('Failed to update comment', e);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(t('comments.delete_confirm'))) return;
+    try {
+      await deleteComment.mutateAsync({
+        id: comment.id,
+        wishId: comment.wish_id,
+      });
+    } catch (e) {
+      console.error('Failed to delete comment', e);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-start gap-2 text-sm">
         <div className="font-medium text-foreground">{authorName}</div>
-        <div className="flex-1 rounded-lg rounded-tl-none bg-surface p-2 break-words text-foreground">
-          {comment.body}
-        </div>
-      </div>
-      <div className="ml-8 flex items-center gap-3 text-xs text-muted">
-        <span>{new Date(comment.created_at).toLocaleDateString()}</span>
-        {!comment.parent_id && (
-          <button
-            type="button"
-            onClick={() => onReply(comment.id)}
-            className="hover:text-foreground"
-          >
-            {t('comments.reply')}
-          </button>
+        {isEditing ? (
+          <div className="flex-1 flex flex-col gap-1.5">
+            <input
+              type="text"
+              value={editBody}
+              onChange={(e) => setEditBody(e.target.value)}
+              className="w-full rounded-md border border-border bg-surface px-2 py-1 text-sm text-foreground focus:border-primary focus:outline-none"
+              autoFocus
+            />
+            <div className="flex gap-2 text-xs">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={updateComment.isPending || !editBody.trim()}
+                className="text-primary hover:underline font-medium"
+              >
+                {t('actions.save')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditBody(comment.body);
+                }}
+                className="text-muted hover:underline"
+              >
+                {t('actions.cancel')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 rounded-lg rounded-tl-none bg-surface p-2 break-words text-foreground">
+            {comment.body}
+          </div>
         )}
-        {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
-          <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
-            {t('comments.visible_to_author')}
+      </div>
+      {!isEditing && (
+        <div className="ml-8 flex items-center gap-3 text-xs text-muted">
+          <span>
+            {formatRelativeTime(comment.created_at, {
+              locale: i18n.language,
+              fallbackFormat: 'dayMonthYear',
+            })}
           </span>
-        )}
-      </div>
+          {!comment.parent_id && (
+            <button
+              type="button"
+              onClick={() => onReply(comment.id)}
+              className="hover:text-foreground"
+            >
+              {t('comments.reply')}
+            </button>
+          )}
+          {comment.author_id === currentUser?.id && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditBody(comment.body);
+                  setIsEditing(true);
+                }}
+                className="hover:text-foreground"
+              >
+                {t('actions.edit')}
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="text-destructive/80 hover:text-destructive"
+                disabled={deleteComment.isPending}
+              >
+                {t('actions.delete')}
+              </button>
+            </>
+          )}
+          {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
+            <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
+              {t('comments.visible_to_author')}
+            </span>
+          )}
+        </div>
+      )}
+      {isEditing && (
+        <div className="ml-8 flex items-center gap-3 text-xs text-muted">
+          <span>
+            {formatRelativeTime(comment.created_at, {
+              locale: i18n.language,
+              fallbackFormat: 'dayMonthYear',
+            })}
+          </span>
+        </div>
+      )}
     </div>
   );
 };
@@ -145,7 +258,7 @@ export function CommentsBottomSheet({
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose} footerSlot={footer}>
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4 p-2">
         {isLoading && <div className="text-center text-sm text-muted">{t('states.loading')}</div>}
 
         {comments

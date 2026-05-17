@@ -24,7 +24,8 @@ alwaysApply: false
 
 ## Даты в UI
 
-Форматирование timestamp'ов — только `@wlist/core/lib` (`formatRelativeTime`, `formatDate`). Передавай `locale: i18n.language`. Не дублируй локальные `formatFeedDate` / `toLocaleString` в страницах.
+- Для работы с датами и их форматирования **всегда предпочтительнее** использовать утилиты из `packages/core/src/lib/dateUtils.ts` (импорт из `@wlist/core/lib`).
+- Форматирование timestamp'ов — только через функции `formatRelativeTime`, `formatDate` из `@wlist/core/lib`. Передавай `locale: i18n.language`. Не дублируй локальные `formatFeedDate` / `toLocaleString` в страницах.
 
 ## Дизайн-токены
 

@@ -106,7 +106,7 @@ export function useUserWishes(ownerId: string) {
 
 ## Даты и время
 
-- Все форматирование дат/относительного времени — через `@wlist/core/lib` (`dateUtils.ts`): `formatDate`, `formatRelativeTime`, `isValidDateString` и т.д.
+- Для работы с датами и их форматирования **всегда предпочтительнее** использовать утилиты из `packages/core/src/lib/dateUtils.ts` (доступные через импорт из `@wlist/core/lib`): `formatDate`, `formatRelativeTime`, `isValidDateString` и т.д.
 - **Не** вызывай `new Date(iso).toLocaleString()` / `toLocaleDateString()` в `apps/tma` или `services/` напрямую.
 - В UI передавай `locale: i18n.language` из `react-i18next` (fallback в утилите — `DEFAULT_DATE_LOCALE`, сейчас `en`).
 - Для ленты и списков предпочитай `formatRelativeTime` («2 hr. ago» / fallback на `dayMonthYear`); для статичных дат — `formatDate` с явным `DateFormat`.
