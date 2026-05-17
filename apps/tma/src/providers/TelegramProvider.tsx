@@ -1,4 +1,10 @@
-import { init, miniApp, retrieveLaunchParams, themeParams } from '@telegram-apps/sdk-react';
+import {
+  init,
+  miniApp,
+  retrieveLaunchParams,
+  themeParams,
+  swipeBehavior,
+} from '@telegram-apps/sdk-react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
 
 interface TelegramState {
@@ -25,6 +31,8 @@ export const TelegramProvider = ({ children }: PropsWithChildren): React.JSX.Ele
         if (themeParams.mountSync.isAvailable()) themeParams.mountSync();
         if (themeParams.bindCssVars.isAvailable()) themeParams.bindCssVars();
         if (miniApp.bindCssVars.isAvailable()) miniApp.bindCssVars();
+        // Отключаем вертикальный свайп
+        swipeBehavior.disableVertical();
         setState({ ready: true, isMockEnv: false });
       } catch (err) {
         setState({

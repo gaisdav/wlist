@@ -1,5 +1,4 @@
 import { clsx } from 'clsx';
-import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -159,31 +158,18 @@ export function BottomSheet({
           </div>
 
           {/* Header */}
-          <div className="flex shrink-0 items-center justify-between border-b border-border/50 px-4 pb-3">
-            <div className="min-w-0 flex-1">
-              {headerSlot ||
-                (title && (
-                  <h2
-                    id="bottom-sheet-title"
-                    className="truncate text-lg font-semibold text-foreground"
-                  >
-                    {title}
-                  </h2>
-                ))}
+          {(headerSlot || title) && (
+            <div className="flex shrink-0 items-center justify-between border-b border-border/50 px-4 pb-2">
+              {headerSlot || (
+                <h3
+                  id="bottom-sheet-title"
+                  className="truncate text-base font-semibold text-foreground text-center"
+                >
+                  {title}
+                </h3>
+              )}
             </div>
-            {/* Кнопка закрытия вынесена из зоны тача, чтобы не триггерить клик при свайпе */}
-            <button
-              type="button"
-              className="-mr-2 shrink-0 rounded-full p-2 text-muted hover:text-foreground relative z-10"
-              onClick={(e) => {
-                e.stopPropagation(); // изолируем от drag зоны
-                onClose();
-              }}
-              aria-label="Close dialog"
-            >
-              <X size={24} />
-            </button>
-          </div>
+          )}
         </div>
 
         {/* Body (scrollable) - сюда возвращаем touch-автоматику для скролла */}
@@ -193,7 +179,7 @@ export function BottomSheet({
 
         {/* Footer (sticky) */}
         {footerSlot && (
-          <div className="shrink-0 border-t border-border/50 bg-background pb-[env(safe-area-inset-bottom)] px-4 pt-2">
+          <div className="shrink-0 border-t border-border/50 bg-background pb-[max(1rem,env(safe-area-inset-bottom,0px))] px-4 pt-2">
             {footerSlot}
           </div>
         )}
