@@ -20,6 +20,10 @@ export type {
   WishUpdateInput,
   WishSlotBookingRow,
   WishSlotRow,
+  CommentsApi,
+  WishCommentCreateInput,
+  WishCommentRow,
+  WishCommentUpdateInput,
 } from './ApiClient.js';
 export { SignInError, type SignInErrorCode } from './SignInError.js';
 export {

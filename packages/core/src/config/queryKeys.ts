@@ -39,4 +39,8 @@ export const queryKeys = {
     byWish: (wishId: string) => [...queryKeys.all, 'slots', 'byWish', wishId] as const,
     myBookings: () => [...queryKeys.all, 'slots', 'myBookings'] as const,
   },
+
+  comments: {
+    byWish: (wishId: string) => [...queryKeys.all, 'comments', 'byWish', wishId] as const,
+  },
 } as const;
