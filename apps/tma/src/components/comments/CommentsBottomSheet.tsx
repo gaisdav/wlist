@@ -8,7 +8,7 @@ import {
 } from '@wlist/core/hooks/comments';
 import { useProfileById } from '@wlist/core/hooks/social';
 import { formatRelativeTime } from '@wlist/core/lib';
-import { Send, X } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -32,7 +32,7 @@ interface CommentItemProps {
   api: ApiClient;
 }
 
-const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: CommentItemProps) => {
+const CommentItem = ({ comment, onReply, onEdit, currentUser, api }: CommentItemProps) => {
   const { t, i18n } = useTranslation('common');
   const { data: profile } = useProfileById(api, comment.author_id);
 
@@ -57,6 +57,17 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
 
   return (
     <div className="flex flex-col gap-1">
+      <div className="ml-8 flex items-center justify-end gap-3 text-xs text-muted">
+        <span>
+          {formatRelativeTime(comment.created_at, {
+            locale: i18n.language,
+            fallbackFormat: 'dayMonthYear',
+          })}
+        </span>
+        {comment.updated_at !== comment.created_at && (
+          <span className="lowercase">{t('states.edited')}</span>
+        )}
+      </div>
       <div className="flex items-start gap-2 text-sm">
         <div className="font-medium text-foreground">{authorName}</div>
         <div className="flex-1 rounded-lg rounded-tl-none bg-surface p-2 break-words text-foreground">
@@ -88,18 +99,12 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
             </button>
           </>
         )}
-        <span>
-          {formatRelativeTime(comment.created_at, {
-            locale: i18n.language,
-            fallbackFormat: 'dayMonthYear',
-          })}
+
+        {/* {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && ( */}
+        <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
+          {t('comments.visible_to_author')}
         </span>
-        {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
-          <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
-            {t('comments.visible_to_author')}
-          </span>
-        )}
-        {comment.updated_at !== comment.created_at && <span>{t('states.edited')}</span>}
+        {/* )} */}
       </div>
     </div>
   );
@@ -228,11 +233,7 @@ export function CommentsBottomSheet({
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
-          {editingComment && (
-            <Button size="iconRound" variant="ghost" intent="danger" onClick={handleCancelEdit}>
-              <X className="size-4 shrink-0" />
-            </Button>
-          )}
+
           <Button
             size="iconRound"
             onClick={handleSubmit}
