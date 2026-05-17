@@ -288,6 +288,7 @@ export function CommentsBottomSheet({
             placeholder={t('comments.placeholder')}
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            maxLength={2000}
           />
 
           <Button
