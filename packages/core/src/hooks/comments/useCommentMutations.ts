@@ -9,7 +9,7 @@ export const useCreateWishComment = (api: ApiClient) => {
     mutationFn: (input: WishCommentCreateInput) => api.comments.create(input),
     onSuccess: (_, input) => {
       void qc.invalidateQueries({ queryKey: queryKeys.comments.byWish(input.wish_id) });
-      void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(input.wish_id) });
+      void qc.invalidateQueries({ queryKey: queryKeys.wishes.all() });
       void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
     },
   });
@@ -31,7 +31,7 @@ export const useDeleteWishComment = (api: ApiClient) => {
     mutationFn: (input: { id: string; wishId: string }) => api.comments.delete(input.id),
     onSuccess: (_, input) => {
       void qc.invalidateQueries({ queryKey: queryKeys.comments.byWish(input.wishId) });
-      void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(input.wishId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.wishes.all() });
       void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
     },
   });
