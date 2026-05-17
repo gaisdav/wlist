@@ -8,8 +8,8 @@ import {
 } from '@wlist/core/hooks/comments';
 import { useProfileById } from '@wlist/core/hooks/social';
 import { formatRelativeTime } from '@wlist/core/lib';
-import { Send } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { Send, X } from 'lucide-react';
+import { useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -27,41 +27,21 @@ interface CommentItemProps {
   comment: WishCommentRow;
   isOwner: boolean;
   onReply: (id: string) => void;
+  onEdit: (comment: WishCommentRow) => void;
   currentUser: { id: string } | null | undefined;
   api: ApiClient;
 }
 
-const CommentItem = ({ comment, isOwner, onReply, currentUser, api }: CommentItemProps) => {
+const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: CommentItemProps) => {
   const { t, i18n } = useTranslation('common');
   const { data: profile } = useProfileById(api, comment.author_id);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editBody, setEditBody] = useState(comment.body);
-
-  const updateComment = useUpdateWishComment(api);
   const deleteComment = useDeleteWishComment(api);
-
-  useEffect(() => {
-    setEditBody(comment.body);
-  }, [comment.body]);
 
   const authorName =
     comment.author_id === currentUser?.id
       ? t('comments.you')
       : profile?.username || profile?.first_name || 'User';
-
-  const handleSave = async () => {
-    if (!editBody.trim()) return;
-    try {
-      await updateComment.mutateAsync({
-        id: comment.id,
-        body: editBody.trim(),
-      });
-      setIsEditing(false);
-    } catch (e) {
-      console.error('Failed to update comment', e);
-    }
-  };
 
   const handleDelete = async () => {
     if (!window.confirm(t('comments.delete_confirm'))) return;
@@ -79,99 +59,48 @@ const CommentItem = ({ comment, isOwner, onReply, currentUser, api }: CommentIte
     <div className="flex flex-col gap-1">
       <div className="flex items-start gap-2 text-sm">
         <div className="font-medium text-foreground">{authorName}</div>
-        {isEditing ? (
-          <div className="flex-1 flex flex-col gap-1.5">
-            <input
-              type="text"
-              value={editBody}
-              onChange={(e) => setEditBody(e.target.value)}
-              className="w-full rounded-md border border-border bg-surface px-2 py-1 text-sm text-foreground focus:border-primary focus:outline-none"
-              autoFocus
-            />
-            <div className="flex gap-2 text-xs">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={updateComment.isPending || !editBody.trim()}
-                className="text-primary hover:underline font-medium"
-              >
-                {t('actions.save')}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditBody(comment.body);
-                }}
-                className="text-muted hover:underline"
-              >
-                {t('actions.cancel')}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 rounded-lg rounded-tl-none bg-surface p-2 break-words text-foreground">
-            {comment.body}
-          </div>
-        )}
+        <div className="flex-1 rounded-lg rounded-tl-none bg-surface p-2 break-words text-foreground">
+          {comment.body}
+        </div>
       </div>
-      {!isEditing && (
-        <div className="ml-8 flex items-center gap-3 text-xs text-muted">
-          <span>
-            {formatRelativeTime(comment.created_at, {
-              locale: i18n.language,
-              fallbackFormat: 'dayMonthYear',
-            })}
-          </span>
-          {!comment.parent_id && (
+      <div className="ml-8 flex items-center gap-3 text-xs text-muted">
+        <span>
+          {formatRelativeTime(comment.created_at, {
+            locale: i18n.language,
+            fallbackFormat: 'dayMonthYear',
+          })}
+        </span>
+        {!comment.parent_id && (
+          <button
+            type="button"
+            onClick={() => onReply(comment.id)}
+            className="hover:text-foreground"
+          >
+            {t('comments.reply')}
+          </button>
+        )}
+        {comment.author_id === currentUser?.id && (
+          <>
+            <button type="button" onClick={() => onEdit(comment)} className="hover:text-foreground">
+              {t('actions.edit')}
+            </button>
             <button
               type="button"
-              onClick={() => onReply(comment.id)}
-              className="hover:text-foreground"
+              onClick={handleDelete}
+              className="text-destructive/80 hover:text-destructive"
+              disabled={deleteComment.isPending}
             >
-              {t('comments.reply')}
+              {t('actions.delete')}
             </button>
-          )}
-          {comment.author_id === currentUser?.id && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditBody(comment.body);
-                  setIsEditing(true);
-                }}
-                className="hover:text-foreground"
-              >
-                {t('actions.edit')}
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="text-destructive/80 hover:text-destructive"
-                disabled={deleteComment.isPending}
-              >
-                {t('actions.delete')}
-              </button>
-            </>
-          )}
-          {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
-            <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
-              {t('comments.visible_to_author')}
-            </span>
-          )}
-          {comment.updated_at !== comment.created_at && <span>{t('states.edited')}</span>}
-        </div>
-      )}
-      {isEditing && (
-        <div className="ml-8 flex items-center gap-3 text-xs text-muted">
-          <span>
-            {formatRelativeTime(comment.created_at, {
-              locale: i18n.language,
-              fallbackFormat: 'dayMonthYear',
-            })}
+          </>
+        )}
+        {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
+          <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
+            {t('comments.visible_to_author')}
           </span>
-        </div>
-      )}
+        )}
+        {comment.updated_at !== comment.created_at && <span>{t('states.edited')}</span>}
+      </div>
     </div>
   );
 };
@@ -186,14 +115,56 @@ export function CommentsBottomSheet({
   const api = useApiClient();
   const { data: comments, isLoading } = useWishComments(api, isOpen ? wishId : '');
   const { data: user } = useCurrentUser(api);
+
   const createComment = useCreateWishComment(api);
+  const updateComment = useUpdateWishComment(api);
 
   const [body, setBody] = useState('');
   const [showToOwner, setShowToOwner] = useState(false);
   const [replyToId, setReplyToId] = useState<string | null>(null);
+  const [editingComment, setEditingComment] = useState<WishCommentRow | null>(null);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleEdit = (comment: WishCommentRow) => {
+    setEditingComment(comment);
+    setBody(comment.body);
+    setReplyToId(null);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setBody('');
+  };
+
+  const handleReply = (id: string) => {
+    setReplyToId(id);
+    setEditingComment(null);
+    setBody('');
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+  };
 
   const handleSubmit = async () => {
     if (!body.trim()) return;
+
+    if (editingComment) {
+      try {
+        await updateComment.mutateAsync({
+          id: editingComment.id,
+          body: body.trim(),
+        });
+        setBody('');
+        setEditingComment(null);
+      } catch (e) {
+        console.error('Failed to update comment', e);
+      }
+      return;
+    }
 
     if (!isOwner && !replyToId && showToOwner) {
       const confirmed = window.confirm(t('comments.confirm_show_owner'));
@@ -214,7 +185,7 @@ export function CommentsBottomSheet({
   const footer = useMemo(
     () => (
       <div className="flex flex-col gap-2 px-2 pt-2">
-        {!isOwner && !replyToId && (
+        {!isOwner && !replyToId && !editingComment && (
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input
               type="checkbox"
@@ -237,24 +208,52 @@ export function CommentsBottomSheet({
             </button>
           </div>
         )}
+        {editingComment && (
+          <div className="flex items-center justify-between text-xs text-muted">
+            <span>{t('actions.edit')}</span>
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="underline hover:text-foreground"
+            >
+              {t('actions.cancel')}
+            </button>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <input
+            ref={inputRef}
             className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             placeholder={t('comments.placeholder')}
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
+          {editingComment && (
+            <Button size="iconRound" variant="ghost" intent="danger" onClick={handleCancelEdit}>
+              <X className="size-4 shrink-0" />
+            </Button>
+          )}
           <Button
             size="iconRound"
             onClick={handleSubmit}
-            disabled={!body.trim() || createComment.isPending}
+            disabled={!body.trim() || createComment.isPending || updateComment.isPending}
           >
             <Send className="size-4 shrink-0" />
           </Button>
         </div>
       </div>
     ),
-    [isOwner, replyToId, showToOwner, body, createComment, handleSubmit, t],
+    [
+      isOwner,
+      replyToId,
+      editingComment,
+      showToOwner,
+      body,
+      createComment.isPending,
+      updateComment.isPending,
+      handleSubmit,
+      t,
+    ],
   );
 
   return (
@@ -269,7 +268,8 @@ export function CommentsBottomSheet({
               <CommentItem
                 comment={root}
                 isOwner={isOwner}
-                onReply={setReplyToId}
+                onReply={handleReply}
+                onEdit={handleEdit}
                 currentUser={user}
                 api={api}
               />
@@ -282,7 +282,8 @@ export function CommentsBottomSheet({
                     <CommentItem
                       comment={reply}
                       isOwner={isOwner}
-                      onReply={setReplyToId}
+                      onReply={handleReply}
+                      onEdit={handleEdit}
                       currentUser={user}
                       api={api}
                     />
