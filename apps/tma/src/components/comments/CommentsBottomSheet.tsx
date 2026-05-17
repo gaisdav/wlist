@@ -136,7 +136,7 @@ export function CommentsBottomSheet({
             onClick={handleSubmit}
             disabled={!body.trim() || createComment.isPending}
           >
-            <Send />
+            <Send className="size-4 shrink-0" />
           </Button>
         </div>
       </div>

@@ -1,4 +1,3 @@
-import { swipeBehavior } from '@telegram-apps/sdk-react';
 import { clsx } from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -40,16 +39,10 @@ export function BottomSheet({
       const raf = requestAnimationFrame(() => {
         requestAnimationFrame(() => setIsVisible(true));
       });
-      if (swipeBehavior.disableVertical.isAvailable()) {
-        swipeBehavior.disableVertical();
-      }
       return () => cancelAnimationFrame(raf);
     } else {
       setIsVisible(false);
       setDragY(0); // Сбрасываем сдвиг при закрытии
-      if (swipeBehavior.enableVertical.isAvailable()) {
-        swipeBehavior.enableVertical();
-      }
       const timer = setTimeout(() => setIsRendered(false), 300);
       return () => clearTimeout(timer);
     }
