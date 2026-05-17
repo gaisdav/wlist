@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { ClipboardList, House, Search, User } from 'lucide-react';
+import { ClipboardList, LayoutList, Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
@@ -41,7 +41,7 @@ export const BottomTabBar = (): React.JSX.Element | null => {
           className={tabLinkClass(location === '/feed')}
           aria-current={location === '/feed' ? 'page' : undefined}
         >
-          <House className={tabIconClass} strokeWidth={1.75} aria-hidden />
+          <LayoutList className={tabIconClass} strokeWidth={1.75} aria-hidden />
           <span className="max-w-full truncate">{t('nav.tabs.feed')}</span>
         </Link>
 
