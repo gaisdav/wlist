@@ -23,6 +23,12 @@ export interface CommentsBottomSheetProps {
   onClose: () => void;
 }
 
+const getInitials = (p?: { first_name?: string | null; username?: string | null } | null) => {
+  if (p?.first_name) return p.first_name.slice(0, 2).toUpperCase();
+  if (p?.username) return p.username.slice(0, 2).toUpperCase();
+  return '??';
+};
+
 interface CommentItemProps {
   comment: WishCommentRow;
   isOwner: boolean;
@@ -32,9 +38,10 @@ interface CommentItemProps {
   api: ApiClient;
 }
 
-const CommentItem = ({ comment, onReply, onEdit, currentUser, api }: CommentItemProps) => {
+const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: CommentItemProps) => {
   const { t, i18n } = useTranslation('common');
   const { data: profile } = useProfileById(api, comment.author_id);
+  const [imgError, setImgError] = useState(false);
 
   const deleteComment = useDeleteWishComment(api);
 
@@ -55,56 +62,85 @@ const CommentItem = ({ comment, onReply, onEdit, currentUser, api }: CommentItem
     }
   };
 
+  const initials = getInitials(profile);
+
   return (
-    <div className="flex flex-col gap-1">
-      <div className="ml-8 flex items-center justify-end gap-3 text-xs text-muted">
-        <span>
-          {formatRelativeTime(comment.created_at, {
-            locale: i18n.language,
-            fallbackFormat: 'dayMonthYear',
-          })}
-        </span>
-        {comment.updated_at !== comment.created_at && (
-          <span className="lowercase">{t('states.edited')}</span>
+    <div className="flex gap-3 items-start">
+      {/* Avatar Column */}
+      <div className="shrink-0 pt-0.5">
+        {profile?.photo_url && !imgError ? (
+          <img
+            src={profile.photo_url}
+            alt=""
+            onError={() => setImgError(true)}
+            className="size-8 rounded-full object-cover shrink-0"
+          />
+        ) : (
+          <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-xs shrink-0">
+            {initials}
+          </div>
         )}
       </div>
-      <div className="flex items-start gap-2 text-sm">
-        <div className="font-medium text-foreground">{authorName}</div>
-        <div className="flex-1 rounded-lg rounded-tl-none bg-surface p-2 break-words text-foreground">
+
+      {/* Content Column */}
+      <div className="flex-1 flex flex-col gap-1 min-w-0">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-sm font-semibold text-foreground truncate">{authorName}</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-muted shrink-0">
+            <span>
+              {formatRelativeTime(comment.created_at, {
+                locale: i18n.language,
+                fallbackFormat: 'dayMonthYear',
+              })}
+            </span>
+            {comment.updated_at !== comment.created_at && (
+              <span className="bg-muted/10 px-1 rounded-sm text-[9px] lowercase">
+                {t('states.edited')}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="text-sm rounded-xl rounded-tl-none bg-surface p-2.5 break-words text-foreground shadow-sm border border-border/10">
           {comment.body}
         </div>
-      </div>
-      <div className="ml-8 flex items-center gap-3 text-xs text-muted">
-        {!comment.parent_id && (
-          <button
-            type="button"
-            onClick={() => onReply(comment.id)}
-            className="hover:text-foreground"
-          >
-            {t('comments.reply')}
-          </button>
-        )}
-        {comment.author_id === currentUser?.id && (
-          <>
-            <button type="button" onClick={() => onEdit(comment)} className="hover:text-foreground">
-              {t('actions.edit')}
-            </button>
+
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted/80 mt-0.5">
+          {!comment.parent_id && (
             <button
               type="button"
-              onClick={handleDelete}
-              className="text-destructive/80 hover:text-destructive"
-              disabled={deleteComment.isPending}
+              onClick={() => onReply(comment.id)}
+              className="hover:text-foreground font-medium transition-colors"
             >
-              {t('actions.delete')}
+              {t('comments.reply')}
             </button>
-          </>
-        )}
+          )}
+          {comment.author_id === currentUser?.id && (
+            <>
+              <button
+                type="button"
+                onClick={() => onEdit(comment)}
+                className="hover:text-foreground font-medium transition-colors"
+              >
+                {t('actions.edit')}
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="text-destructive/80 hover:text-destructive font-medium transition-colors"
+                disabled={deleteComment.isPending}
+              >
+                {t('actions.delete')}
+              </button>
+            </>
+          )}
 
-        {/* {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && ( */}
-        <span className="bg-primary/10 text-primary px-1.5 rounded-sm">
-          {t('comments.visible_to_author')}
-        </span>
-        {/* )} */}
+          {comment.visible_to_owner_thread && !comment.parent_id && !isOwner && (
+            <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wide uppercase shrink-0">
+              {t('comments.visible_to_author')}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
