@@ -191,5 +191,38 @@
     "empty": "No comments yet.",
     "visible_to_author": "Visible to author",
     "delete_confirm": "Delete this comment? This cannot be undone."
+  },
+  "events": {
+    "title": "Events",
+    "list": {
+      "title": "Events",
+      "empty": "No events created yet.",
+      "add_event": "Add event",
+      "days_left_one": "{{count}} day left",
+      "days_left_other": "{{count}} days left",
+      "days_left_today": "Today!"
+    },
+    "detail": {
+      "title": "Event Details",
+      "edit": "Edit event",
+      "wishes": "Wishes",
+      "empty_wishes": "No wishes linked to this event yet.",
+      "delete_confirm": "Delete this event? This will not delete the wishes themselves."
+    },
+    "form": {
+      "create_title": "New event",
+      "edit_title": "Edit event",
+      "title_label": "Title",
+      "date_label": "Date (optional)",
+      "recurring_label": "Recurring yearly",
+      "submit_create": "Create event",
+      "submit_edit": "Save changes",
+      "errors": {
+        "title_required": "Please enter a title."
+      }
+    },
+    "wish_select": {
+      "label": "Add to events"
+    }
   }
 }

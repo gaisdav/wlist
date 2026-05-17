@@ -1,8 +1,12 @@
 import { type Wish } from '@wlist/core/entities/wish';
+import { useWishEvents } from '@wlist/core/hooks/events';
 import { truncateWishDescriptionForList } from '@wlist/core/lib';
 import { Link2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
+
+import { useApiClient } from '../../providers/ApiClientProvider';
+import { Badge } from '../primitives/badge';
 
 import { WISH_NO_PHOTO_EMOJI } from './constants';
 import { WishPhoto } from './WishPhoto';
@@ -26,6 +30,8 @@ export const WishCard = ({
   footerSlot,
 }: WishCardProps): React.JSX.Element => {
   const { t } = useTranslation('common');
+  const api = useApiClient();
+  const { data: events } = useWishEvents(api, wish.id);
   const preview = truncateWishDescriptionForList(wish.description);
   const hasPhoto = Boolean(wish.photo_storage_path);
   const hasLink = Boolean(wish.link);
@@ -90,6 +96,15 @@ export const WishCard = ({
             <span className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
               {t('wishes.list.archived')}
             </span>
+          ) : null}
+          {events && events.length > 0 ? (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {events.map((event) => (
+                <Badge key={event.id} size="sm" variant="soft">
+                  {event.title}
+                </Badge>
+              ))}
+            </div>
           ) : null}
         </div>
         {hasLink ? (

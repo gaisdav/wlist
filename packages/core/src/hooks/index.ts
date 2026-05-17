@@ -5,3 +5,4 @@ export * from './social/index.js';
 export * from './slots/index.js';
 export * from './wishes/index.js';
 export * from './comments/index.js';
+export * from './events/index.js';

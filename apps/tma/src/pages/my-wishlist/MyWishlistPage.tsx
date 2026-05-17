@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
+import { UserEventsSection } from '../../components/events';
 import { buttonVariants } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { UserFollowsBottomSheet } from '../../components/social';
@@ -81,6 +82,8 @@ export const MyWishlistPage = (): React.JSX.Element => {
           </div>
         ) : null}
       </header>
+
+      {userId && <UserEventsSection ownerId={userId} isOwner />}
 
       {wishes.isError ? (
         <p className="text-sm text-destructive">{t('states.error')}</p>

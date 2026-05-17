@@ -23,6 +23,12 @@ const WishDetailPage = lazy(() =>
 const WishFormPage = lazy(() =>
   import('./pages/wish-form/WishFormPage').then((m) => ({ default: m.WishFormPage })),
 );
+const EventDetailPage = lazy(() =>
+  import('./pages/event-detail/EventDetailPage').then((m) => ({ default: m.EventDetailPage })),
+);
+const EventFormPage = lazy(() =>
+  import('./pages/event-form/EventFormPage').then((m) => ({ default: m.EventFormPage })),
+);
 
 export const AppRouter = (): React.JSX.Element => (
   <Router>
@@ -49,6 +55,13 @@ export const AppRouter = (): React.JSX.Element => (
             <WishFormPage mode="edit" />
           </Route>
           <Route path="/wish/:wishId" component={WishDetailPage} />
+          <Route path="/event/new">
+            <EventFormPage mode="create" />
+          </Route>
+          <Route path="/event/:eventId/edit">
+            <EventFormPage mode="edit" />
+          </Route>
+          <Route path="/event/:eventId" component={EventDetailPage} />
           <Route>
             <Redirect to="/me" replace />
           </Route>

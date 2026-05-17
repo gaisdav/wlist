@@ -1,4 +1,5 @@
 import { useCurrentUser } from '@wlist/core/hooks/auth';
+import { useWishEvents } from '@wlist/core/hooks/events';
 import {
   useArchiveWish,
   useDeleteWish,
@@ -12,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
 import { PhotoLightbox } from '../../components/overlays';
+import { Badge } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useWishPhotoSignedUrl } from '../../components/wishes';
@@ -31,6 +33,7 @@ export const WishDetailPage = (): React.JSX.Element => {
   const [, setLocation] = useLocation();
   const profile = useCurrentUser(api);
   const wish = useWish(api, wishId);
+  const { data: events } = useWishEvents(api, wishId);
   const ownerWishes = useUserWishes(api, wish.data?.owner_id);
   const archive = useArchiveWish(api);
   const unarchive = useUnarchiveWish(api);
@@ -146,9 +149,25 @@ export const WishDetailPage = (): React.JSX.Element => {
           t={t}
         />
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold text-foreground">{w.title}</h1>
-          <WishReservationBadge wish={w} isOwner={isOwner} viewerId={viewerId} variant="compact" />
+          <div className="flex flex-wrap items-center gap-2">
+            <WishReservationBadge
+              wish={w}
+              isOwner={isOwner}
+              viewerId={viewerId}
+              variant="compact"
+            />
+            {events && events.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {events.map((event) => (
+                  <Badge key={event.id} size="sm" variant="soft">
+                    {event.title}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </div>
 
         {w.description ? (

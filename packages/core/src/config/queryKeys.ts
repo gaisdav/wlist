@@ -43,4 +43,12 @@ export const queryKeys = {
   comments: {
     byWish: (wishId: string) => [...queryKeys.all, 'comments', 'byWish', wishId] as const,
   },
+
+  events: {
+    all: () => [...queryKeys.all, 'events'] as const,
+    byOwner: (ownerId: string) => [...queryKeys.events.all(), 'byOwner', ownerId] as const,
+    one: (eventId: string) => [...queryKeys.events.all(), 'one', eventId] as const,
+    wishes: (eventId: string) => [...queryKeys.events.all(), 'wishes', eventId] as const,
+    forWish: (wishId: string) => [...queryKeys.events.all(), 'forWish', wishId] as const,
+  },
 } as const;

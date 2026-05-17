@@ -40,6 +40,9 @@ export const routes = {
   wishEdit: route('/wish/:wishId/edit', z.object({ wishId: z.uuid() })),
   myBookings: route('/me/bookings', z.object({})),
   profile: route('/me/profile', z.object({})),
+  eventDetail: route('/event/:eventId', z.object({ eventId: z.uuid() })),
+  eventCreate: route('/event/new', z.object({})),
+  eventEdit: route('/event/:eventId/edit', z.object({ eventId: z.uuid() })),
 } as const;
 
 export type RouteName = keyof typeof routes;

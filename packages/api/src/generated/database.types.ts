@@ -29,6 +29,77 @@ export type Database = {
         }
         Relationships: []
       }
+      event_wishes: {
+        Row: {
+          event_id: string
+          wish_id: string
+        }
+        Insert: {
+          event_id: string
+          wish_id: string
+        }
+        Update: {
+          event_id?: string
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_wishes_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_wishes_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          event_date: string | null
+          id: string
+          is_archived: boolean
+          is_recurring_yearly: boolean
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          is_archived?: boolean
+          is_recurring_yearly?: boolean
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          is_archived?: boolean
+          is_recurring_yearly?: boolean
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feed_events: {
         Row: {
           actor_id: string

@@ -12,6 +12,7 @@ import type {
   WishCommentRow,
   WishCommentUpdateInput,
 } from './commentsTypes.js';
+import type { EventCreateInput, EventRow, EventUpdateInput } from './eventTypes.js';
 import type { WishSlotBookingRow, WishSlotRow } from './slotTypes.js';
 import type { FeedItemRow } from './socialTypes.js';
 import type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
@@ -200,6 +201,19 @@ export interface CommentsApi {
   delete(id: string): Promise<void>;
 }
 
+export interface EventsApi {
+  listByOwner(ownerId: string): Promise<EventRow[]>;
+  get(id: string): Promise<EventRow | null>;
+  create(input: EventCreateInput): Promise<EventRow>;
+  update(input: EventUpdateInput): Promise<EventRow>;
+  delete(id: string): Promise<void>;
+  listWishes(eventId: string): Promise<WishRow[]>;
+  linkWish(eventId: string, wishId: string): Promise<void>;
+  unlinkWish(eventId: string, wishId: string): Promise<void>;
+  setWishEvents(wishId: string, eventIds: string[]): Promise<void>;
+  listForWish(wishId: string): Promise<EventRow[]>;
+}
+
 export interface ApiClient {
   auth: AuthApi;
   profiles: ProfilesApi;
@@ -210,6 +224,7 @@ export interface ApiClient {
   wishes: WishesApi;
   slots: SlotsApi;
   comments: CommentsApi;
+  events: EventsApi;
 }
 
 export type { WishCreateInput, WishRow, WishUpdateInput } from './wishTypes.js';
@@ -220,3 +235,4 @@ export type {
   WishCommentCreateInput,
   WishCommentUpdateInput,
 } from './commentsTypes.js';
+export type { EventCreateInput, EventRow, EventUpdateInput } from './eventTypes.js';

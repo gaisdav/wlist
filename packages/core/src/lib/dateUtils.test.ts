@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { formatDate, formatRelativeTime, isValidDateString } from './dateUtils.js';
+import {
+  formatDate,
+  formatRelativeTime,
+  isValidDateString,
+  calculateDaysLeft,
+} from './dateUtils.js';
 
 describe('isValidDateString', () => {
   it('accepts ISO timestamps', () => {
@@ -50,5 +55,40 @@ describe('formatRelativeTime', () => {
 
   it('returns em dash for invalid input', () => {
     expect(formatRelativeTime('invalid')).toBe('—');
+  });
+});
+
+describe('calculateDaysLeft', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-18T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns null when date is empty or invalid', () => {
+    expect(calculateDaysLeft(null, false)).toBeNull();
+    expect(calculateDaysLeft('', false)).toBeNull();
+    expect(calculateDaysLeft('not-a-date', false)).toBeNull();
+  });
+
+  it('calculates days left for non-recurring future event', () => {
+    expect(calculateDaysLeft('2026-05-20', false)).toBe(2);
+  });
+
+  it('calculates days left for non-recurring past event', () => {
+    expect(calculateDaysLeft('2026-05-10', false)).toBe(-8);
+  });
+
+  it('calculates days left for recurring event later this year', () => {
+    const days = calculateDaysLeft('1990-12-31', true);
+    expect(days).toBeGreaterThan(0);
+  });
+
+  it('calculates days left for recurring event earlier this year', () => {
+    const days = calculateDaysLeft('1990-01-10', true);
+    expect(days).toBeGreaterThan(200);
   });
 });

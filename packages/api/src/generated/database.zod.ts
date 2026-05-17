@@ -36,6 +36,81 @@ export const publicAuthTelegramUsedInitDataUpdateSchema = z.object({
   used_at: z.string().optional(),
 });
 
+export const publicEventWishesRowSchema = z.object({
+  event_id: z.string(),
+  wish_id: z.string(),
+});
+
+export const publicEventWishesInsertSchema = z.object({
+  event_id: z.string(),
+  wish_id: z.string(),
+});
+
+export const publicEventWishesUpdateSchema = z.object({
+  event_id: z.string().optional(),
+  wish_id: z.string().optional(),
+});
+
+export const publicEventWishesRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("event_wishes_event_id_fkey"),
+    columns: z.tuple([z.literal("event_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("events"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("event_wishes_wish_id_fkey"),
+    columns: z.tuple([z.literal("wish_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
+export const publicEventsRowSchema = z.object({
+  created_at: z.string(),
+  event_date: z.string().nullable(),
+  id: z.string(),
+  is_archived: z.boolean(),
+  is_recurring_yearly: z.boolean(),
+  owner_id: z.string(),
+  title: z.string(),
+  updated_at: z.string(),
+});
+
+export const publicEventsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  event_date: z.string().optional().nullable(),
+  id: z.string().optional(),
+  is_archived: z.boolean().optional(),
+  is_recurring_yearly: z.boolean().optional(),
+  owner_id: z.string(),
+  title: z.string(),
+  updated_at: z.string().optional(),
+});
+
+export const publicEventsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  event_date: z.string().optional().nullable(),
+  id: z.string().optional(),
+  is_archived: z.boolean().optional(),
+  is_recurring_yearly: z.boolean().optional(),
+  owner_id: z.string().optional(),
+  title: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const publicEventsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("events_owner_id_fkey"),
+    columns: z.tuple([z.literal("owner_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
 export const publicFeedEventsRowSchema = z.object({
   actor_id: z.string(),
   created_at: z.string(),

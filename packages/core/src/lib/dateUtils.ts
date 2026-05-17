@@ -167,3 +167,34 @@ export const formatRelativeTime = (
 
   return formatDate(date, fallbackFormat, { locale });
 };
+
+/**
+ * Calculates how many days are left until an event.
+ * If the event repeats yearly and has already passed this year,
+ * it calculates the days left until next year's occurrence.
+ * Returns null if no eventDate is provided.
+ */
+export const calculateDaysLeft = (
+  eventDate: string | null | undefined,
+  isRecurringYearly: boolean,
+): number | null => {
+  if (!eventDate) return null;
+  const dateObj = new Date(eventDate);
+  if (Number.isNaN(dateObj.getTime())) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const targetDate = new Date(dateObj);
+  targetDate.setHours(0, 0, 0, 0);
+
+  if (isRecurringYearly) {
+    targetDate.setFullYear(today.getFullYear());
+    if (targetDate.getTime() < today.getTime()) {
+      targetDate.setFullYear(today.getFullYear() + 1);
+    }
+  }
+
+  const diffMs = targetDate.getTime() - today.getTime();
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+};

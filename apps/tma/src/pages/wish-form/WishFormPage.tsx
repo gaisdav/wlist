@@ -6,6 +6,8 @@ import {
   type WishDraftFormInput,
   type WishDraftPayload,
 } from '@wlist/core/entities/wish';
+import { useCurrentUser } from '@wlist/core/hooks/auth';
+import { useUserEvents, useWishEvents, useSetWishEvents } from '@wlist/core/hooks/events';
 import { useCreateWish, useUpdateWish, useWish } from '@wlist/core/hooks/wishes';
 import {
   isWishCurrencyCode,
@@ -78,6 +80,18 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const existing = useWish(api, mode === 'edit' ? wishId : undefined);
   const createMut = useCreateWish(api);
   const updateMut = useUpdateWish(api);
+
+  const profile = useCurrentUser(api);
+  const userEvents = useUserEvents(api, profile.data?.id);
+  const wishEvents = useWishEvents(api, mode === 'edit' ? wishId : undefined);
+  const setWishEventsMut = useSetWishEvents(api);
+  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (mode === 'edit' && wishEvents.data) {
+      setSelectedEventIds(wishEvents.data.map((e) => e.id));
+    }
+  }, [mode, wishEvents.data]);
 
   useQueryErrorToast(mode === 'edit' && Boolean(wishId) && existing.isError, t('states.error'));
   useQueryErrorToast(
@@ -188,6 +202,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           ...(repostFromId ? { reposted_from_id: repostFromId } : {}),
         });
         if (photo) await uploadPhotoIfNeeded(row.id, photo, null);
+        if (selectedEventIds.length > 0) {
+          await setWishEventsMut.mutateAsync({ wishId: row.id, eventIds: selectedEventIds });
+        }
         setLocation(`/wish/${row.id}`, { replace: true });
         return;
       }
@@ -204,6 +221,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         copy_lines: body.copy_lines,
       });
       if (photo) await uploadPhotoIfNeeded(wishId, photo, previousPhotoPath);
+      await setWishEventsMut.mutateAsync({ wishId, eventIds: selectedEventIds });
       setLocation(`/wish/${wishId}`, { replace: true });
     } finally {
       setIsSaving(false);
@@ -420,6 +438,37 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
             </label>
           ) : null}
         </div>
+
+        {userEvents.data && userEvents.data.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-foreground">
+              {t('events.wish_select.label')}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {userEvents.data.map((event) => {
+                const isSelected = selectedEventIds.includes(event.id);
+                return (
+                  <button
+                    key={event.id}
+                    type="button"
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
+                      isSelected
+                        ? 'bg-primary border-primary text-primary-foreground shadow-sm'
+                        : 'bg-transparent border-border text-muted hover:bg-muted/10'
+                    }`}
+                    onClick={() => {
+                      setSelectedEventIds((prev) =>
+                        isSelected ? prev.filter((id) => id !== event.id) : [...prev, event.id],
+                      );
+                    }}
+                  >
+                    {event.title}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">

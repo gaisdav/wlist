@@ -24,6 +24,10 @@ export type {
   WishCommentCreateInput,
   WishCommentRow,
   WishCommentUpdateInput,
+  EventsApi,
+  EventCreateInput,
+  EventRow,
+  EventUpdateInput,
 } from './ApiClient.js';
 export { SignInError, type SignInErrorCode } from './SignInError.js';
 export {
