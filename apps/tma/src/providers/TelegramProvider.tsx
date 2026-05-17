@@ -26,13 +26,17 @@ export const TelegramProvider = ({ children }: PropsWithChildren): React.JSX.Ele
     const setup = async (): Promise<void> => {
       try {
         await init();
+
         retrieveLaunchParams();
         if (miniApp.mountSync.isAvailable()) miniApp.mountSync();
         if (themeParams.mountSync.isAvailable()) themeParams.mountSync();
         if (themeParams.bindCssVars.isAvailable()) themeParams.bindCssVars();
         if (miniApp.bindCssVars.isAvailable()) miniApp.bindCssVars();
-        // Отключаем вертикальный свайп
-        swipeBehavior.disableVertical();
+        if (swipeBehavior.mount.isAvailable()) {
+          swipeBehavior.mount();
+          swipeBehavior.disableVertical();
+        }
+
         setState({ ready: true, isMockEnv: false });
       } catch (err) {
         setState({
