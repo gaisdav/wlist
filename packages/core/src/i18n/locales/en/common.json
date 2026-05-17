@@ -200,7 +200,8 @@
       "add_event": "Add event",
       "days_left_one": "{{count}} day left",
       "days_left_other": "{{count}} days left",
-      "days_left_today": "Today!"
+      "days_left_today": "Today!",
+      "passed": "Event has passed"
     },
     "detail": {
       "title": "Event Details",

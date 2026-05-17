@@ -69,12 +69,18 @@ export const UserEventsSection = ({
                   </p>
                 ) : null}
                 {daysLeft !== null ? (
-                  <p className="mt-2 text-xs font-medium text-primary">
-                    {daysLeft === 0
-                      ? t('events.list.days_left_today')
-                      : daysLeft === 1
-                        ? t('events.list.days_left_one', { count: daysLeft })
-                        : t('events.list.days_left_other', { count: daysLeft })}
+                  <p
+                    className={`mt-2 text-xs font-medium ${
+                      daysLeft < 0 ? 'text-destructive' : 'text-primary'
+                    }`}
+                  >
+                    {daysLeft < 0
+                      ? t('events.list.passed')
+                      : daysLeft === 0
+                        ? t('events.list.days_left_today')
+                        : daysLeft === 1
+                          ? t('events.list.days_left_one', { count: daysLeft })
+                          : t('events.list.days_left_other', { count: daysLeft })}
                   </p>
                 ) : null}
               </Link>

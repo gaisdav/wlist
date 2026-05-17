@@ -11,6 +11,7 @@ export const badgeVariants = tv({
       outline: 'bg-transparent border-border text-foreground',
       brandOutline: 'bg-transparent border-primary/50 text-primary',
       success: 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400',
+      destructive: 'bg-destructive/10 border-destructive/20 text-destructive',
     },
     size: {
       sm: 'px-2 py-0.5 text-xs font-semibold',

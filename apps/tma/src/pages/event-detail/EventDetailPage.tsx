@@ -7,6 +7,7 @@ import { Calendar, Edit, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
+import { Badge } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes';
@@ -124,14 +125,20 @@ export const EventDetailPage = (): React.JSX.Element => {
         </div>
 
         {daysLeft !== null ? (
-          <div className="rounded-xl bg-primary/10 border border-primary/20 px-3 py-2.5 self-start shadow-sm">
-            <span className="text-sm font-semibold text-primary">
-              {daysLeft === 0
-                ? t('events.list.days_left_today')
-                : daysLeft === 1
-                  ? t('events.list.days_left_one', { count: daysLeft })
-                  : t('events.list.days_left_other', { count: daysLeft })}
-            </span>
+          <div className="self-start">
+            <Badge
+              variant={daysLeft < 0 ? 'destructive' : 'soft'}
+              size="md"
+              className="py-1 px-3 rounded-xl shadow-sm text-sm"
+            >
+              {daysLeft < 0
+                ? t('events.list.passed')
+                : daysLeft === 0
+                  ? t('events.list.days_left_today')
+                  : daysLeft === 1
+                    ? t('events.list.days_left_one', { count: daysLeft })
+                    : t('events.list.days_left_other', { count: daysLeft })}
+            </Badge>
           </div>
         ) : null}
       </header>
