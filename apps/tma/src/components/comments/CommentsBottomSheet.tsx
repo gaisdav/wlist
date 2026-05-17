@@ -11,6 +11,7 @@ import { formatRelativeTime } from '@wlist/core/lib';
 import { Send } from 'lucide-react';
 import { useMemo, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'wouter';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { BottomSheet } from '../overlays/BottomSheet';
@@ -36,9 +37,18 @@ interface CommentItemProps {
   onEdit: (comment: WishCommentRow) => void;
   currentUser: { id: string } | null | undefined;
   api: ApiClient;
+  onClose: () => void;
 }
 
-const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: CommentItemProps) => {
+const CommentItem = ({
+  comment,
+  isOwner,
+  onReply,
+  onEdit,
+  currentUser,
+  api,
+  onClose,
+}: CommentItemProps) => {
   const { t, i18n } = useTranslation('common');
   const { data: profile } = useProfileById(api, comment.author_id);
   const [imgError, setImgError] = useState(false);
@@ -68,7 +78,13 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
     <div className="flex flex-col gap-1 w-full">
       {/* Top line: Author & Time */}
       <div className="flex items-baseline justify-between gap-3 text-xs text-muted pl-10">
-        <span className="text-sm font-semibold text-foreground truncate flex-1">{authorName}</span>
+        <Link
+          to={`/u/${comment.author_id}`}
+          onClick={onClose}
+          className="text-sm font-semibold text-foreground truncate flex-1 hover:text-primary transition-colors"
+        >
+          {authorName}
+        </Link>
         <div className="flex items-center gap-1.5 text-[10px] shrink-0">
           <span>
             {formatRelativeTime(comment.created_at, {
@@ -87,7 +103,11 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
       {/* Middle line: Avatar + Comment Bubble */}
       <div className="flex gap-2 items-start">
         {/* Avatar Column */}
-        <div className="shrink-0 pt-0.5">
+        <Link
+          to={`/u/${comment.author_id}`}
+          onClick={onClose}
+          className="shrink-0 pt-0.5 hover:opacity-80 transition-opacity block"
+        >
           {profile?.photo_url && !imgError ? (
             <img
               src={profile.photo_url}
@@ -100,7 +120,7 @@ const CommentItem = ({ comment, isOwner, onReply, onEdit, currentUser, api }: Co
               {initials}
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Comment Bubble */}
         <div className="flex-1 text-sm rounded-xl rounded-tl-none bg-surface p-2.5 break-words text-foreground shadow-sm border border-border/10">
@@ -179,8 +199,9 @@ export function CommentsBottomSheet({
     }, 50);
   };
 
-  const handleCancelEdit = () => {
+  const handleCancel = () => {
     setEditingComment(null);
+    setReplyToId(null);
     setBody('');
   };
 
@@ -191,6 +212,13 @@ export function CommentsBottomSheet({
     setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
+  };
+
+  const handleClose = () => {
+    setBody('');
+    setReplyToId(null);
+    setEditingComment(null);
+    onClose();
   };
 
   const handleSubmit = async () => {
@@ -240,30 +268,19 @@ export function CommentsBottomSheet({
             {t('comments.show_to_owner')}
           </label>
         )}
-        {replyToId && (
+        {(replyToId || editingComment) && (
           <div className="flex items-center justify-between text-xs text-muted">
-            <span>{t('comments.replying')}</span>
+            {replyToId ? <span>{t('comments.replying')}</span> : <span>{t('actions.edit')}</span>}
             <button
               type="button"
-              onClick={() => setReplyToId(null)}
+              onClick={handleCancel}
               className="underline hover:text-foreground"
             >
               {t('actions.cancel')}
             </button>
           </div>
         )}
-        {editingComment && (
-          <div className="flex items-center justify-between text-xs text-muted">
-            <span>{t('actions.edit')}</span>
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-              className="underline hover:text-foreground"
-            >
-              {t('actions.cancel')}
-            </button>
-          </div>
-        )}
+
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -297,7 +314,7 @@ export function CommentsBottomSheet({
   );
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} footerSlot={footer}>
+    <BottomSheet isOpen={isOpen} onClose={handleClose} footerSlot={footer}>
       <div className="flex flex-col gap-4 p-2 px-1">
         {isLoading && <div className="text-center text-sm text-muted">{t('states.loading')}</div>}
 
@@ -312,6 +329,7 @@ export function CommentsBottomSheet({
                 onEdit={handleEdit}
                 currentUser={user}
                 api={api}
+                onClose={handleClose}
               />
 
               {/* Replies */}
@@ -326,6 +344,7 @@ export function CommentsBottomSheet({
                       onEdit={handleEdit}
                       currentUser={user}
                       api={api}
+                      onClose={handleClose}
                     />
                   </div>
                 ))}
