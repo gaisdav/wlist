@@ -2,7 +2,8 @@ import type { ApiClient, WishCommentRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useWishComments, useCreateWishComment } from '@wlist/core/hooks/comments';
 import { useProfileById } from '@wlist/core/hooks/social';
-import { useState } from 'react';
+import { Send } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -96,44 +97,51 @@ export function CommentsBottomSheet({
     setReplyToId(null);
   };
 
-  const footer = (
-    <div className="flex flex-col gap-2 px-4 pt-2">
-      {!isOwner && !replyToId && (
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={showToOwner}
-            onChange={(e) => setShowToOwner(e.target.checked)}
-            className="rounded border-border accent-primary"
+  const footer = useMemo(
+    () => (
+      <div className="flex flex-col gap-2 px-2 pt-2">
+        {!isOwner && !replyToId && (
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={showToOwner}
+              onChange={(e) => setShowToOwner(e.target.checked)}
+              className="rounded border-border accent-primary"
+            />
+            {t('comments.show_to_owner')}
+          </label>
+        )}
+        {replyToId && (
+          <div className="flex items-center justify-between text-xs text-muted">
+            <span>{t('comments.replying')}</span>
+            <button
+              type="button"
+              onClick={() => setReplyToId(null)}
+              className="underline hover:text-foreground"
+            >
+              {t('actions.cancel')}
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <textarea
+            className="max-h-32 min-h-[40px] flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+            placeholder={t('comments.placeholder')}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={1}
           />
-          {t('comments.show_to_owner')}
-        </label>
-      )}
-      {replyToId && (
-        <div className="flex items-center justify-between text-xs text-muted">
-          <span>{t('comments.replying')}</span>
-          <button
-            type="button"
-            onClick={() => setReplyToId(null)}
-            className="underline hover:text-foreground"
+          <Button
+            size="iconRound"
+            onClick={handleSubmit}
+            disabled={!body.trim() || createComment.isPending}
           >
-            {t('actions.cancel')}
-          </button>
+            <Send />
+          </Button>
         </div>
-      )}
-      <div className="flex items-end gap-2">
-        <textarea
-          className="max-h-32 min-h-[40px] flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-          placeholder={t('comments.placeholder')}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={1}
-        />
-        <Button size="sm" onClick={handleSubmit} disabled={!body.trim() || createComment.isPending}>
-          {t('comments.send')}
-        </Button>
       </div>
-    </div>
+    ),
+    [isOwner, replyToId, showToOwner, body, createComment, handleSubmit, t],
   );
 
   return (
