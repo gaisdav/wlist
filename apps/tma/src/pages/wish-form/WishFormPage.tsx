@@ -453,7 +453,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
                   type="button"
                   className={badgeVariants({
                     variant: isSelected ? 'brand' : 'neutral',
-                    size: 'sm',
+                    size: 'md',
                     className: 'cursor-pointer hover:opacity-90 transition-all',
                   })}
                   onClick={() => {
@@ -470,7 +470,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
               type="button"
               className={badgeVariants({
                 variant: 'brandOutline',
-                size: 'sm',
+                size: 'md',
                 className:
                   'border-dashed cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-1',
               })}
