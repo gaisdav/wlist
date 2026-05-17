@@ -159,6 +159,7 @@ const CommentItem = ({ comment, isOwner, onReply, currentUser, api }: CommentIte
               {t('comments.visible_to_author')}
             </span>
           )}
+          {comment.updated_at !== comment.created_at && <span>{t('states.edited')}</span>}
         </div>
       )}
       {isEditing && (

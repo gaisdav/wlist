@@ -14,7 +14,8 @@
   "states": {
     "loading": "Loading…",
     "empty": "Nothing here yet.",
-    "error": "Something went wrong."
+    "error": "Something went wrong.",
+    "edited": "Edited"
   },
   "auth": {
     "signing_in": "Signing in via Telegram…",
