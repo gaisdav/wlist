@@ -151,6 +151,66 @@ export const publicProfilesUpdateSchema = z.object({
   username: z.string().optional().nullable(),
 });
 
+export const publicWishCommentsRowSchema = z.object({
+  author_id: z.string(),
+  body: z.string(),
+  created_at: z.string(),
+  id: z.string(),
+  is_deleted: z.boolean(),
+  parent_id: z.string().nullable(),
+  updated_at: z.string(),
+  visible_to_owner_thread: z.boolean(),
+  wish_id: z.string(),
+});
+
+export const publicWishCommentsInsertSchema = z.object({
+  author_id: z.string(),
+  body: z.string(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  is_deleted: z.boolean().optional(),
+  parent_id: z.string().optional().nullable(),
+  updated_at: z.string().optional(),
+  visible_to_owner_thread: z.boolean().optional(),
+  wish_id: z.string(),
+});
+
+export const publicWishCommentsUpdateSchema = z.object({
+  author_id: z.string().optional(),
+  body: z.string().optional(),
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  is_deleted: z.boolean().optional(),
+  parent_id: z.string().optional().nullable(),
+  updated_at: z.string().optional(),
+  visible_to_owner_thread: z.boolean().optional(),
+  wish_id: z.string().optional(),
+});
+
+export const publicWishCommentsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("wish_comments_author_id_fkey"),
+    columns: z.tuple([z.literal("author_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("wish_comments_parent_id_fkey"),
+    columns: z.tuple([z.literal("parent_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wish_comments"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("wish_comments_wish_id_fkey"),
+    columns: z.tuple([z.literal("wish_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
 export const publicWishLikesRowSchema = z.object({
   created_at: z.string(),
   user_id: z.string(),
@@ -231,6 +291,7 @@ export const publicWishSlotsRelationshipsSchema = z.tuple([
 ]);
 
 export const publicWishesRowSchema = z.object({
+  comments_count: z.number(),
   copy_lines: jsonSchema.nullable(),
   created_at: z.string(),
   currency: z.string().nullable(),
@@ -251,6 +312,7 @@ export const publicWishesRowSchema = z.object({
 });
 
 export const publicWishesInsertSchema = z.object({
+  comments_count: z.number().optional(),
   copy_lines: jsonSchema.optional().nullable(),
   created_at: z.string().optional(),
   currency: z.string().optional().nullable(),
@@ -271,6 +333,7 @@ export const publicWishesInsertSchema = z.object({
 });
 
 export const publicWishesUpdateSchema = z.object({
+  comments_count: z.number().optional(),
   copy_lines: jsonSchema.optional().nullable(),
   created_at: z.string().optional(),
   currency: z.string().optional().nullable(),

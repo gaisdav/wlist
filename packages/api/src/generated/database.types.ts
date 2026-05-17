@@ -140,6 +140,64 @@ export type Database = {
         }
         Relationships: []
       }
+      wish_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_deleted: boolean
+          parent_id: string | null
+          updated_at: string
+          visible_to_owner_thread: boolean
+          wish_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          parent_id?: string | null
+          updated_at?: string
+          visible_to_owner_thread?: boolean
+          wish_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_deleted?: boolean
+          parent_id?: string | null
+          updated_at?: string
+          visible_to_owner_thread?: boolean
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wish_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wish_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "wish_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wish_comments_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wish_likes: {
         Row: {
           created_at: string
@@ -217,6 +275,7 @@ export type Database = {
       }
       wishes: {
         Row: {
+          comments_count: number
           copy_lines: Json | null
           created_at: string
           currency: string | null
@@ -236,6 +295,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          comments_count?: number
           copy_lines?: Json | null
           created_at?: string
           currency?: string | null
@@ -255,6 +315,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          comments_count?: number
           copy_lines?: Json | null
           created_at?: string
           currency?: string | null
