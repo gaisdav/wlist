@@ -101,7 +101,7 @@ export const WishCard = ({
           </span>
         ) : null}
       </Link>
-      <WishSocialStrip wish={wish} isOwner={isOwner} hideCommentsIfEmpty />
+      <WishSocialStrip wish={wish} isOwner={isOwner} />
       {footerSlot ? <div className="border-t border-border px-3 py-2">{footerSlot}</div> : null}
     </div>
   );

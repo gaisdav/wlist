@@ -11,14 +11,9 @@ import { Button } from '../primitives/button';
 interface WishSocialStripProps {
   wish: Wish;
   isOwner: boolean;
-  hideCommentsIfEmpty?: boolean;
 }
 
-export const WishSocialStrip = ({
-  wish,
-  isOwner,
-  hideCommentsIfEmpty,
-}: WishSocialStripProps): React.JSX.Element => {
+export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const api = useApiClient();
   const likeState = useWishLikeState(api, isOwner ? undefined : wish.id);
@@ -56,25 +51,23 @@ export const WishSocialStrip = ({
           <span aria-label={t('social.likes_count')}>{likesDisplay}</span>
         </div>
 
-        {(!hideCommentsIfEmpty || wish.comments_count > 0) && (
-          <div className="flex items-center gap-1.5">
-            <Button
-              type="button"
-              variant="ghost"
-              size="iconRound"
-              className="-ml-2 text-foreground"
-              aria-label={t('comments.title')}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsCommentsOpen(true);
-              }}
-            >
-              <MessageCircle className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-            </Button>
-            <span aria-label={t('comments.title')}>{wish.comments_count}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="iconRound"
+            className="-ml-2 text-foreground"
+            aria-label={t('comments.title')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsCommentsOpen(true);
+            }}
+          >
+            <MessageCircle className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+          </Button>
+          <span aria-label={t('comments.title')}>{wish.comments_count}</span>
+        </div>
 
         <div className="flex items-center gap-1.5">
           <Repeat2 className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} aria-hidden />
