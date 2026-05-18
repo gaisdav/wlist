@@ -29,6 +29,36 @@ export type Database = {
         }
         Relationships: []
       }
+      event_visibility_lists: {
+        Row: {
+          event_id: string
+          list_id: string
+        }
+        Insert: {
+          event_id: string
+          list_id: string
+        }
+        Update: {
+          event_id?: string
+          list_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_visibility_lists_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_visibility_lists_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_wishes: {
         Row: {
           event_id: string
@@ -69,6 +99,7 @@ export type Database = {
           owner_id: string
           title: string
           updated_at: string
+          visibility: Database["public"]["Enums"]["wish_visibility"]
         }
         Insert: {
           created_at?: string
@@ -79,6 +110,7 @@ export type Database = {
           owner_id: string
           title: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["wish_visibility"]
         }
         Update: {
           created_at?: string
@@ -89,6 +121,7 @@ export type Database = {
           owner_id?: string
           title?: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["wish_visibility"]
         }
         Relationships: [
           {
@@ -210,6 +243,71 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      user_list_members: {
+        Row: {
+          created_at: string
+          list_id: string
+          member_id: string
+        }
+        Insert: {
+          created_at?: string
+          list_id: string
+          member_id: string
+        }
+        Update: {
+          created_at?: string
+          list_id?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_list_members_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_list_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lists_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wish_comments: {
         Row: {
@@ -341,6 +439,36 @@ export type Database = {
           },
         ]
       }
+      wish_visibility_lists: {
+        Row: {
+          list_id: string
+          wish_id: string
+        }
+        Insert: {
+          list_id: string
+          wish_id: string
+        }
+        Update: {
+          list_id?: string
+          wish_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wish_visibility_lists_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wish_visibility_lists_wish_id_fkey"
+            columns: ["wish_id"]
+            isOneToOne: false
+            referencedRelation: "wishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wishes: {
         Row: {
           comments_count: number
@@ -361,6 +489,7 @@ export type Database = {
           reposts_count: number
           title: string
           updated_at: string
+          visibility: Database["public"]["Enums"]["wish_visibility"]
         }
         Insert: {
           comments_count?: number
@@ -381,6 +510,7 @@ export type Database = {
           reposts_count?: number
           title: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["wish_visibility"]
         }
         Update: {
           comments_count?: number
@@ -401,6 +531,7 @@ export type Database = {
           reposts_count?: number
           title?: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["wish_visibility"]
         }
         Relationships: [
           {
@@ -458,6 +589,7 @@ export type Database = {
     }
     Enums: {
       wish_slot_status: "active" | "cancelled"
+      wish_visibility: "public" | "followers" | "lists" | "private"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -586,6 +718,7 @@ export const Constants = {
   public: {
     Enums: {
       wish_slot_status: ["active", "cancelled"],
+      wish_visibility: ["public", "followers", "lists", "private"],
     },
   },
 } as const

@@ -9,6 +9,13 @@ import { type Json } from "./database.types";
 
 export const publicWishSlotStatusSchema = z.enum(["active", "cancelled"]);
 
+export const publicWishVisibilitySchema = z.enum([
+  "public",
+  "followers",
+  "lists",
+  "private",
+]);
+
 export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
   z
     .union([
@@ -35,6 +42,38 @@ export const publicAuthTelegramUsedInitDataUpdateSchema = z.object({
   init_data_hash: z.string().optional(),
   used_at: z.string().optional(),
 });
+
+export const publicEventVisibilityListsRowSchema = z.object({
+  event_id: z.string(),
+  list_id: z.string(),
+});
+
+export const publicEventVisibilityListsInsertSchema = z.object({
+  event_id: z.string(),
+  list_id: z.string(),
+});
+
+export const publicEventVisibilityListsUpdateSchema = z.object({
+  event_id: z.string().optional(),
+  list_id: z.string().optional(),
+});
+
+export const publicEventVisibilityListsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("event_visibility_lists_event_id_fkey"),
+    columns: z.tuple([z.literal("event_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("events"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("event_visibility_lists_list_id_fkey"),
+    columns: z.tuple([z.literal("list_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("user_lists"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
 
 export const publicEventWishesRowSchema = z.object({
   event_id: z.string(),
@@ -77,6 +116,7 @@ export const publicEventsRowSchema = z.object({
   owner_id: z.string(),
   title: z.string(),
   updated_at: z.string(),
+  visibility: publicWishVisibilitySchema,
 });
 
 export const publicEventsInsertSchema = z.object({
@@ -88,6 +128,7 @@ export const publicEventsInsertSchema = z.object({
   owner_id: z.string(),
   title: z.string(),
   updated_at: z.string().optional(),
+  visibility: publicWishVisibilitySchema.optional(),
 });
 
 export const publicEventsUpdateSchema = z.object({
@@ -99,6 +140,7 @@ export const publicEventsUpdateSchema = z.object({
   owner_id: z.string().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
+  visibility: publicWishVisibilitySchema.optional(),
 });
 
 export const publicEventsRelationshipsSchema = z.tuple([
@@ -225,6 +267,75 @@ export const publicProfilesUpdateSchema = z.object({
   updated_at: z.string().optional(),
   username: z.string().optional().nullable(),
 });
+
+export const publicUserListMembersRowSchema = z.object({
+  created_at: z.string(),
+  list_id: z.string(),
+  member_id: z.string(),
+});
+
+export const publicUserListMembersInsertSchema = z.object({
+  created_at: z.string().optional(),
+  list_id: z.string(),
+  member_id: z.string(),
+});
+
+export const publicUserListMembersUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  list_id: z.string().optional(),
+  member_id: z.string().optional(),
+});
+
+export const publicUserListMembersRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("user_list_members_list_id_fkey"),
+    columns: z.tuple([z.literal("list_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("user_lists"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("user_list_members_member_id_fkey"),
+    columns: z.tuple([z.literal("member_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
+export const publicUserListsRowSchema = z.object({
+  created_at: z.string(),
+  id: z.string(),
+  name: z.string(),
+  owner_id: z.string(),
+  updated_at: z.string(),
+});
+
+export const publicUserListsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  name: z.string(),
+  owner_id: z.string(),
+  updated_at: z.string().optional(),
+});
+
+export const publicUserListsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  id: z.string().optional(),
+  name: z.string().optional(),
+  owner_id: z.string().optional(),
+  updated_at: z.string().optional(),
+});
+
+export const publicUserListsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("user_lists_owner_id_fkey"),
+    columns: z.tuple([z.literal("owner_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("profiles"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
 
 export const publicWishCommentsRowSchema = z.object({
   author_id: z.string(),
@@ -362,6 +473,38 @@ export const publicWishSlotsRelationshipsSchema = z.tuple([
   }),
 ]);
 
+export const publicWishVisibilityListsRowSchema = z.object({
+  list_id: z.string(),
+  wish_id: z.string(),
+});
+
+export const publicWishVisibilityListsInsertSchema = z.object({
+  list_id: z.string(),
+  wish_id: z.string(),
+});
+
+export const publicWishVisibilityListsUpdateSchema = z.object({
+  list_id: z.string().optional(),
+  wish_id: z.string().optional(),
+});
+
+export const publicWishVisibilityListsRelationshipsSchema = z.tuple([
+  z.object({
+    foreignKeyName: z.literal("wish_visibility_lists_list_id_fkey"),
+    columns: z.tuple([z.literal("list_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("user_lists"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+  z.object({
+    foreignKeyName: z.literal("wish_visibility_lists_wish_id_fkey"),
+    columns: z.tuple([z.literal("wish_id")]),
+    isOneToOne: z.literal(false),
+    referencedRelation: z.literal("wishes"),
+    referencedColumns: z.tuple([z.literal("id")]),
+  }),
+]);
+
 export const publicWishesRowSchema = z.object({
   comments_count: z.number(),
   copy_lines: jsonSchema.nullable(),
@@ -381,6 +524,7 @@ export const publicWishesRowSchema = z.object({
   reposts_count: z.number(),
   title: z.string(),
   updated_at: z.string(),
+  visibility: publicWishVisibilitySchema,
 });
 
 export const publicWishesInsertSchema = z.object({
@@ -402,6 +546,7 @@ export const publicWishesInsertSchema = z.object({
   reposts_count: z.number().optional(),
   title: z.string(),
   updated_at: z.string().optional(),
+  visibility: publicWishVisibilitySchema.optional(),
 });
 
 export const publicWishesUpdateSchema = z.object({
@@ -423,6 +568,7 @@ export const publicWishesUpdateSchema = z.object({
   reposts_count: z.number().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
+  visibility: publicWishVisibilitySchema.optional(),
 });
 
 export const publicWishesRelationshipsSchema = z.tuple([
