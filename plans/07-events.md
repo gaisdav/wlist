@@ -103,7 +103,7 @@
    Убедиться, что в `packages/api/src/generated/database.types.ts` and `packages/api/src/generated/database.zod.ts` появились схемы для `events` и `event_wishes`.
 
 ### Шаг 3. API-клиент (`packages/api`)
-1. Добавить сигнатуры методов в интерфейс `ApiClient` в файле `packages/api/src/client/ApiClient.ts`:
+1. Добавить сигнатуры методов в интерфейс `ApiClient` в файле `packages/api/src/clients/ApiClient.ts` и определить их в `packages/api/src/clients/events/types.ts`:
    - `events.listByOwner(ownerId: string): Promise<EventRow[]>`
    - `events.get(id: string): Promise<EventRow | null>`
    - `events.create(input: { title: string; event_date?: string | null; is_recurring_yearly?: boolean }): Promise<EventRow>`
@@ -114,7 +114,7 @@
    - `events.unlinkWish(eventId: string, wishId: string): Promise<void>`
    - `events.setWishEvents(wishId: string, eventIds: string[]): Promise<void>` (для мультиселекта на форме создания/редактирования желания)
    - `events.listForWish(wishId: string): Promise<EventRow[]>`
-2. Реализовать эти методы в `packages/api/src/client/SupabaseApiClient.ts` (создав функцию-обертку `createEventsApi`).
+2. Реализовать эти методы в доменной папке `packages/api/src/clients/events/` (создав файл `EventsApiClient.ts` с экспортом `createEventsApi`), после чего подключить его в `SupabaseApiClient.ts` и `ApiClient.ts`.
 
 ### Шаг 4. Бизнес-логика в `@wlist/core`
 1. **Слой Entities:**

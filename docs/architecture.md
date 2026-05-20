@@ -229,7 +229,7 @@ packages/core/src/
 
   export type Wish = z.infer<typeof wishSchema>;
   ```
-  В `packages/api/src/client/` типы строк таблиц **алиасим** к `Database['public']['Tables'][…]['Row' | 'Insert' | 'Update']`, а не копируем поля вручную.
+  В `packages/api/src/clients/` типы строк таблиц **алиасим** к `Database['public']['Tables'][…]['Row' | 'Insert' | 'Update']`, а не копируем поля вручную.
   При добавлении/изменении колонки в миграции и регенерации `database.zod.ts` — TS-сборка падает в `entities/`, пока не поправим `extend`/refine. Расхождения видны на CI.
 - **`services/`** — оркестрируют бизнес-операции, не зависят от React. Принимают `ApiClient` через аргумент, возвращают типизированные данные. Здесь живут инварианты: «нельзя забронировать собственное желание», «нельзя удалить wish с активными слотами» и т.д. (плюс зеркальные проверки в БД).
 - **`hooks/`** — обёртка над `services`, привязанная к React и TanStack Query. Получают `ApiClient` через `useApiClient()` (см. §4). **Это единственное место, где `core` импортирует React.**
@@ -263,9 +263,12 @@ export const queryKeys = {
 
 ```
 packages/api/src/
-├── client/
+├── clients/                 # Многофайловый клиент, разбитый по доменам
 │   ├── ApiClient.ts        # Интерфейс, описывающий все операции
-│   └── SupabaseApiClient.ts # Реализация поверх supabase-js
+│   ├── SupabaseApiClient.ts # Реализация поверх supabase-js
+│   ├── index.ts             # Единый экспортер (barrel)
+│   ├── shared.ts            # Общие типы
+│   └── <domain>/            # Пример домена: реализация и типы
 ├── generated/
 │   ├── database.types.ts   # supabase gen types (TS-типы row, snake_case)
 │   └── database.zod.ts     # supazod (Zod-схемы row, snake_case)
@@ -313,7 +316,7 @@ export interface ApiClient {
 }
 ```
 
-Социальный слой (этап 05, `plans/05-social.md`): фактический `ApiClient` также включает `profiles` (в т.ч. поиск), `follows`, `feed`, `wishLikes` — см. исходный контракт в `packages/api/src/client/ApiClient.ts`.
+Социальный слой (этап 05, `plans/05-social.md`): фактический `ApiClient` также включает `profiles` (в т.ч. поиск), `follows`, `feed`, `wishLikes` — см. исходный контракт в `packages/api/src/clients/ApiClient.ts`.
 
 Реализация `SupabaseApiClient`:
 
@@ -815,7 +818,7 @@ flowchart LR
 - [ ] Нет импортов `react-dom`, `window.*`, `document.*`.
 - [ ] Нет импортов `@telegram-apps/*`.
 - [ ] Нет импортов из `apps/*`.
-- [ ] Нет импортов из `packages/api/src/client/SupabaseApiClient` (только из `client/ApiClient` — интерфейс).
+- [ ] Нет импортов из `packages/api/src/clients/SupabaseApiClient` (только из `clients/ApiClient` — интерфейс).
 - [ ] Все доменные типы выведены из Zod-схем в `entities/`.
 - [ ] Любой новый use-case добавлен в `services/`, не сразу в `hooks/`.
 - [ ] Если добавлен новый экран — добавлен и маршрут в `routes/`.

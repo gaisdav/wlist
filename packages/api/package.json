@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./client": "./src/client/index.ts",
+    "./client": "./src/clients/index.ts",
     "./modules": "./src/modules/index.ts",
     "./generated/database.types": "./src/generated/database.types.ts",
     "./generated/database.zod": "./src/generated/database.zod.ts",

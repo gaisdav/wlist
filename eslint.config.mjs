@@ -10,7 +10,7 @@ import tseslint from 'typescript-eslint';
 
 const PACKAGE_BOUNDARY_RULES = {
   // @wlist/core MUST stay platform-agnostic.
-  core: ['react-dom', 'react-dom/*', '@telegram-apps/*', '@wlist/api/client/SupabaseApiClient'],
+  core: ['react-dom', 'react-dom/*', '@telegram-apps/*', '@wlist/api/clients/SupabaseApiClient'],
   // @wlist/api MUST NOT depend on UI runtimes.
   api: ['react', 'react-dom', '@telegram-apps/*'],
 };

@@ -54,7 +54,7 @@ Append-only журнал: **одна строка на каждое новое �
 | `payload`    | `jsonb`    | Снимок на момент создания (для fallback в UI) |
 | `created_at` | `timestamptz` | Время события |
 
-Тип в коде: `FeedEventRow` в [`packages/api/src/client/socialTypes.ts`](../packages/api/src/client/socialTypes.ts), сгенерирован из [`packages/api/src/generated/database.types.ts`](../packages/api/src/generated/database.types.ts).
+Тип в коде: `FeedEventRow` в [`packages/api/src/clients/feed/types.ts`](../packages/api/src/clients/feed/types.ts), сгенерирован из [`packages/api/src/generated/database.types.ts`](../packages/api/src/generated/database.types.ts).
 
 ### Как появляются строки (триггер)
 
@@ -108,7 +108,7 @@ Append-only журнал: **одна строка на каждое новое �
 
 ### Контракт
 
-[`packages/api/src/client/ApiClient.ts`](../packages/api/src/client/ApiClient.ts):
+[`packages/api/src/clients/ApiClient.ts`](../packages/api/src/clients/ApiClient.ts):
 
 ```ts
 interface FeedApi {
@@ -122,7 +122,7 @@ interface WishesApi {
 
 ### Реализация запросов
 
-[`packages/api/src/client/SupabaseApiClient.ts`](../packages/api/src/client/SupabaseApiClient.ts).
+[`packages/api/src/clients/SupabaseApiClient.ts`](../packages/api/src/clients/SupabaseApiClient.ts).
 
 **Лента** — `createFeedApi`:
 
@@ -347,8 +347,8 @@ const titleFromPayload = (row: FeedEventRow): string => {
 | Маршрут | [`apps/tma/src/router.tsx`](../apps/tma/src/router.tsx) `/feed` |
 | Страница | [`apps/tma/src/pages/feed/FeedPage.tsx`](../apps/tma/src/pages/feed/FeedPage.tsx) |
 | Карточка | [`apps/tma/src/components/wishes/WishCard.tsx`](../apps/tma/src/components/wishes/WishCard.tsx) |
-| API | [`packages/api/src/client/SupabaseApiClient.ts`](../packages/api/src/client/SupabaseApiClient.ts) (`createFeedApi`, `listByIds`) |
-| Типы | [`packages/api/src/client/socialTypes.ts`](../packages/api/src/client/socialTypes.ts) |
+| API | [`packages/api/src/clients/feed/FeedApiClient.ts`](../packages/api/src/clients/feed/FeedApiClient.ts) (`createFeedApi`) + `wishes/WishesApiClient.ts` (`listByIds`) |
+| Типы | [`packages/api/src/clients/feed/types.ts`](../packages/api/src/clients/feed/types.ts) |
 | Хуки | [`useInfiniteFeed.ts`](../packages/core/src/hooks/social/useInfiniteFeed.ts), [`useWishesByIds.ts`](../packages/core/src/hooks/wishes/useWishesByIds.ts) |
 | Query keys | [`packages/core/src/config/queryKeys.ts`](../packages/core/src/config/queryKeys.ts) |
 | БД-триггер | [`20260616120000_feed_events_wish_rows_only.sql`](../supabase/migrations/20260616120000_feed_events_wish_rows_only.sql) |

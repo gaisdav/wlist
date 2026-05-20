@@ -12,10 +12,14 @@ alwaysApply: false
 
 ```
 src/
-├── client/
+├── clients/                 # Многофайловый клиент, разбитый по доменам
 │   ├── ApiClient.ts         # Интерфейс — главное, что импортирует core
 │   ├── SupabaseApiClient.ts # Реализация поверх supabase-js
-│   └── wishTypes.ts         # пример: алиасы к Database, без ручного списка колонок
+│   ├── index.ts             # Единый экспортер (barrel)
+│   ├── shared.ts            # Общие типы
+│   └── events/              # Пример домена: реализация и типы
+│       ├── EventsApiClient.ts
+│       └── types.ts
 ├── generated/
 │   ├── database.types.ts    # TS-типы row (snake_case) — supabase gen types
 │   └── database.zod.ts      # Zod-схемы row (snake_case) — supazod
