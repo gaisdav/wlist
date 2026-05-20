@@ -115,11 +115,10 @@ export function BottomSheet({
       {/* Overlay */}
       <div
         className={clsx(
-          'absolute inset-0 bg-black/30 backdrop-blur-sm transition-all duration-300',
+          'absolute inset-0 bg-black/30 backdrop-blur-[2px] transition-all duration-300',
           isVisible ? 'opacity-100' : 'opacity-0',
         )}
         style={{
-          // Слегка уменьшаем прозрачность фона пропорционально свайпу шторки
           opacity:
             isDragging && sheetRef.current
               ? Math.max(0, 1 - dragY / sheetRef.current.clientHeight)
