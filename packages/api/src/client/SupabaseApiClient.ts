@@ -731,6 +731,7 @@ const createEventsApi = (sb: SupabaseClientLike): EventsApi => ({
       .from('events')
       .select('*')
       .eq('owner_id', ownerId)
+      .order('event_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data ?? []) as EventRow[];
