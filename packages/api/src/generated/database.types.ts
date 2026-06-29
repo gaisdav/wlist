@@ -543,6 +543,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      can_view_wish: {
+        Args: { p_viewer: string; p_wish_id: string }
+        Returns: boolean
+      }
       check_wish_comment_parent_visible: {
         Args: {
           p_parent_id: string

@@ -576,6 +576,13 @@ export const publicBookWishSlotsReturnsSchema = z.array(
   }),
 );
 
+export const publicCanViewWishArgsSchema = z.object({
+  p_viewer: z.string(),
+  p_wish_id: z.string(),
+});
+
+export const publicCanViewWishReturnsSchema = z.boolean();
+
 export const publicCheckWishCommentParentVisibleArgsSchema = z.object({
   p_parent_id: z.string(),
   p_user_id: z.string(),
