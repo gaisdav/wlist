@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { confirm } from '../../telegram/confirm';
 import { BottomSheet } from '../overlays/BottomSheet';
 import { Button } from '../primitives/button';
 
@@ -61,7 +62,12 @@ const CommentItem = ({
       : profile?.username || profile?.first_name || 'User';
 
   const handleDelete = async () => {
-    if (!window.confirm(t('comments.delete_confirm'))) return;
+    const confirmed = await confirm({
+      message: t('comments.delete_confirm'),
+      confirmLabel: t('actions.delete'),
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       await deleteComment.mutateAsync({
         id: comment.id,
@@ -239,7 +245,10 @@ export function CommentsBottomSheet({
     }
 
     if (!isOwner && !replyToId && showToOwner) {
-      const confirmed = window.confirm(t('comments.confirm_show_owner'));
+      const confirmed = await confirm({
+        message: t('comments.confirm_show_owner'),
+        confirmLabel: t('comments.show_to_owner'),
+      });
       if (!confirmed) return;
     }
 

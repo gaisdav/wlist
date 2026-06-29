@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateEvent, useEvent, useUpdateEvent } from '@wlist/core/hooks/events';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
@@ -11,6 +11,7 @@ import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/sk
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
 const eventFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -86,6 +87,17 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
       setIsSaving(false);
     }
   };
+
+  // Native MainButton mirrors the in-page submit; the in-page button is the fallback.
+  const submitFromMainButton = useCallback(() => {
+    void handleSubmit(onValid)();
+  }, [handleSubmit, onValid]);
+  useTelegramMainButton({
+    text: mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit'),
+    onClick: submitFromMainButton,
+    isLoaderVisible: isSaving,
+    isEnabled: !isSaving,
+  });
 
   if (mode === 'edit' && (event.isLoading || !eventId)) {
     return (

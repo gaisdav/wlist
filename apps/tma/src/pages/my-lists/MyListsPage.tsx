@@ -16,6 +16,7 @@ import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { confirm } from '../../telegram/confirm';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 const displayName = (p: { username: string | null; first_name: string }): string =>
@@ -133,8 +134,13 @@ export const MyListsPage = (): React.JSX.Element => {
     createMut.mutate(name, { onSuccess: () => setNewName('') });
   };
 
-  const onDelete = (id: string): void => {
-    if (!window.confirm(t('lists.delete_confirm'))) return;
+  const onDelete = async (id: string): Promise<void> => {
+    const confirmed = await confirm({
+      message: t('lists.delete_confirm'),
+      confirmLabel: t('actions.delete'),
+      destructive: true,
+    });
+    if (!confirmed) return;
     deleteMut.mutate(id);
     setExpandedId((cur) => (cur === id ? null : cur));
   };
@@ -201,7 +207,7 @@ export const MyListsPage = (): React.JSX.Element => {
                     size="iconRound"
                     aria-label={t('lists.delete')}
                     isLoading={deleteMut.isPending && deleteMut.variables === list.id}
-                    onClick={() => onDelete(list.id)}
+                    onClick={() => void onDelete(list.id)}
                   >
                     <Trash2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
                   </Button>

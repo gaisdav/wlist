@@ -15,7 +15,10 @@
     "loading": "Loading…",
     "empty": "Nothing here yet.",
     "error": "Something went wrong.",
-    "edited": "Edited"
+    "edited": "Edited",
+    "retry": "Try again",
+    "error_title": "Couldn't load this",
+    "error_description": "Check your connection and try again."
   },
   "auth": {
     "signing_in": "Signing in via Telegram…",
@@ -52,7 +55,11 @@
     "list": {
       "title": "My wishes",
       "empty": "No wishes yet. Add one to get started.",
+      "empty_title": "Your wishlist is empty",
+      "empty_description": "Add the first thing you'd love to receive.",
       "user_title": "Wishlist",
+      "user_empty_title": "No wishes shared yet",
+      "user_empty_description": "This person hasn't added anything you can see.",
       "archived": "Archived"
     },
     "card": {
@@ -147,6 +154,8 @@
     "bookings": {
       "title": "My bookings",
       "empty": "You have not booked any gift slots yet.",
+      "empty_title": "No bookings yet",
+      "empty_description": "Reserve a gift slot from a friend's wish to see it here.",
       "untitled_wish": "Wish",
       "archived": "Archived wish",
       "status_active": "Active",
@@ -170,6 +179,8 @@
     "feed": {
       "title": "Feed",
       "empty": "No wishes in your feed yet. Follow someone or add a wish.",
+      "empty_title": "Your feed is quiet",
+      "empty_description": "Follow friends to see what they're wishing for.",
       "wish_unavailable": "This wish is no longer visible.",
       "no_title": "(untitled)",
       "open_wish": "Open wish",

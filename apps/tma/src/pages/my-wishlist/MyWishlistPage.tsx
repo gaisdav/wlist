@@ -1,12 +1,14 @@
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useFollowsCounts } from '@wlist/core/hooks/social';
 import { useMyWishes } from '@wlist/core/hooks/wishes';
+import { Gift, WifiOff } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 
 import { UserEventsSection } from '../../components/events';
 import { buttonVariants } from '../../components/primitives/button';
+import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { UserFollowsBottomSheet } from '../../components/social';
 import { WishCard } from '../../components/wishes';
@@ -15,6 +17,7 @@ import { useApiClient } from '../../providers/ApiClientProvider';
 
 export const MyWishlistPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
+  const [, navigate] = useLocation();
   const api = useApiClient();
   const profile = useCurrentUser(api);
   const userId = profile.data?.id;
@@ -89,9 +92,20 @@ export const MyWishlistPage = (): React.JSX.Element => {
       {userId && <UserEventsSection ownerId={userId} isOwner />}
 
       {wishes.isError ? (
-        <p className="text-sm text-destructive">{t('states.error')}</p>
+        <EmptyState
+          icon={WifiOff}
+          tone="error"
+          title={t('states.error_title')}
+          description={t('states.error_description')}
+          action={{ label: t('states.retry'), onClick: () => void wishes.refetch() }}
+        />
       ) : !wishes.data?.length ? (
-        <p className="text-sm text-muted">{t('wishes.list.empty')}</p>
+        <EmptyState
+          icon={Gift}
+          title={t('wishes.list.empty_title')}
+          description={t('wishes.list.empty_description')}
+          action={{ label: t('nav.add_wish'), onClick: () => navigate('/wish/new') }}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {wishes.data.map((w) => (

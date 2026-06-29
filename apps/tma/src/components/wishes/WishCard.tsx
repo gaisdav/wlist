@@ -69,36 +69,40 @@ export const WishCard = ({ wish, isOwner = false, viewerId }: WishCardProps): Re
                   })}
             </p>
           ) : null}
-          {wish.is_collaborative && !wish.is_archived ? (
-            <span className="mt-1 inline-block rounded bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary">
-              {t('wishes.card.collaborative')}
-            </span>
-          ) : null}
-          <WishReservationBadge
-            wish={wish}
-            isOwner={isOwner}
-            viewerId={viewerId}
-            variant="inline"
-          />
-          {wish.is_archived ? (
-            <span className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-              {t('wishes.list.archived')}
-            </span>
-          ) : null}
-          {isOwner && wish.visibility !== 'public' ? (
-            <span className="mt-1 inline-flex items-center gap-1 text-xs text-muted">
-              {wish.visibility === 'followers' ? (
-                <Users className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-              ) : (
-                <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-              )}
-              {t(`wishes.card.visibility_${wish.visibility}`)}
-            </span>
-          ) : null}
+          {/* Status band: one wrapping row so chips read as a group, not stacked lines.
+              Reservation leads (most actionable); collaborative/archived follow as chips;
+              visibility is owner-only and stays quietest. */}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <WishReservationBadge
+              wish={wish}
+              isOwner={isOwner}
+              viewerId={viewerId}
+              variant="inline"
+            />
+            {wish.is_archived ? (
+              <Badge size="sm" variant="neutral">
+                {t('wishes.list.archived')}
+              </Badge>
+            ) : wish.is_collaborative ? (
+              <Badge size="sm" variant="soft">
+                {t('wishes.card.collaborative')}
+              </Badge>
+            ) : null}
+            {isOwner && wish.visibility !== 'public' ? (
+              <span className="inline-flex items-center gap-1 text-xs text-muted">
+                {wish.visibility === 'followers' ? (
+                  <Users className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+                ) : (
+                  <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+                )}
+                {t(`wishes.card.visibility_${wish.visibility}`)}
+              </span>
+            ) : null}
+          </div>
           {events && events.length > 0 ? (
             <div className="mt-1.5 flex flex-wrap gap-1">
               {events.map((event) => (
-                <Badge key={event.id} size="sm" variant="soft">
+                <Badge key={event.id} size="sm" variant="outline">
                   {event.title}
                   {event.event_date ? ` (${formatDate(event.event_date, 'short')})` : ''}
                 </Badge>

@@ -1,10 +1,12 @@
 import type { WishSlotBookingRow } from '@wlist/api';
 import { useCancelSlot, useMySlotBookings } from '@wlist/core/hooks/slots';
+import { Gift, WifiOff } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
+import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -34,7 +36,15 @@ export const MyBookingsPage = (): React.JSX.Element => {
   }
 
   if (bookings.isError) {
-    return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
+    return (
+      <EmptyState
+        icon={WifiOff}
+        tone="error"
+        title={t('states.error_title')}
+        description={t('states.error_description')}
+        action={{ label: t('states.retry'), onClick: () => void bookings.refetch() }}
+      />
+    );
   }
 
   const rows = bookings.data ?? [];
@@ -48,7 +58,11 @@ export const MyBookingsPage = (): React.JSX.Element => {
       {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}
 
       {!rows.length ? (
-        <p className="text-sm text-muted">{t('wishes.bookings.empty')}</p>
+        <EmptyState
+          icon={Gift}
+          title={t('wishes.bookings.empty_title')}
+          description={t('wishes.bookings.empty_description')}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {rows.map((row) => {
