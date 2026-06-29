@@ -79,6 +79,9 @@ export const MyWishlistPage = (): React.JSX.Element => {
             >
               {t('social.counts.followers', { n: counts.data.followers })}
             </button>
+            <Link to="/me/lists" className="underline hover:text-foreground transition-colors">
+              {t('lists.manage')}
+            </Link>
           </div>
         ) : null}
       </header>

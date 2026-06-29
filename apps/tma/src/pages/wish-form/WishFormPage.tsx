@@ -3,11 +3,13 @@ import {
   copyLinesToFormTuple,
   defaultWishDraftFormValues,
   wishDraftSchema,
+  type Wish,
   type WishDraftFormInput,
   type WishDraftPayload,
 } from '@wlist/core/entities/wish';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useUserEvents, useWishEvents, useSetWishEvents } from '@wlist/core/hooks/events';
+import { useUserLists, useWishVisibilityLists } from '@wlist/core/hooks/lists';
 import { useCreateWish, useUpdateWish, useWish } from '@wlist/core/hooks/wishes';
 import {
   isWishCurrencyCode,
@@ -42,6 +44,10 @@ import {
 interface WishFormPageProps {
   mode: 'create' | 'edit';
 }
+
+type WishVisibility = Wish['visibility'];
+
+const VISIBILITY_OPTIONS: readonly WishVisibility[] = ['public', 'followers', 'lists'];
 
 const visibleCopyLineSlots = (tuple: WishDraftFormInput['copyLines']): number => {
   let highest = 0;
@@ -88,11 +94,32 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const setWishEventsMut = useSetWishEvents(api);
   const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
 
+  const userLists = useUserLists(api);
+  const wishLists = useWishVisibilityLists(api, mode === 'edit' ? wishId : undefined);
+  const repostLists = useWishVisibilityLists(
+    api,
+    mode === 'create' ? (repostFromId ?? undefined) : undefined,
+  );
+  const [visibility, setVisibility] = useState<WishVisibility>('public');
+  const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
+
   useEffect(() => {
     if (mode === 'edit' && wishEvents.data) {
       setSelectedEventIds(wishEvents.data.map((e) => e.id));
     }
   }, [mode, wishEvents.data]);
+
+  // Prefill visibility from the wish being edited / reposted.
+  useEffect(() => {
+    const src = mode === 'edit' ? existing.data : repostSource.data;
+    if (src) setVisibility(src.visibility);
+  }, [mode, existing.data, repostSource.data]);
+
+  // Prefill chosen lists (only relevant for visibility = 'lists').
+  useEffect(() => {
+    const ids = mode === 'edit' ? wishLists.data : repostLists.data;
+    if (ids) setSelectedListIds(ids);
+  }, [mode, wishLists.data, repostLists.data]);
 
   useQueryErrorToast(mode === 'edit' && Boolean(wishId) && existing.isError, t('states.error'));
   useQueryErrorToast(
@@ -184,6 +211,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   };
 
   const onValid = async (payload: WishDraftPayload): Promise<void> => {
+    // 'lists' visibility requires at least one list, else the wish is invisible
+    // to everyone but the owner. The inline hint under the selector explains it.
+    if (visibility === 'lists' && selectedListIds.length === 0) return;
     setIsSaving(true);
     try {
       const body = {
@@ -197,9 +227,15 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         copy_lines: payload.copy_lines,
       };
 
+      const visibilityFields = {
+        visibility,
+        ...(visibility === 'lists' ? { list_ids: selectedListIds } : {}),
+      };
+
       if (mode === 'create') {
         const row = await createMut.mutateAsync({
           ...body,
+          ...visibilityFields,
           ...(repostFromId ? { reposted_from_id: repostFromId } : {}),
         });
         if (photo) await uploadPhotoIfNeeded(row.id, photo, null);
@@ -220,6 +256,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         currency: body.currency,
         link: body.link,
         copy_lines: body.copy_lines,
+        ...visibilityFields,
       });
       if (photo) await uploadPhotoIfNeeded(wishId, photo, previousPhotoPath);
       await setWishEventsMut.mutateAsync({ wishId, eventIds: selectedEventIds });
@@ -437,6 +474,84 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
                 </span>
               ) : null}
             </label>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-foreground">
+            {t('wishes.form.visibility_label')}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {VISIBILITY_OPTIONS.map((opt) => {
+              const isSelected = visibility === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  disabled={isSaving}
+                  aria-pressed={isSelected}
+                  className={badgeVariants({
+                    variant: isSelected ? 'brand' : 'neutral',
+                    size: 'md',
+                    className: 'cursor-pointer hover:opacity-90 transition-all',
+                  })}
+                  onClick={() => setVisibility(opt)}
+                >
+                  {t(`wishes.form.visibility_${opt}`)}
+                </button>
+              );
+            })}
+          </div>
+
+          {visibility === 'lists' ? (
+            userLists.data && userLists.data.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {userLists.data.map((list) => {
+                    const isSelected = selectedListIds.includes(list.id);
+                    return (
+                      <button
+                        key={list.id}
+                        type="button"
+                        disabled={isSaving}
+                        aria-pressed={isSelected}
+                        className={badgeVariants({
+                          variant: isSelected ? 'brand' : 'neutral',
+                          size: 'md',
+                          className: 'cursor-pointer hover:opacity-90 transition-all',
+                        })}
+                        onClick={() =>
+                          setSelectedListIds((prev) =>
+                            isSelected ? prev.filter((id) => id !== list.id) : [...prev, list.id],
+                          )
+                        }
+                      >
+                        {list.name}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedListIds.length === 0 ? (
+                  <span className="text-xs text-destructive">
+                    {t('wishes.form.visibility_lists_pick')}
+                  </span>
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted">
+                  {t('wishes.form.visibility_lists_empty')}
+                </span>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="self-start"
+                  onClick={() => setLocation('/me/lists')}
+                >
+                  {t('wishes.form.visibility_lists_manage')}
+                </Button>
+              </div>
+            )
           ) : null}
         </div>
 

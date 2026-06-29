@@ -2,7 +2,7 @@ import { type Wish } from '@wlist/core/entities/wish';
 import { useWishEvents } from '@wlist/core/hooks/events';
 import { formatDate, formatWishAmount, truncateWishDescriptionForList } from '@wlist/core/lib';
 import { clsx } from 'clsx';
-import { Link2 } from 'lucide-react';
+import { Link2, Lock, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
@@ -83,6 +83,16 @@ export const WishCard = ({ wish, isOwner = false, viewerId }: WishCardProps): Re
           {wish.is_archived ? (
             <span className="mt-1 inline-block rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
               {t('wishes.list.archived')}
+            </span>
+          ) : null}
+          {isOwner && wish.visibility !== 'public' ? (
+            <span className="mt-1 inline-flex items-center gap-1 text-xs text-muted">
+              {wish.visibility === 'followers' ? (
+                <Users className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+              ) : (
+                <Lock className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
+              )}
+              {t(`wishes.card.visibility_${wish.visibility}`)}
             </span>
           ) : null}
           {events && events.length > 0 ? (

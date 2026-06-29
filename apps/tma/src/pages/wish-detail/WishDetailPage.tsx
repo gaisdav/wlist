@@ -8,7 +8,7 @@ import {
   useWish,
 } from '@wlist/core/hooks/wishes';
 import { formatDate, formatWishAmount } from '@wlist/core/lib';
-import { Check, ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Copy, Lock, Repeat2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
@@ -179,6 +179,17 @@ export const WishDetailPage = (): React.JSX.Element => {
           <p className="text-sm text-foreground">
             <span className="text-muted">{t('wishes.detail.price')}: </span>
             {priceLine}
+          </p>
+        ) : null}
+
+        {isOwner && w.visibility !== 'public' ? (
+          <p className="inline-flex items-center gap-1 text-sm text-muted">
+            {w.visibility === 'followers' ? (
+              <Users className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+            ) : (
+              <Lock className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+            )}
+            {t(`wishes.card.visibility_${w.visibility}`)}
           </p>
         ) : null}
 
