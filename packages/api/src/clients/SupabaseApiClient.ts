@@ -13,6 +13,8 @@ import { createFeedApi } from './feed/FeedApiClient.js';
 import type { FeedApi } from './feed/types.js';
 import { createFollowsApi } from './follows/FollowsApiClient.js';
 import type { FollowsApi } from './follows/types.js';
+import { createListsApi } from './lists/ListsApiClient.js';
+import type { ListsApi } from './lists/types.js';
 import { createProfilesApi } from './profiles/ProfilesApiClient.js';
 import type { ProfilesApi } from './profiles/types.js';
 import type { SupabaseClientLike } from './shared.js';
@@ -40,6 +42,7 @@ export class SupabaseApiClient implements ApiClient {
   readonly auth: AuthApi;
   readonly profiles: ProfilesApi;
   readonly follows: FollowsApi;
+  readonly lists: ListsApi;
   readonly feed: FeedApi;
   readonly wishLikes: WishLikesApi;
   readonly storage: StorageApi;
@@ -63,6 +66,7 @@ export class SupabaseApiClient implements ApiClient {
     this.auth = createAuthApi(this.supabase, url, anonKey);
     this.profiles = createProfilesApi(this.supabase);
     this.follows = createFollowsApi(this.supabase);
+    this.lists = createListsApi(this.supabase);
     this.feed = createFeedApi(this.supabase);
     this.wishLikes = createWishLikesApi(this.supabase);
     this.storage = createStorageApi(this.supabase);

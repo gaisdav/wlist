@@ -5,6 +5,7 @@ export { SignInError, type SignInErrorCode } from './auth/SignInError.js';
 
 export type { ProfilesApi, ProfileRow } from './profiles/types.js';
 export type { FollowsApi } from './follows/types.js';
+export type { ListsApi, UserListRow } from './lists/types.js';
 export type { FeedApi, FeedItemRow, FeedEventRow, FeedCursor } from './feed/types.js';
 export type { WishLikesApi } from './wishLikes/types.js';
 export type { StorageApi, WishPhotoSignedUpload } from './storage/types.js';
