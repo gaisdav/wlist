@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { SwitchField } from '../../components/primitives/switch';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
@@ -38,7 +39,7 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
 
   useQueryErrorToast(mode === 'edit' && Boolean(eventId) && event.isError, t('states.error'));
 
-  const { register, handleSubmit, formState, reset, watch } = useForm<EventFormInput>({
+  const { register, handleSubmit, formState, reset, watch, setValue } = useForm<EventFormInput>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: '',
@@ -149,16 +150,14 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
           />
         </label>
 
-        <label className="flex items-center gap-2 cursor-pointer py-1">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
-            {...register('is_recurring_yearly')}
-          />
-          <span className="text-sm font-medium text-foreground">
-            {t('events.form.recurring_label')}
-          </span>
-        </label>
+        <SwitchField
+          label={t('events.form.recurring_label')}
+          checked={isRecurring}
+          onChange={(checked) =>
+            setValue('is_recurring_yearly', checked, { shouldDirty: true, shouldValidate: true })
+          }
+          disabled={isSaving}
+        />
 
         <Button type="submit" isLoading={isSaving} className="mt-2">
           {mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit')}
