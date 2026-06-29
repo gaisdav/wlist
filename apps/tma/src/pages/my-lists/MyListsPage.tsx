@@ -8,11 +8,12 @@ import {
   useUserLists,
 } from '@wlist/core/hooks/lists';
 import { useFollowersList, useFollowingList } from '@wlist/core/hooks/social';
-import { Trash2 } from 'lucide-react';
+import { FolderPlus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../../components/primitives/button';
+import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -87,6 +88,7 @@ const ListMembers = ({
         <span className="text-xs font-medium uppercase tracking-wide text-muted">
           {t('lists.add_members')}
         </span>
+        <span className="text-xs text-muted">{t('lists.add_members_hint')}</span>
         {isLoadingCandidates ? (
           <Skeleton className="h-8 rounded" />
         ) : candidates.length > 0 ? (
@@ -184,7 +186,7 @@ export const MyListsPage = (): React.JSX.Element => {
       </div>
 
       {!lists.data?.length ? (
-        <p className="text-sm text-muted">{t('lists.empty')}</p>
+        <EmptyState icon={FolderPlus} title={t('lists.empty')} />
       ) : (
         <ul className="flex flex-col gap-2">
           {lists.data.map((list) => {

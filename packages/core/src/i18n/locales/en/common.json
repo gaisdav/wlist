@@ -85,7 +85,7 @@
       "prev_wish": "Previous wish",
       "next_wish": "Next wish",
       "sibling_nav": "Other wishes in this list",
-      "copy_lines": "What to write on the gift",
+      "copy_lines": "Text to copy",
       "copy_line": "Copy text"
     },
     "form": {
@@ -105,7 +105,12 @@
       "photo_hint": "JPEG, PNG, or WebP — large files are resized automatically. GIF keeps animation; max {{maxMb}} MB.",
       "submit_create": "Create wish",
       "submit_edit": "Save changes",
-      "add_copy_line": "Add copy line",
+      "add_copy_line": "Add another line",
+      "copy_lines_label": "Text to copy (optional)",
+      "copy_lines_info_aria": "About text to copy",
+      "copy_lines_info_title": "Text to copy",
+      "copy_lines_info_body": "Add anything the gift-giver may want to copy in one tap on the wish page: a card number, a delivery address, a size or model. Tip: in the description you can say \"details to copy are below\" and put the actual values here as separate lines.",
+      "copy_lines_info_dismiss": "Got it",
       "visibility_label": "Who can see this",
       "visibility_public": "Everyone",
       "visibility_followers": "My followers",
@@ -117,7 +122,7 @@
       "collaborative_locked_hint": "Cannot be changed after the wish is created. Delete this wish and create a new one to use different group-gift settings.",
       "max_slots_label": "Max participants (optional)",
       "max_slots_hint": "Leave empty to use the default cap ({{cap}}).",
-      "copy_line_placeholder": "Line {{n}}",
+      "copy_line_placeholder": "e.g. card number, delivery address, size",
       "errors": {
         "invalid_price": "Enter a valid non-negative number.",
         "invalid_currency": "Pick a supported currency.",
@@ -229,12 +234,16 @@
       "edit": "Edit event",
       "wishes": "Wishes",
       "empty_wishes": "No wishes linked to this event yet.",
+      "no_date": "Date not set",
+      "recurring_suffix": "Recurring",
+      "event_by": "Event by {{name}}",
       "delete_confirm": "Delete this event? This will not delete the wishes themselves."
     },
     "form": {
       "create_title": "New event",
       "edit_title": "Edit event",
       "title_label": "Title",
+      "title_placeholder": "e.g. My birthday",
       "date_label": "Date (optional)",
       "recurring_label": "Recurring yearly",
       "submit_create": "Create event",
@@ -262,8 +271,6 @@
     "add_members": "Add members",
     "add_members_hint": "Add from people you follow or who follow you.",
     "no_candidates": "Nobody to add yet — follow people or get followers first.",
-    "remove_member": "Remove",
-    "tab_following": "Following",
-    "tab_followers": "Followers"
+    "remove_member": "Remove"
   }
 }

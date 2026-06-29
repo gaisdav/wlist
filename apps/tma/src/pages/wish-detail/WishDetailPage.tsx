@@ -214,6 +214,9 @@ export const WishDetailPage = (): React.JSX.Element => {
 
         {w.copy_lines && w.copy_lines.length > 0 ? (
           <section className="flex flex-col gap-2" aria-label={t('wishes.detail.copy_lines')}>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted">
+              {t('wishes.detail.copy_lines')}
+            </h2>
             <ul className="flex flex-col gap-2">
               {w.copy_lines.map((line, idx) => (
                 <li

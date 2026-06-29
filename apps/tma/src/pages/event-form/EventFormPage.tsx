@@ -38,7 +38,7 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
 
   useQueryErrorToast(mode === 'edit' && Boolean(eventId) && event.isError, t('states.error'));
 
-  const { register, handleSubmit, formState, reset } = useForm<EventFormInput>({
+  const { register, handleSubmit, formState, reset, watch } = useForm<EventFormInput>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: '',
@@ -46,6 +46,10 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
       is_recurring_yearly: true,
     },
   });
+
+  const isRecurring = watch('is_recurring_yearly');
+  // A one-off event in the past makes no sense; a yearly one ignores the year.
+  const minDate = isRecurring ? undefined : new Date().toISOString().slice(0, 10);
 
   useEffect(() => {
     if (!event.data) return;
@@ -125,7 +129,7 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
           </span>
           <input
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-            placeholder="e.g. My Birthday"
+            placeholder={t('events.form.title_placeholder')}
             {...register('title')}
           />
           {formState.errors.title ? (
@@ -139,6 +143,7 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
           <span className="text-sm font-medium text-foreground">{t('events.form.date_label')}</span>
           <input
             type="date"
+            min={minDate}
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             {...register('event_date')}
           />
