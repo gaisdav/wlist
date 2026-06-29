@@ -32,6 +32,7 @@ import { BottomSheet } from '../../components/overlays';
 import { badgeVariants } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { SwitchField } from '../../components/primitives/switch';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { showErrorToast } from '../../lib/errorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -464,22 +465,19 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         </div>
 
         <div className={`flex flex-col gap-2${mode === 'edit' ? ' opacity-80' : ''}`}>
-          <label
-            className={`flex items-start gap-2${mode === 'edit' ? ' cursor-default' : ' cursor-pointer'}`}
-          >
-            <input
-              type="checkbox"
-              className="mt-1 h-4 w-4 shrink-0 disabled:cursor-not-allowed"
-              disabled={mode === 'edit' || isSaving}
-              {...register('isCollaborative')}
-            />
-            <span className="text-sm font-medium text-foreground">
-              {t('wishes.form.collaborative_label')}
-            </span>
-          </label>
-          {mode === 'edit' ? (
-            <p className="text-xs text-muted">{t('wishes.form.collaborative_locked_hint')}</p>
-          ) : null}
+          <SwitchField
+            label={t('wishes.form.collaborative_label')}
+            hint={
+              mode === 'edit'
+                ? t('wishes.form.collaborative_locked_hint')
+                : t('wishes.form.group_gift_hint')
+            }
+            checked={isCollaborative}
+            onChange={(checked) =>
+              setValue('isCollaborative', checked, { shouldDirty: true, shouldValidate: true })
+            }
+            disabled={mode === 'edit' || isSaving}
+          />
 
           {isCollaborative ? (
             <label className="flex flex-col gap-1">
