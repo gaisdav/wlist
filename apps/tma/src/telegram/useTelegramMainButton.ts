@@ -1,8 +1,4 @@
-import {
-  mountMainButton,
-  onMainButtonClick,
-  setMainButtonParams,
-} from '@telegram-apps/sdk-react';
+import { mountMainButton, onMainButtonClick, setMainButtonParams } from '@telegram-apps/sdk-react';
 import { useEffect } from 'react';
 
 interface MainButtonOptions {

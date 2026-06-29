@@ -37,7 +37,11 @@ export const WishReservationBadge = ({
       return <span className="text-sm font-medium text-foreground">…</span>;
     }
     if (!summary) return null;
-    return <span className="text-sm font-medium text-foreground">{reservationLabel(t, wish, summary)}</span>;
+    return (
+      <span className="text-sm font-medium text-foreground">
+        {reservationLabel(t, wish, summary)}
+      </span>
+    );
   }
 
   if (slotsQuery.isLoading) {
