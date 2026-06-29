@@ -11,47 +11,37 @@ import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useUserEvents, useWishEvents, useSetWishEvents } from '@wlist/core/hooks/events';
 import { useUserLists, useWishVisibilityLists } from '@wlist/core/hooks/lists';
 import { useCreateWish, useUpdateWish, useWish } from '@wlist/core/hooks/wishes';
-import {
-  isWishCurrencyCode,
-  persistLastWishCurrency,
-  readLastWishCurrency,
-  SUPPORTED_WISH_CURRENCIES,
-  WISH_COPY_LINE_MAX_CHARS,
-  WISH_COPY_LINES_MAX,
-  WISH_PHOTO_MAX_UPLOAD_BYTES,
-  WISH_SLOTS_DEFAULT_CAP,
-} from '@wlist/core/lib';
-import { Info, Plus } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { isWishCurrencyCode, readLastWishCurrency, WISH_COPY_LINES_MAX } from '@wlist/core/lib';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
 import { z } from 'zod';
 
 import { BottomSheet } from '../../components/overlays';
-import { badgeVariants } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
-import { SwitchField } from '../../components/primitives/switch';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { showErrorToast } from '../../lib/errorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
+import { wishPhotoMimeForApi } from './prepareWishPhotoUpload';
 import {
-  PrepareWishPhotoError,
-  prepareWishPhotoUpload,
-  wishPhotoMimeForApi,
-} from './prepareWishPhotoUpload';
+  WishCopyLinesSection,
+  WishCoreSection,
+  WishEventsSection,
+  WishGroupGiftSection,
+  WishPhotoSection,
+  WishVisibilitySection,
+} from './sections';
 
 interface WishFormPageProps {
   mode: 'create' | 'edit';
 }
 
 type WishVisibility = Wish['visibility'];
-
-const VISIBILITY_OPTIONS: readonly WishVisibility[] = ['public', 'followers', 'lists'];
 
 const visibleCopyLineSlots = (tuple: WishDraftFormInput['copyLines']): number => {
   let highest = 0;
@@ -67,13 +57,11 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const { wishId } = useParams<{ wishId?: string }>();
   const api = useApiClient();
   const [, setLocation] = useLocation();
-  const photoMaxMb = String(Math.round(WISH_PHOTO_MAX_UPLOAD_BYTES / (1024 * 1024)));
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [copyLinesVisible, setCopyLinesVisible] = useState(0);
   const [isCopyInfoOpen, setIsCopyInfoOpen] = useState(false);
-  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const [repostFromId, setRepostFromId] = useState<string | null>(null);
 
@@ -137,11 +125,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     defaultValues: defaultWishDraftFormValues(),
   });
 
-  const { register, handleSubmit, formState, reset, watch, setValue, getValues } = form;
-
-  const priceStr = watch('priceStr');
-  const isCollaborative = watch('isCollaborative');
-  const hasPrice = priceStr.trim() !== '';
+  const { handleSubmit, reset } = form;
 
   useEffect(() => {
     if (!existing.data) return;
@@ -324,388 +308,50 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         disabled={isSaving}
         className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0 disabled:opacity-60"
       >
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.title_label')}
-          </span>
-          <input
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            {...register('title')}
-          />
-          {formState.errors.title ? (
-            <span className="text-xs text-destructive">{formState.errors.title.message}</span>
-          ) : null}
-        </label>
+        <WishCoreSection form={form} />
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.description_label')}
-          </span>
-          <textarea
-            rows={4}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            {...register('description')}
-          />
-          {formState.errors.description ? (
-            <span className="text-xs text-destructive">{formState.errors.description.message}</span>
-          ) : null}
-        </label>
+        <WishCopyLinesSection
+          form={form}
+          isSaving={isSaving}
+          visibleCount={copyLinesVisible}
+          onAddLine={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
+          onOpenInfo={() => setIsCopyInfoOpen(true)}
+        />
 
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.price_label')}
-          </span>
-          <input
-            inputMode="decimal"
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            {...register('priceStr', {
-              onChange: (e) => {
-                const v = String((e.target as HTMLInputElement).value ?? '');
-                const nextHas = v.trim() !== '';
-                if (!nextHas) {
-                  setValue('currency', '', { shouldValidate: true, shouldDirty: true });
-                  return;
-                }
-                const cur = getValues('currency');
-                if (!cur) {
-                  setValue('currency', readLastWishCurrency(), {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  });
-                }
-              },
-            })}
-          />
-          {formState.errors.priceStr ? (
-            <span className="text-xs text-destructive">
-              {t('wishes.form.errors.invalid_price')}
-            </span>
-          ) : null}
-        </label>
+        <WishGroupGiftSection form={form} isSaving={isSaving} mode={mode} />
 
-        {hasPrice ? (
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-foreground">
-              {t('wishes.form.currency_label')}
-            </span>
-            <select
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              {...register('currency', {
-                onChange: (e) => {
-                  const v = (e.target as HTMLSelectElement).value;
-                  if (v) persistLastWishCurrency(v);
-                },
-              })}
-            >
-              <option value="">{t('wishes.form.currency_placeholder')}</option>
-              {SUPPORTED_WISH_CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            {formState.errors.currency ? (
-              <span className="text-xs text-destructive">
-                {formState.errors.currency.message === 'currency_without_price'
-                  ? t('wishes.form.errors.currency_without_price')
-                  : t('wishes.form.errors.invalid_currency')}
-              </span>
-            ) : null}
-          </label>
-        ) : null}
-
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-foreground">{t('wishes.form.link_label')}</span>
-          <input
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
-            {...register('linkStr')}
-          />
-          {formState.errors.linkStr ? (
-            <span className="text-xs text-destructive">{t('wishes.form.errors.invalid_link')}</span>
-          ) : null}
-        </label>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-medium text-foreground">
-              {t('wishes.form.copy_lines_label')}
-            </span>
-            <button
-              type="button"
-              className="text-muted transition-colors hover:text-foreground"
-              aria-label={t('wishes.form.copy_lines_info_aria')}
-              onClick={() => setIsCopyInfoOpen(true)}
-            >
-              <Info className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-            </button>
-          </div>
-          {([0, 1, 2, 3, 4] as const).slice(0, copyLinesVisible).map((i) => (
-            <textarea
-              key={i}
-              rows={3}
-              maxLength={WISH_COPY_LINE_MAX_CHARS}
-              className="resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              placeholder={t('wishes.form.copy_line_placeholder')}
-              {...register(`copyLines.${i}`)}
-            />
-          ))}
-          {copyLinesVisible < WISH_COPY_LINES_MAX ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="self-start"
-              disabled={isSaving}
-              onClick={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
-            >
-              <Plus className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-              {t('wishes.form.add_copy_line')}
-            </Button>
-          ) : null}
-        </div>
-
-        <div className={`flex flex-col gap-2${mode === 'edit' ? ' opacity-80' : ''}`}>
-          <SwitchField
-            label={t('wishes.form.collaborative_label')}
-            hint={
-              mode === 'edit'
-                ? t('wishes.form.collaborative_locked_hint')
-                : t('wishes.form.group_gift_hint')
-            }
-            checked={isCollaborative}
-            onChange={(checked) =>
-              setValue('isCollaborative', checked, { shouldDirty: true, shouldValidate: true })
-            }
-            disabled={mode === 'edit' || isSaving}
-          />
-
-          {isCollaborative ? (
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-foreground">
-                {t('wishes.form.max_slots_label')}
-              </span>
-              <input
-                inputMode="numeric"
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70"
-                disabled={mode === 'edit' || isSaving}
-                {...register('maxSlotsStr')}
-              />
-              {mode === 'create' ? (
-                <span className="text-xs text-muted">
-                  {t('wishes.form.max_slots_hint', { cap: WISH_SLOTS_DEFAULT_CAP })}
-                </span>
-              ) : null}
-              {formState.errors.maxSlotsStr && mode === 'create' ? (
-                <span className="text-xs text-destructive">
-                  {formState.errors.maxSlotsStr.message === 'invalid_max_slots'
-                    ? t('wishes.form.errors.invalid_max_slots')
-                    : formState.errors.maxSlotsStr.message}
-                </span>
-              ) : null}
-            </label>
-          ) : null}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.visibility_label')}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {VISIBILITY_OPTIONS.map((opt) => {
-              const isSelected = visibility === opt;
-              return (
-                <button
-                  key={opt}
-                  type="button"
-                  disabled={isSaving}
-                  aria-pressed={isSelected}
-                  className={badgeVariants({
-                    variant: isSelected ? 'brand' : 'neutral',
-                    size: 'md',
-                    className: 'cursor-pointer hover:opacity-90 transition-all',
-                  })}
-                  onClick={() => setVisibility(opt)}
-                >
-                  {t(`wishes.form.visibility_${opt}`)}
-                </button>
-              );
-            })}
-          </div>
-
-          {visibility === 'lists' ? (
-            userLists.data && userLists.data.length > 0 ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-wrap gap-2">
-                  {userLists.data.map((list) => {
-                    const isSelected = selectedListIds.includes(list.id);
-                    return (
-                      <button
-                        key={list.id}
-                        type="button"
-                        disabled={isSaving}
-                        aria-pressed={isSelected}
-                        className={badgeVariants({
-                          variant: isSelected ? 'brand' : 'neutral',
-                          size: 'md',
-                          className: 'cursor-pointer hover:opacity-90 transition-all',
-                        })}
-                        onClick={() =>
-                          setSelectedListIds((prev) =>
-                            isSelected ? prev.filter((id) => id !== list.id) : [...prev, list.id],
-                          )
-                        }
-                      >
-                        {list.name}
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedListIds.length === 0 ? (
-                  <span className="text-xs text-destructive">
-                    {t('wishes.form.visibility_lists_pick')}
-                  </span>
-                ) : null}
-              </div>
-            ) : (
-              <div className="flex flex-col items-start gap-2 rounded-lg border border-dashed border-border bg-surface px-3 py-3">
-                <span className="text-sm text-muted">
-                  {t('wishes.form.visibility_lists_empty')}
-                </span>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setLocation('/me/lists')}
-                >
-                  {t('wishes.form.visibility_lists_manage')}
-                </Button>
-              </div>
+        <WishVisibilitySection
+          isSaving={isSaving}
+          visibility={visibility}
+          onVisibilityChange={setVisibility}
+          lists={userLists.data}
+          selectedListIds={selectedListIds}
+          onToggleList={(listId) =>
+            setSelectedListIds((prev) =>
+              prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId],
             )
-          ) : null}
-        </div>
+          }
+          onManageLists={() => setLocation('/me/lists')}
+        />
 
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-foreground">
-            {t('events.wish_select.label')}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {userEvents.data?.map((event) => {
-              const isSelected = selectedEventIds.includes(event.id);
-              return (
-                <button
-                  key={event.id}
-                  type="button"
-                  className={badgeVariants({
-                    variant: isSelected ? 'brand' : 'neutral',
-                    size: 'md',
-                    className: 'cursor-pointer hover:opacity-90 transition-all',
-                  })}
-                  onClick={() => {
-                    setSelectedEventIds((prev) =>
-                      isSelected ? prev.filter((id) => id !== event.id) : [...prev, event.id],
-                    );
-                  }}
-                >
-                  {event.title}
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              className={badgeVariants({
-                variant: 'brandOutline',
-                size: 'md',
-                className:
-                  'border-dashed cursor-pointer hover:bg-primary/5 transition-all flex items-center gap-1',
-              })}
-              onClick={() => setLocation('/event/new')}
-            >
-              <span>+</span>
-              <span>{t('events.list.add_event')}</span>
-            </button>
-          </div>
-        </div>
+        <WishEventsSection
+          events={userEvents.data}
+          selectedEventIds={selectedEventIds}
+          onToggleEvent={(eventId) =>
+            setSelectedEventIds((prev) =>
+              prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId],
+            )
+          }
+          onCreateEvent={() => setLocation('/event/new')}
+        />
 
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-foreground">
-            {t('wishes.form.photo_label')}
-          </span>
-          <input
-            ref={photoInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            disabled={isSaving}
-            className="sr-only"
-            aria-label={t('wishes.form.photo_label')}
-            onChange={(e) => {
-              const input = e.target;
-              const f = input.files?.[0];
-              input.value = '';
-              void (async () => {
-                if (!f) {
-                  setPhoto(null);
-                  setPhotoError(null);
-                  return;
-                }
-                setPhotoError(null);
-                try {
-                  const prepared = await prepareWishPhotoUpload(f);
-                  setPhoto(prepared);
-                } catch (err) {
-                  setPhoto(null);
-                  if (err instanceof PrepareWishPhotoError) {
-                    if (err.code === 'too_large') {
-                      setPhotoError(t('wishes.form.errors.photo_too_large', { maxMb: photoMaxMb }));
-                    } else if (err.code === 'decode_failed') {
-                      setPhotoError(t('wishes.form.errors.photo_decode_failed'));
-                    } else {
-                      setPhotoError(t('wishes.form.errors.photo_unsupported_type'));
-                    }
-                  } else {
-                    setPhotoError(t('states.error'));
-                  }
-                }
-              })();
-            }}
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isSaving}
-              onClick={() => photoInputRef.current?.click()}
-            >
-              {photo ? t('wishes.form.photo_change') : t('wishes.form.photo_choose')}
-            </Button>
-            {photo ? (
-              <>
-                <span
-                  className="min-w-0 max-w-full flex-1 truncate text-sm text-foreground"
-                  title={photo.name}
-                >
-                  {t('wishes.form.photo_selected', { fileName: photo.name })}
-                </span>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="shrink-0"
-                  disabled={isSaving}
-                  onClick={() => {
-                    setPhoto(null);
-                    setPhotoError(null);
-                  }}
-                >
-                  {t('wishes.form.photo_clear')}
-                </Button>
-              </>
-            ) : null}
-          </div>
-          <span className="text-xs text-muted">
-            {t('wishes.form.photo_hint', { maxMb: photoMaxMb })}
-          </span>
-          {photoError ? <span className="text-xs text-destructive">{photoError}</span> : null}
-        </div>
+        <WishPhotoSection
+          isSaving={isSaving}
+          photo={photo}
+          onPhotoChange={setPhoto}
+          photoError={photoError}
+          onPhotoError={setPhotoError}
+        />
 
         {!mainButtonActive ? (
           <Button type="submit" isLoading={isSaving}>
