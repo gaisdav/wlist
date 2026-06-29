@@ -7,3 +7,4 @@ export * from './wishPhotoLimits.js';
 export * from './wishSlotsConstants.js';
 export * from './wishReservationSummary.js';
 export * from './dateUtils.js';
+export * from './formatPrice.js';

@@ -7,7 +7,7 @@ import {
   useUserWishes,
   useWish,
 } from '@wlist/core/hooks/wishes';
-import { formatDate } from '@wlist/core/lib';
+import { formatDate, formatWishAmount } from '@wlist/core/lib';
 import { Check, ChevronLeft, ChevronRight, Copy, Repeat2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -119,10 +119,7 @@ export const WishDetailPage = (): React.JSX.Element => {
 
   let priceLine: string | null = null;
   if (w.price != null) {
-    const amountStr = w.price.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
+    const amountStr = formatWishAmount(w.price);
     priceLine = w.currency
       ? `${amountStr} ${w.currency}`
       : t('wishes.card.price_no_currency', { amount: amountStr });

@@ -1,6 +1,7 @@
 import { type Wish } from '@wlist/core/entities/wish';
 import { useWishEvents } from '@wlist/core/hooks/events';
-import { formatDate, truncateWishDescriptionForList } from '@wlist/core/lib';
+import { formatDate, formatWishAmount, truncateWishDescriptionForList } from '@wlist/core/lib';
+import { clsx } from 'clsx';
 import { Link2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
@@ -19,16 +20,9 @@ interface WishCardProps {
   /** When true, like toggle is hidden (cannot like own wish). */
   isOwner?: boolean;
   viewerId?: string;
-  /** Reserved for future use (e.g. comments preview under likes/reposts). */
-  footerSlot?: React.ReactNode;
 }
 
-export const WishCard = ({
-  wish,
-  isOwner = false,
-  viewerId,
-  footerSlot,
-}: WishCardProps): React.JSX.Element => {
+export const WishCard = ({ wish, isOwner = false, viewerId }: WishCardProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const api = useApiClient();
   const { data: events } = useWishEvents(api, wish.id);
@@ -58,7 +52,7 @@ export const WishCard = ({
             </div>
           )}
         </div>
-        <div className={`min-w-0 flex-1${hasLink ? ' pr-7' : ''}`}>
+        <div className={clsx('min-w-0 flex-1', hasLink && 'pr-7')}>
           <p className="truncate font-medium text-foreground">{wish.title}</p>
           <p className="mt-0.5 line-clamp-2 text-sm text-muted">
             {preview || t('wishes.card.no_description')}
@@ -67,17 +61,11 @@ export const WishCard = ({
             <p className="mt-1 text-xs text-muted">
               {wish.currency
                 ? t('wishes.card.price', {
-                    amount: wish.price.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2,
-                    }),
+                    amount: formatWishAmount(wish.price),
                     currency: wish.currency,
                   })
                 : t('wishes.card.price_no_currency', {
-                    amount: wish.price.toLocaleString(undefined, {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2,
-                    }),
+                    amount: formatWishAmount(wish.price),
                   })}
             </p>
           ) : null}
@@ -118,7 +106,6 @@ export const WishCard = ({
         ) : null}
       </Link>
       <WishSocialStrip wish={wish} isOwner={isOwner} />
-      {footerSlot ? <div className="border-t border-border px-3 py-2">{footerSlot}</div> : null}
     </div>
   );
 };

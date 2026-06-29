@@ -272,15 +272,13 @@ packages/api/src/
 ├── generated/
 │   ├── database.types.ts   # supabase gen types (TS-типы row, snake_case)
 │   └── database.zod.ts     # supazod (Zod-схемы row, snake_case)
-├── modules/                # «Низкоуровневые» функции по доменам
-│   ├── auth.ts
-│   ├── wishes.ts
-│   ├── slots.ts
-│   └── storage.ts
 ├── edge-contracts/         # Zod-схемы request/response Edge Functions
 │   └── auth-telegram.ts
 └── index.ts
 ```
+
+> Низкоуровневые операции по доменам живут не в отдельном `modules/`, а прямо в
+> `clients/<domain>/` (реализация + типы рядом). Отдельного слоя `modules/` нет.
 
 ### `ApiClient` — точка инверсии зависимостей
 
@@ -355,7 +353,7 @@ flowchart LR
   DB -- supabase gen types --> Types["api/generated/database.types.ts"]
   DB -- supazod --> Zod["api/generated/database.zod.ts"]
   Zod -- import + extend/refine --> Ent["core/entities/<name>/<name>.ts (snake_case ≈ Row)"]
-  Types -. typing supabase-js .-> Modules["api/modules/*.ts"]
+  Types -. typing supabase-js .-> Clients["api/clients/<domain>/*.ts"]
 ```
 
 **CI-инварианты:**
@@ -391,23 +389,30 @@ sequenceDiagram
 
   TMA->>SDK: WebApp.initData (raw string)
   TMA->>Edge: POST { initData }
-  Edge->>Edge: HMAC-SHA256(initData, BOT_TOKEN) проверка подписи
+  Edge->>Edge: HMAC-SHA256(initData, TG_BOT_TOKEN) проверка подписи
   Edge->>Edge: Проверка auth_date (≤ 24h)
-  Edge->>Auth: createUser/upsert(by telegram_id)
+  Edge->>Auth: createUser/upsert(by telegram_id) [service-role]
   Edge->>DB: upsert(profiles by id=telegram_id)
-  Auth-->>Edge: { user, access_token, refresh_token }
-  Edge-->>TMA: { accessToken, refreshToken, profile }
-  TMA->>TMA: storeSession(accessToken)
+  Edge->>Auth: generateLink(magiclink) → token_hash
+  Auth-->>Edge: { token_hash }
+  Edge-->>TMA: { tokenHash, isNewUser }
+  TMA->>Auth: supabase.auth.verifyOtp({ type: 'magiclink', token_hash })
+  Auth-->>TMA: { session } (хранится supabase-js)
   TMA->>DB: subsequent queries with Bearer accessToken
 ```
 
 **Важно:**
 
+- Edge Function **не** возвращает токены напрямую. Она проверяет подпись, апсертит
+  пользователя/профиль через service-role и отдаёт **одноразовый `tokenHash`**
+  (magic-link OTP). Клиент обменивает его на сессию через `supabase.auth.verifyOtp(...)`
+  — так refresh-токен не путешествует по сети вручную. Поле `isNewUser` — для онбординга.
 - Валидация `initData` — только на сервере. Клиентская проверка обходится за минуту через DevTools.
-- Переменная `BOT_TOKEN` живёт в Supabase Function Secrets, не в репо.
-- JWT хранится в памяти + (опционально) `sessionStorage`. **Не** localStorage, чтобы при следующем запуске Mini App перелогиниться через свежий `initData`.
-- Refresh-токен используем стандартным Supabase-механизмом (`autoRefreshToken: true`).
-- При истечении JWT клиент выполняет повторный `signInWithTelegram(initData)`. Это безопасно — тот же `initData` валиден ≤ 24 часов.
+- Переменная `TG_BOT_TOKEN` живёт в Supabase Function Secrets, не в репо.
+- Сессией управляет `supabase-js` (`persistSession: true`, `autoRefreshToken: true`,
+  `detectSessionInUrl: false` — см. `SupabaseApiClient`). Refresh — стандартным механизмом.
+- При невозможности обновить сессию клиент выполняет повторный `signInWithTelegram(initData)`.
+  Это безопасно — тот же `initData` валиден ≤ 24 часов.
 
 ---
 
@@ -420,12 +425,10 @@ flowchart TD
   Page["UserWishlistPage (apps/tma/pages)"] -->|useUserWishes(ownerId)| Hook["useUserWishes (core/hooks)"]
   Hook -->|useApiClient()| Ctx[ApiClientContext]
   Hook -->|useQuery + queryKeys.wishes.byOwner(ownerId)| Query[TanStack Query]
-  Query -->|cache miss| Service["wishesService.listByOwner(api, ownerId)"]
-  Service -->|api.wishes.list({ ownerId })| Modules["api/modules/wishes.list"]
-  Modules -->|supabase.from('wishes').select| DB[(Postgres + RLS)]
-  DB -->|rows| Modules
-  Modules -->|mapKeys + zod.parse| Service
-  Service -->|Wish[]| Query
+  Query -->|cache miss| Client["api.wishes.listByOwner (api/clients/wishes)"]
+  Client -->|supabase.from('wishes').select| DB[(Postgres + RLS)]
+  DB -->|rows (snake_case)| Client
+  Client -->|zod.parse в core/entities| Query
   Query -->|data| Hook
   Hook -->|data| Page
 ```
@@ -433,19 +436,24 @@ flowchart TD
 ### Мутации и инвалидация
 
 ```ts
-// core/hooks/useCreateWish.ts
-export function useCreateWish() {
-  const api = useApiClient();
+// core/hooks/wishes/useWishMutations.ts — api приходит аргументом (DI), не из контекста core
+export const useCreateWish = (api: ApiClient) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateWishInput) => wishesService.create(api, input),
-    onSuccess: (wish) => {
-      qc.invalidateQueries({ queryKey: queryKeys.wishes.byOwner(wish.ownerId) });
+    mutationFn: (input: WishCreateInput) => api.wishes.create(input),
+    onSuccess: (row) => {
+      // ключи в snake_case — форма row совпадает с Postgres (см. §4)
+      void qc.invalidateQueries({ queryKey: queryKeys.wishes.byOwner(row.owner_id) });
+      void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
       // optimistic insert по желанию — здесь не показано
     },
   });
-}
+};
 ```
+
+> В MVP хуки вызывают `api.<domain>.*` напрямую. Слой `services/` появляется там, где
+> есть нетривиальная оркестрация/инварианты (сейчас — только `services/auth`). Простые
+> CRUD-мутации отдельный сервис не оборачивают.
 
 Принципы:
 
@@ -636,16 +644,20 @@ supabase/functions/
 
 ```ts
 // packages/api/src/edge-contracts/auth-telegram.ts
-export const authTelegramRequest = z.object({
-  initData: z.string().min(1),
+export const authTelegramRequestSchema = z.object({
+  initData: z.string().min(1).max(8192),
 });
-export const authTelegramResponse = z.object({
-  accessToken: z.string(),
-  refreshToken: z.string(),
-  profile: profileSchema,
+// Ответ — НЕ токены, а одноразовый magic-link hash (см. §5). Клиент меняет его
+// на сессию через supabase.auth.verifyOtp(...).
+export const authTelegramResponseSchema = z.object({
+  tokenHash: z.string().min(1),
+  email: z.email(),
+  isNewUser: z.boolean(),
 });
-export type AuthTelegramRequest = z.infer<typeof authTelegramRequest>;
-export type AuthTelegramResponse = z.infer<typeof authTelegramResponse>;
+// Ошибки — дискриминированная схема: invalid_init_data | expired_init_data |
+// replayed_init_data | malformed_request | internal_error (+ optional message без PII).
+export type AuthTelegramRequest = z.infer<typeof authTelegramRequestSchema>;
+export type AuthTelegramResponse = z.infer<typeof authTelegramResponseSchema>;
 ```
 
 ### 9.3. Принципы
@@ -797,11 +809,11 @@ flowchart LR
 
 Хранятся в GitHub Actions secrets и Vercel project envs (раздельно для preview / dev / prod).
 
-**Публичные (попадают в TMA-сборку, префикс `VITE_PUBLIC_*`):**
+**Публичные (попадают в TMA-сборку, префикс `VITE_*`):**
 
 - `VITE_PUBLIC_APP_URL` — публичный URL приложения (на старте — временный домен Vercel, после покупки — `https://wlist.pro`).
-- `VITE_PUBLIC_SUPABASE_URL` — URL Supabase-проекта.
-- `VITE_PUBLIC_SUPABASE_ANON_KEY` — anon key Supabase.
+- `VITE_SUPABASE_URL` — URL Supabase-проекта.
+- `VITE_SUPABASE_ANON_KEY` — anon (publishable) key Supabase.
 
 **Серверные (только Edge Functions / CI):**
 
