@@ -1,5 +1,5 @@
 import { mountMainButton, onMainButtonClick, setMainButtonParams } from '@telegram-apps/sdk-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface MainButtonOptions {
   text: string;
@@ -24,15 +24,23 @@ export const useTelegramMainButton = ({
   isVisible = true,
   isEnabled = true,
   isLoaderVisible = false,
-}: MainButtonOptions): void => {
+}: MainButtonOptions): boolean => {
   // Keep the latest handler in a ref so callers can pass an inline `onClick`
   // without forcing the effect (and the click re-registration) to re-run.
   const onClickRef = useRef(onClick);
   onClickRef.current = onClick;
 
+  // Whether the native MainButton is actually driving the CTA. Callers use this
+  // to hide their in-page submit button inside Telegram (and keep it in browsers).
+  const [isActive, setIsActive] = useState(false);
+
   useEffect(() => {
     if (mountMainButton.isAvailable()) mountMainButton();
-    if (!setMainButtonParams.isAvailable()) return;
+    if (!setMainButtonParams.isAvailable()) {
+      setIsActive(false);
+      return;
+    }
+    setIsActive(true);
 
     setMainButtonParams({ text, isVisible, isEnabled, isLoaderVisible });
 
@@ -46,4 +54,6 @@ export const useTelegramMainButton = ({
       if (setMainButtonParams.isAvailable()) setMainButtonParams({ isVisible: false });
     };
   }, [text, isVisible, isEnabled, isLoaderVisible]);
+
+  return isActive;
 };

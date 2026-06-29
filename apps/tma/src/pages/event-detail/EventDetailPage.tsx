@@ -3,12 +3,13 @@ import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useDeleteEvent, useEvent, useEventWishes } from '@wlist/core/hooks/events';
 import { useProfileById } from '@wlist/core/hooks/social';
 import { calculateDaysLeft, formatDate } from '@wlist/core/lib';
-import { Calendar, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Edit, Gift, Trash2, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
 import { Badge } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
+import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
@@ -88,8 +89,8 @@ export const EventDetailPage = (): React.JSX.Element => {
             <div className="flex items-center gap-1.5 text-xs text-muted font-medium mb-1">
               <Calendar className="h-3.5 w-3.5 shrink-0" />
               <span>
-                {ev.event_date ? formatDate(ev.event_date, 'long') : 'Date not set'}
-                {ev.is_recurring_yearly ? ' (Recurring)' : ''}
+                {ev.event_date ? formatDate(ev.event_date, 'long') : t('events.detail.no_date')}
+                {ev.is_recurring_yearly ? ` (${t('events.detail.recurring_suffix')})` : ''}
               </span>
             </div>
             <h1 className="text-xl font-semibold text-foreground tracking-tight break-words">
@@ -97,12 +98,11 @@ export const EventDetailPage = (): React.JSX.Element => {
             </h1>
             {!isOwner && ownerName ? (
               <p className="mt-1 text-xs text-muted-foreground">
-                Event by{' '}
                 <Link
                   to={`/u/${ev.owner_id}`}
                   className="underline font-medium hover:text-foreground"
                 >
-                  {ownerName}
+                  {t('events.detail.event_by', { name: ownerName })}
                 </Link>
               </p>
             ) : null}
@@ -157,9 +157,15 @@ export const EventDetailPage = (): React.JSX.Element => {
         </h2>
 
         {wishes.isError ? (
-          <p className="text-sm text-destructive">{t('states.error')}</p>
+          <EmptyState
+            icon={WifiOff}
+            tone="error"
+            title={t('states.error_title')}
+            description={t('states.error_description')}
+            action={{ label: t('states.retry'), onClick: () => void wishes.refetch() }}
+          />
         ) : !wishes.data || wishes.data.length === 0 ? (
-          <p className="text-sm text-muted">{t('events.detail.empty_wishes')}</p>
+          <EmptyState icon={Gift} title={t('events.detail.empty_wishes')} />
         ) : (
           <ul className="flex flex-col gap-2">
             {wishes.data.map((w) => (

@@ -21,13 +21,14 @@ import {
   WISH_PHOTO_MAX_UPLOAD_BYTES,
   WISH_SLOTS_DEFAULT_CAP,
 } from '@wlist/core/lib';
-import { Plus } from 'lucide-react';
+import { Info, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
 import { z } from 'zod';
 
+import { BottomSheet } from '../../components/overlays';
 import { badgeVariants } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
@@ -70,6 +71,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [copyLinesVisible, setCopyLinesVisible] = useState(0);
+  const [isCopyInfoOpen, setIsCopyInfoOpen] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const [repostFromId, setRepostFromId] = useState<string | null>(null);
@@ -275,7 +277,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   // Mirror the in-page submit on Telegram's native MainButton — the platform's
   // primary CTA. The in-page button stays as the browser/dev fallback. The hook
   // stashes onClick in a ref, so an inline handler is fine here.
-  useTelegramMainButton({
+  const mainButtonActive = useTelegramMainButton({
     text: mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit'),
     onClick: () => void handleSubmit(onValid)(),
     isLoaderVisible: isSaving,
@@ -423,13 +425,26 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         </label>
 
         <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-medium text-foreground">
+              {t('wishes.form.copy_lines_label')}
+            </span>
+            <button
+              type="button"
+              className="text-muted transition-colors hover:text-foreground"
+              aria-label={t('wishes.form.copy_lines_info_aria')}
+              onClick={() => setIsCopyInfoOpen(true)}
+            >
+              <Info className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+            </button>
+          </div>
           {([0, 1, 2, 3, 4] as const).slice(0, copyLinesVisible).map((i) => (
             <textarea
               key={i}
               rows={3}
               maxLength={WISH_COPY_LINE_MAX_CHARS}
               className="resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              placeholder={t('wishes.form.copy_line_placeholder', { n: i + 1 })}
+              placeholder={t('wishes.form.copy_line_placeholder')}
               {...register(`copyLines.${i}`)}
             />
           ))}
@@ -554,14 +569,14 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
                 ) : null}
               </div>
             ) : (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted">
+              <div className="flex flex-col items-start gap-2 rounded-lg border border-dashed border-border bg-surface px-3 py-3">
+                <span className="text-sm text-muted">
                   {t('wishes.form.visibility_lists_empty')}
                 </span>
                 <Button
                   type="button"
-                  variant="link"
-                  className="self-start"
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setLocation('/me/lists')}
                 >
                   {t('wishes.form.visibility_lists_manage')}
@@ -694,10 +709,25 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           {photoError ? <span className="text-xs text-destructive">{photoError}</span> : null}
         </div>
 
-        <Button type="submit" isLoading={isSaving}>
-          {mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit')}
-        </Button>
+        {!mainButtonActive ? (
+          <Button type="submit" isLoading={isSaving}>
+            {mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit')}
+          </Button>
+        ) : null}
       </fieldset>
+
+      <BottomSheet
+        isOpen={isCopyInfoOpen}
+        onClose={() => setIsCopyInfoOpen(false)}
+        title={t('wishes.form.copy_lines_info_title')}
+      >
+        <div className="flex flex-col gap-4 px-4 pb-4">
+          <p className="text-sm text-muted">{t('wishes.form.copy_lines_info_body')}</p>
+          <Button type="button" variant="secondary" onClick={() => setIsCopyInfoOpen(false)}>
+            {t('wishes.form.copy_lines_info_dismiss')}
+          </Button>
+        </div>
+      </BottomSheet>
     </form>
   );
 };
