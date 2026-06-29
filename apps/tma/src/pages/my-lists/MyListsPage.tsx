@@ -20,6 +20,7 @@ import { TextInput } from '../../components/primitives/text-field';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { confirm } from '../../telegram/confirm';
+import { hapticMutationOptions } from '../../telegram/hapticMutation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 const displayName = (p: { username: string | null; first_name: string }): string =>
@@ -74,7 +75,9 @@ const ListMembers = ({
                   size="sm"
                   isLoading={removeMut.isPending && removeMut.variables?.memberId === m.id}
                   disabled={removeMut.isPending && removeMut.variables?.memberId === m.id}
-                  onClick={() => removeMut.mutate({ listId, memberId: m.id })}
+                  onClick={() =>
+                    removeMut.mutate({ listId, memberId: m.id }, hapticMutationOptions())
+                  }
                 >
                   {t('lists.remove_member')}
                 </Button>
@@ -103,7 +106,7 @@ const ListMembers = ({
                 size="sm"
                 isLoading={addMut.isPending && addMut.variables?.memberId === p.id}
                 disabled={addMut.isPending && addMut.variables?.memberId === p.id}
-                onClick={() => addMut.mutate({ listId, memberId: p.id })}
+                onClick={() => addMut.mutate({ listId, memberId: p.id }, hapticMutationOptions())}
               >
                 + {displayName(p)}
               </Button>
@@ -135,7 +138,7 @@ export const MyListsPage = (): React.JSX.Element => {
   const onCreate = (): void => {
     const name = newName.trim();
     if (!name) return;
-    createMut.mutate(name, { onSuccess: () => setNewName('') });
+    createMut.mutate(name, hapticMutationOptions({ onSuccess: () => setNewName('') }));
   };
 
   const onDelete = async (id: string): Promise<void> => {
@@ -145,7 +148,7 @@ export const MyListsPage = (): React.JSX.Element => {
       destructive: true,
     });
     if (!confirmed) return;
-    deleteMut.mutate(id);
+    deleteMut.mutate(id, hapticMutationOptions());
     setExpandedId((cur) => (cur === id ? null : cur));
   };
 
