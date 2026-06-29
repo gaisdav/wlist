@@ -1,3 +1,4 @@
+import { getDisplayName } from '@wlist/core/entities/profile';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import {
   useAddListMember,
@@ -8,8 +9,8 @@ import {
   useUserLists,
 } from '@wlist/core/hooks/lists';
 import { useFollowersList, useFollowingList } from '@wlist/core/hooks/social';
-import { FolderPlus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { FolderPlus, Search, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../../components/primitives/button';
@@ -24,10 +25,47 @@ import { hapticMutationOptions } from '../../telegram/hapticMutation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
-const displayName = (p: { username: string | null; first_name: string }): string =>
-  p.username ? `@${p.username}` : p.first_name;
+interface PersonLike {
+  id: string;
+  username: string | null;
+  first_name: string;
+  telegram_id: number;
+}
 
-/** Members panel for one list: shows current members + candidates from follows. */
+/** Initials circle standing in for an avatar — keeps member rows scannable. */
+const PersonAvatar = ({ person }: { person: PersonLike }): React.JSX.Element => {
+  const initial = (person.first_name || person.username || '?').trim().charAt(0).toUpperCase();
+  return (
+    <span
+      aria-hidden
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+    >
+      {initial || '?'}
+    </span>
+  );
+};
+
+/** One person row: avatar + name (+ @username) + a trailing add/remove action. */
+const PersonRow = ({
+  person,
+  action,
+}: {
+  person: PersonLike;
+  action: React.ReactNode;
+}): React.JSX.Element => (
+  <li className="flex items-center gap-2">
+    <PersonAvatar person={person} />
+    <span className="flex min-w-0 flex-1 flex-col">
+      <span className="truncate text-sm font-medium text-foreground">{getDisplayName(person)}</span>
+      {person.username ? (
+        <span className="truncate text-xs text-muted">@{person.username}</span>
+      ) : null}
+    </span>
+    {action}
+  </li>
+);
+
+/** Members panel for one list: shows current members + searchable candidates. */
 const ListMembers = ({
   listId,
   viewerId,
@@ -43,54 +81,71 @@ const ListMembers = ({
   const addMut = useAddListMember(api);
   const removeMut = useRemoveListMember(api);
 
-  const memberIds = new Set((members.data ?? []).map((m) => m.id));
+  const [query, setQuery] = useState('');
 
   // Candidates = following ∪ followers, de-duped, excluding current members and self.
-  const candidateMap = new Map<
-    string,
-    { id: string; username: string | null; first_name: string }
-  >();
-  for (const p of [...(following.data ?? []), ...(followers.data ?? [])]) {
-    if (p.id !== viewerId && !memberIds.has(p.id)) candidateMap.set(p.id, p);
-  }
-  const candidates = [...candidateMap.values()];
+  const candidates = useMemo(() => {
+    const memberIds = new Set((members.data ?? []).map((m) => m.id));
+    const map = new Map<string, PersonLike>();
+    for (const p of [...(following.data ?? []), ...(followers.data ?? [])]) {
+      if (p.id !== viewerId && !memberIds.has(p.id)) map.set(p.id, p);
+    }
+    return [...map.values()];
+  }, [members.data, following.data, followers.data, viewerId]);
+
+  // Client-side filter — candidates are a bounded local set (follows), so no
+  // server search is needed (and the candidate rule stays intact).
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return candidates;
+    return candidates.filter(
+      (p) => p.first_name.toLowerCase().includes(q) || (p.username ?? '').toLowerCase().includes(q),
+    );
+  }, [candidates, query]);
+
   const isLoadingCandidates = members.isLoading || following.isLoading || followers.isLoading;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <span className="text-xs font-medium uppercase tracking-wide text-muted">
           {t('lists.members_title')}
         </span>
         {members.isLoading ? (
-          <Skeleton className="h-6 rounded" />
+          <Skeleton className="h-8 rounded" />
         ) : members.data && members.data.length > 0 ? (
-          <ul className="flex flex-col gap-1">
-            {members.data.map((m) => (
-              <li key={m.id} className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm text-foreground">{displayName(m)}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  intent="danger"
-                  size="sm"
-                  isLoading={removeMut.isPending && removeMut.variables?.memberId === m.id}
-                  disabled={removeMut.isPending && removeMut.variables?.memberId === m.id}
-                  onClick={() =>
-                    removeMut.mutate({ listId, memberId: m.id }, hapticMutationOptions())
+          <ul className="flex flex-col gap-2">
+            {members.data.map((m) => {
+              const pending = removeMut.isPending && removeMut.variables?.memberId === m.id;
+              return (
+                <PersonRow
+                  key={m.id}
+                  person={m}
+                  action={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      intent="danger"
+                      size="sm"
+                      isLoading={pending}
+                      disabled={pending}
+                      onClick={() =>
+                        removeMut.mutate({ listId, memberId: m.id }, hapticMutationOptions())
+                      }
+                    >
+                      {t('lists.remove_member')}
+                    </Button>
                   }
-                >
-                  {t('lists.remove_member')}
-                </Button>
-              </li>
-            ))}
+                />
+              );
+            })}
           </ul>
         ) : (
           <span className="text-sm text-muted">{t('lists.members_empty')}</span>
         )}
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <span className="text-xs font-medium uppercase tracking-wide text-muted">
           {t('lists.add_members')}
         </span>
@@ -98,21 +153,52 @@ const ListMembers = ({
         {isLoadingCandidates ? (
           <Skeleton className="h-8 rounded" />
         ) : candidates.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {candidates.map((p) => (
-              <Button
-                key={p.id}
-                type="button"
-                variant="outline"
-                size="sm"
-                isLoading={addMut.isPending && addMut.variables?.memberId === p.id}
-                disabled={addMut.isPending && addMut.variables?.memberId === p.id}
-                onClick={() => addMut.mutate({ listId, memberId: p.id }, hapticMutationOptions())}
-              >
-                + {displayName(p)}
-              </Button>
-            ))}
-          </div>
+          <>
+            <div className="relative">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+                strokeWidth={2}
+                aria-hidden
+              />
+              <TextInput
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('lists.members_search_placeholder')}
+                aria-label={t('lists.members_search_placeholder')}
+                className="pl-9"
+              />
+            </div>
+            {filtered.length > 0 ? (
+              <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto">
+                {filtered.map((p) => {
+                  const pending = addMut.isPending && addMut.variables?.memberId === p.id;
+                  return (
+                    <PersonRow
+                      key={p.id}
+                      person={p}
+                      action={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          isLoading={pending}
+                          disabled={pending}
+                          onClick={() =>
+                            addMut.mutate({ listId, memberId: p.id }, hapticMutationOptions())
+                          }
+                        >
+                          {t('lists.add_member')}
+                        </Button>
+                      }
+                    />
+                  );
+                })}
+              </ul>
+            ) : (
+              <span className="text-sm text-muted">{t('lists.members_no_matches')}</span>
+            )}
+          </>
         ) : (
           <span className="text-sm text-muted">{t('lists.no_candidates')}</span>
         )}

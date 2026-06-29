@@ -272,6 +272,9 @@
     "add_members": "Add members",
     "add_members_hint": "Add from people you follow or who follow you.",
     "no_candidates": "Nobody to add yet — follow people or get followers first.",
+    "members_search_placeholder": "Search by name or @username",
+    "members_no_matches": "No one matches your search.",
+    "add_member": "Add",
     "remove_member": "Remove"
   }
 }
