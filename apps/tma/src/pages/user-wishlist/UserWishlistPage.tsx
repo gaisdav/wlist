@@ -8,12 +8,14 @@ import {
   useUnfollowUser,
 } from '@wlist/core/hooks/social';
 import { useUserWishes } from '@wlist/core/hooks/wishes';
+import { Gift, WifiOff } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Redirect, useParams } from 'wouter';
 
 import { UserEventsSection } from '../../components/events';
 import { Button } from '../../components/primitives/button';
+import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { UserFollowsBottomSheet } from '../../components/social';
 import { WishCard } from '../../components/wishes';
@@ -130,9 +132,19 @@ export const UserWishlistPage = (): React.JSX.Element => {
       {userId && <UserEventsSection ownerId={userId} />}
 
       {wishes.isError ? (
-        <p className="text-sm text-destructive">{t('states.error')}</p>
+        <EmptyState
+          icon={WifiOff}
+          tone="error"
+          title={t('states.error_title')}
+          description={t('states.error_description')}
+          action={{ label: t('states.retry'), onClick: () => void wishes.refetch() }}
+        />
       ) : !wishes.data?.length ? (
-        <p className="text-sm text-muted">{t('wishes.list.empty')}</p>
+        <EmptyState
+          icon={Gift}
+          title={t('wishes.list.user_empty_title')}
+          description={t('wishes.list.user_empty_description')}
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {wishes.data.map((w) => (

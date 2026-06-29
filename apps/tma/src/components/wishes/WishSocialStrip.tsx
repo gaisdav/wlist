@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'wouter';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { haptics } from '../../telegram/haptics';
 import { CommentsBottomSheet } from '../comments';
 import { Button } from '../primitives/button';
 
@@ -41,7 +42,10 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               aria-label={likedByMe ? t('social.unlike') : t('social.like')}
               aria-pressed={likedByMe}
               disabled={likeState.isLoading || toggleLike.isPending}
-              onClick={() => void toggleLike.mutateAsync({ wishId: wish.id, liked: !likedByMe })}
+              onClick={() => {
+                haptics.impact('light');
+                void toggleLike.mutateAsync({ wishId: wish.id, liked: !likedByMe });
+              }}
             >
               <Heart
                 className={`h-4 w-4 shrink-0 ${likedByMe ? 'fill-primary text-primary' : ''}`}

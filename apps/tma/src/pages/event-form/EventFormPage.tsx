@@ -11,6 +11,7 @@ import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/sk
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
 const eventFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -86,6 +87,14 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
       setIsSaving(false);
     }
   };
+
+  // Native MainButton mirrors the in-page submit; the in-page button is the fallback.
+  useTelegramMainButton({
+    text: mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit'),
+    onClick: () => void handleSubmit(onValid)(),
+    isLoaderVisible: isSaving,
+    isEnabled: !isSaving,
+  });
 
   if (mode === 'edit' && (event.isLoading || !eventId)) {
     return (

@@ -23,6 +23,8 @@ import { WishReservationSection } from '../../components/wishes/WishReservationS
 import { WishSocialStrip } from '../../components/wishes/WishSocialStrip';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { confirm } from '../../telegram/confirm';
+import { haptics } from '../../telegram/haptics';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 import { WishDetailHero } from './WishDetailHero';
@@ -112,8 +114,14 @@ export const WishDetailPage = (): React.JSX.Element => {
   };
 
   const onDelete = async (): Promise<void> => {
-    if (!window.confirm(t('wishes.detail.delete_confirm'))) return;
+    const confirmed = await confirm({
+      message: t('wishes.detail.delete_confirm'),
+      confirmLabel: t('actions.delete'),
+      destructive: true,
+    });
+    if (!confirmed) return;
     await del.mutateAsync(w.id);
+    haptics.notify('success');
     setLocation('/me');
   };
 

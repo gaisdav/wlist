@@ -13,6 +13,8 @@ import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/sk
 import { WishCard } from '../../components/wishes';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { confirm } from '../../telegram/confirm';
+import { haptics } from '../../telegram/haptics';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 export const EventDetailPage = (): React.JSX.Element => {
@@ -44,8 +46,14 @@ export const EventDetailPage = (): React.JSX.Element => {
 
   const onDelete = async (): Promise<void> => {
     if (!eventId || !event.data) return;
-    if (!window.confirm(t('events.detail.delete_confirm'))) return;
+    const confirmed = await confirm({
+      message: t('events.detail.delete_confirm'),
+      confirmLabel: t('actions.delete'),
+      destructive: true,
+    });
+    if (!confirmed) return;
     await deleteMut.mutateAsync(eventId);
+    haptics.notify('success');
     setLocation('/me', { replace: true });
   };
 

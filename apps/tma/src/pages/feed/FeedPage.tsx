@@ -2,10 +2,12 @@ import type { FeedEventRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
 import { formatRelativeTime } from '@wlist/core/lib';
+import { Inbox, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
+import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes/WishCard';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
@@ -20,6 +22,7 @@ const titleFromPayload = (row: FeedEventRow): string => {
 
 export const FeedPage = (): React.JSX.Element => {
   const { t, i18n } = useTranslation('common');
+  const [, navigate] = useLocation();
   const api = useApiClient();
   const profile = useCurrentUser(api);
   const feed = useInfiniteFeed(api);
@@ -40,9 +43,20 @@ export const FeedPage = (): React.JSX.Element => {
           <Skeleton className="h-16 rounded-lg" />
         </PageLoadingPlaceholder>
       ) : feed.isError ? (
-        <p className="text-sm text-destructive">{t('states.error')}</p>
+        <EmptyState
+          icon={WifiOff}
+          tone="error"
+          title={t('states.error_title')}
+          description={t('states.error_description')}
+          action={{ label: t('states.retry'), onClick: () => void feed.refetch() }}
+        />
       ) : flat.length === 0 ? (
-        <p className="text-sm text-muted">{t('social.feed.empty')}</p>
+        <EmptyState
+          icon={Inbox}
+          title={t('social.feed.empty_title')}
+          description={t('social.feed.empty_description')}
+          action={{ label: t('nav.tabs.find_people'), onClick: () => navigate('/search') }}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {flat.map((row) => {

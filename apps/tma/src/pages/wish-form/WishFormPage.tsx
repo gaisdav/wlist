@@ -35,6 +35,7 @@ import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { showErrorToast } from '../../lib/errorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
 import {
   PrepareWishPhotoError,
@@ -270,6 +271,16 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       setIsSaving(false);
     }
   };
+
+  // Mirror the in-page submit on Telegram's native MainButton — the platform's
+  // primary CTA. The in-page button stays as the browser/dev fallback. The hook
+  // stashes onClick in a ref, so an inline handler is fine here.
+  useTelegramMainButton({
+    text: mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit'),
+    onClick: () => void handleSubmit(onValid)(),
+    isLoaderVisible: isSaving,
+    isEnabled: !isSaving,
+  });
 
   if (mode === 'create' && repostFromId && repostSource.isLoading) {
     return (
