@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { badgeVariants } from '../../../components/primitives/badge';
 import { Button } from '../../../components/primitives/button';
+import { SegmentedControl } from '../../../components/primitives/segmented-control';
+import { haptics } from '../../../telegram/haptics';
 
 type WishVisibility = Wish['visibility'];
 
@@ -21,10 +23,11 @@ interface WishVisibilitySectionProps {
 }
 
 /**
- * Visibility picker (public / followers / chosen lists). When "lists" is active,
- * reveals the owner's lists to toggle — or an empty-state with a CTA to create
- * one. An empty selection under "lists" shows an inline hint (submit is also
- * guarded upstream).
+ * Visibility picker as a segmented control — one of three mutually-exclusive
+ * audiences (public / followers / chosen lists), with a light haptic tick on
+ * change. When "lists" is active, reveals the owner's lists to multi-select via
+ * toggle chips — or a compact empty-state with a CTA to create one. An empty
+ * selection under "lists" shows an inline hint (submit is also guarded upstream).
  */
 export const WishVisibilitySection = ({
   isSaving,
@@ -39,30 +42,19 @@ export const WishVisibilitySection = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-foreground">
-        {t('wishes.form.visibility_label')}
-      </span>
-      <div className="flex flex-wrap gap-2">
-        {VISIBILITY_OPTIONS.map((opt) => {
-          const isSelected = visibility === opt;
-          return (
-            <button
-              key={opt}
-              type="button"
-              disabled={isSaving}
-              aria-pressed={isSelected}
-              className={badgeVariants({
-                variant: isSelected ? 'brand' : 'neutral',
-                size: 'md',
-                className: 'cursor-pointer hover:opacity-90 transition-all',
-              })}
-              onClick={() => onVisibilityChange(opt)}
-            >
-              {t(`wishes.form.visibility_${opt}`)}
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedControl
+        value={visibility}
+        onChange={(next) => {
+          haptics.select();
+          onVisibilityChange(next);
+        }}
+        disabled={isSaving}
+        aria-label={t('wishes.form.visibility_label')}
+        options={VISIBILITY_OPTIONS.map((opt) => ({
+          value: opt,
+          label: t(`wishes.form.visibility_${opt}`),
+        }))}
+      />
 
       {visibility === 'lists' ? (
         lists && lists.length > 0 ? (
