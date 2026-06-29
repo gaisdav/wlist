@@ -25,7 +25,7 @@
     "db:reset": "supabase db reset",
     "db:push": "supabase db push",
     "db:diff": "supabase db diff -f",
-    "db:types": "supabase gen types typescript --linked --schema public 2>/dev/null > packages/api/src/generated/database.types.ts",
+    "db:types": "tmp=$(mktemp) && supabase gen types typescript --linked --schema public > \"$tmp\" && test -s \"$tmp\" && mv \"$tmp\" packages/api/src/generated/database.types.ts || { rm -f \"$tmp\"; echo 'db:types failed — database.types.ts left unchanged' >&2; exit 1; }",
     "db:zod": "supazod --input packages/api/src/generated/database.types.ts --output packages/api/src/generated/database.zod.ts --schema public",
     "db:codegen": "pnpm db:types && pnpm db:zod"
   },

@@ -29,36 +29,6 @@ export type Database = {
         }
         Relationships: []
       }
-      event_visibility_lists: {
-        Row: {
-          event_id: string
-          list_id: string
-        }
-        Insert: {
-          event_id: string
-          list_id: string
-        }
-        Update: {
-          event_id?: string
-          list_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "event_visibility_lists_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_visibility_lists_list_id_fkey"
-            columns: ["list_id"]
-            isOneToOne: false
-            referencedRelation: "user_lists"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       event_wishes: {
         Row: {
           event_id: string
@@ -99,7 +69,6 @@ export type Database = {
           owner_id: string
           title: string
           updated_at: string
-          visibility: Database["public"]["Enums"]["wish_visibility"]
         }
         Insert: {
           created_at?: string
@@ -110,7 +79,6 @@ export type Database = {
           owner_id: string
           title: string
           updated_at?: string
-          visibility?: Database["public"]["Enums"]["wish_visibility"]
         }
         Update: {
           created_at?: string
@@ -121,7 +89,6 @@ export type Database = {
           owner_id?: string
           title?: string
           updated_at?: string
-          visibility?: Database["public"]["Enums"]["wish_visibility"]
         }
         Relationships: [
           {
@@ -576,6 +543,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      can_view_wish: {
+        Args: { p_viewer: string; p_wish_id: string }
+        Returns: boolean
+      }
       check_wish_comment_parent_visible: {
         Args: {
           p_parent_id: string
@@ -589,7 +560,7 @@ export type Database = {
     }
     Enums: {
       wish_slot_status: "active" | "cancelled"
-      wish_visibility: "public" | "followers" | "lists" | "private"
+      wish_visibility: "public" | "followers" | "lists"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -718,7 +689,7 @@ export const Constants = {
   public: {
     Enums: {
       wish_slot_status: ["active", "cancelled"],
-      wish_visibility: ["public", "followers", "lists", "private"],
+      wish_visibility: ["public", "followers", "lists"],
     },
   },
 } as const

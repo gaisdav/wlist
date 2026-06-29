@@ -13,7 +13,6 @@ export const publicWishVisibilitySchema = z.enum([
   "public",
   "followers",
   "lists",
-  "private",
 ]);
 
 export const jsonSchema: z.ZodSchema<Json> = z.lazy(() =>
@@ -42,38 +41,6 @@ export const publicAuthTelegramUsedInitDataUpdateSchema = z.object({
   init_data_hash: z.string().optional(),
   used_at: z.string().optional(),
 });
-
-export const publicEventVisibilityListsRowSchema = z.object({
-  event_id: z.string(),
-  list_id: z.string(),
-});
-
-export const publicEventVisibilityListsInsertSchema = z.object({
-  event_id: z.string(),
-  list_id: z.string(),
-});
-
-export const publicEventVisibilityListsUpdateSchema = z.object({
-  event_id: z.string().optional(),
-  list_id: z.string().optional(),
-});
-
-export const publicEventVisibilityListsRelationshipsSchema = z.tuple([
-  z.object({
-    foreignKeyName: z.literal("event_visibility_lists_event_id_fkey"),
-    columns: z.tuple([z.literal("event_id")]),
-    isOneToOne: z.literal(false),
-    referencedRelation: z.literal("events"),
-    referencedColumns: z.tuple([z.literal("id")]),
-  }),
-  z.object({
-    foreignKeyName: z.literal("event_visibility_lists_list_id_fkey"),
-    columns: z.tuple([z.literal("list_id")]),
-    isOneToOne: z.literal(false),
-    referencedRelation: z.literal("user_lists"),
-    referencedColumns: z.tuple([z.literal("id")]),
-  }),
-]);
 
 export const publicEventWishesRowSchema = z.object({
   event_id: z.string(),
@@ -116,7 +83,6 @@ export const publicEventsRowSchema = z.object({
   owner_id: z.string(),
   title: z.string(),
   updated_at: z.string(),
-  visibility: publicWishVisibilitySchema,
 });
 
 export const publicEventsInsertSchema = z.object({
@@ -128,7 +94,6 @@ export const publicEventsInsertSchema = z.object({
   owner_id: z.string(),
   title: z.string(),
   updated_at: z.string().optional(),
-  visibility: publicWishVisibilitySchema.optional(),
 });
 
 export const publicEventsUpdateSchema = z.object({
@@ -140,7 +105,6 @@ export const publicEventsUpdateSchema = z.object({
   owner_id: z.string().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
-  visibility: publicWishVisibilitySchema.optional(),
 });
 
 export const publicEventsRelationshipsSchema = z.tuple([
@@ -611,6 +575,13 @@ export const publicBookWishSlotsReturnsSchema = z.array(
     wish_id: z.string(),
   }),
 );
+
+export const publicCanViewWishArgsSchema = z.object({
+  p_viewer: z.string(),
+  p_wish_id: z.string(),
+});
+
+export const publicCanViewWishReturnsSchema = z.boolean();
 
 export const publicCheckWishCommentParentVisibleArgsSchema = z.object({
   p_parent_id: z.string(),

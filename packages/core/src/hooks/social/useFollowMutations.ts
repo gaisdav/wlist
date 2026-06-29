@@ -21,9 +21,15 @@ const invalidateFollowSide = (
   void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
 };
 
-const bumpCounts = (qc: QueryClient, key: readonly unknown[], field: keyof Counts, delta: number) => {
+const bumpCounts = (
+  qc: QueryClient,
+  key: readonly unknown[],
+  field: keyof Counts,
+  delta: number,
+) => {
   const current = qc.getQueryData<Counts>(key);
-  if (current) qc.setQueryData<Counts>(key, { ...current, [field]: Math.max(0, current[field] + delta) });
+  if (current)
+    qc.setQueryData<Counts>(key, { ...current, [field]: Math.max(0, current[field] + delta) });
 };
 
 /**
