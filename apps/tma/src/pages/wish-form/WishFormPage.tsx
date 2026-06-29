@@ -32,6 +32,7 @@ import { badgeVariants } from '../../components/primitives/badge';
 import { Button } from '../../components/primitives/button';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
+import { showErrorToast } from '../../lib/errorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
@@ -212,8 +213,12 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
   const onValid = async (payload: WishDraftPayload): Promise<void> => {
     // 'lists' visibility requires at least one list, else the wish is invisible
-    // to everyone but the owner. The inline hint under the selector explains it.
-    if (visibility === 'lists' && selectedListIds.length === 0) return;
+    // to everyone but the owner. Inline hint + toast so the blocked submit isn't
+    // a silent no-op.
+    if (visibility === 'lists' && selectedListIds.length === 0) {
+      showErrorToast(t('wishes.form.visibility_lists_pick'));
+      return;
+    }
     setIsSaving(true);
     try {
       const body = {

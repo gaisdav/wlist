@@ -48,6 +48,7 @@ const ListMembers = ({
     if (p.id !== viewerId && !memberIds.has(p.id)) candidateMap.set(p.id, p);
   }
   const candidates = [...candidateMap.values()];
+  const isLoadingCandidates = members.isLoading || following.isLoading || followers.isLoading;
 
   return (
     <div className="flex flex-col gap-3">
@@ -67,7 +68,8 @@ const ListMembers = ({
                   variant="ghost"
                   intent="danger"
                   size="sm"
-                  isLoading={removeMut.isPending}
+                  isLoading={removeMut.isPending && removeMut.variables?.memberId === m.id}
+                  disabled={removeMut.isPending && removeMut.variables?.memberId === m.id}
                   onClick={() => removeMut.mutate({ listId, memberId: m.id })}
                 >
                   {t('lists.remove_member')}
@@ -84,7 +86,9 @@ const ListMembers = ({
         <span className="text-xs font-medium uppercase tracking-wide text-muted">
           {t('lists.add_members')}
         </span>
-        {candidates.length > 0 ? (
+        {isLoadingCandidates ? (
+          <Skeleton className="h-8 rounded" />
+        ) : candidates.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {candidates.map((p) => (
               <Button
@@ -92,7 +96,8 @@ const ListMembers = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={addMut.isPending}
+                isLoading={addMut.isPending && addMut.variables?.memberId === p.id}
+                disabled={addMut.isPending && addMut.variables?.memberId === p.id}
                 onClick={() => addMut.mutate({ listId, memberId: p.id })}
               >
                 + {displayName(p)}
