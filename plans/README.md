@@ -78,6 +78,7 @@
 | 12  | ⬜     | [`12-multi-platform.md`](./12-multi-platform.md)           | Расширение на веб-сайт и React Native через монорепо           |
 | 13  | ⬜     | [`13-future-features.md`](./13-future-features.md)         | Backlog: Secret Santa, AI, геймификация, календарь, TG-чаты вне TMA   |
 | 14  | 🔵     | [`14-wish-form-ux.md`](./14-wish-form-ux.md)               | Редизайн экрана создания/редактирования желания (UX-план)            |
+| 15  | 🔵     | [`15-event-list-ux.md`](./15-event-list-ux.md)             | UX форм события и списков + сквозные замечания (UX-план)             |
 
 ## Структура файла этапа
 
