@@ -9,6 +9,14 @@ export const queryKeys = {
     search: (q: string) => [...queryKeys.all, 'profiles', 'search', q] as const,
   },
 
+  lists: {
+    all: () => [...queryKeys.all, 'lists'] as const,
+    mine: () => [...queryKeys.lists.all(), 'mine'] as const,
+    members: (listId: string) => [...queryKeys.lists.all(), 'members', listId] as const,
+    /** List ids a wish is shared with (edit-form prefill). */
+    forWish: (wishId: string) => [...queryKeys.lists.all(), 'forWish', wishId] as const,
+  },
+
   follows: {
     counts: (userId: string) => [...queryKeys.all, 'follows', 'counts', userId] as const,
     isFollowing: (followeeId: string) =>

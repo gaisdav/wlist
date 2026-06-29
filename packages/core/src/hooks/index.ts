@@ -2,6 +2,7 @@
 // Each domain has its own folder; re-exports are added as hooks land in plans 01–04.
 export * from './auth/index.js';
 export * from './social/index.js';
+export * from './lists/index.js';
 export * from './slots/index.js';
 export * from './wishes/index.js';
 export * from './comments/index.js';
