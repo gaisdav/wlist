@@ -22,7 +22,7 @@ import {
   WISH_SLOTS_DEFAULT_CAP,
 } from '@wlist/core/lib';
 import { Plus } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
@@ -273,13 +273,11 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   };
 
   // Mirror the in-page submit on Telegram's native MainButton — the platform's
-  // primary CTA. The in-page button stays as the browser/dev fallback.
-  const submitFromMainButton = useCallback(() => {
-    void handleSubmit(onValid)();
-  }, [handleSubmit, onValid]);
+  // primary CTA. The in-page button stays as the browser/dev fallback. The hook
+  // stashes onClick in a ref, so an inline handler is fine here.
   useTelegramMainButton({
     text: mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit'),
-    onClick: submitFromMainButton,
+    onClick: () => void handleSubmit(onValid)(),
     isLoaderVisible: isSaving,
     isEnabled: !isSaving,
   });

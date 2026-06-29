@@ -1,5 +1,5 @@
 import { mountMainButton, onMainButtonClick, setMainButtonParams } from '@telegram-apps/sdk-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface MainButtonOptions {
   text: string;
@@ -25,6 +25,11 @@ export const useTelegramMainButton = ({
   isEnabled = true,
   isLoaderVisible = false,
 }: MainButtonOptions): void => {
+  // Keep the latest handler in a ref so callers can pass an inline `onClick`
+  // without forcing the effect (and the click re-registration) to re-run.
+  const onClickRef = useRef(onClick);
+  onClickRef.current = onClick;
+
   useEffect(() => {
     if (mountMainButton.isAvailable()) mountMainButton();
     if (!setMainButtonParams.isAvailable()) return;
@@ -32,7 +37,7 @@ export const useTelegramMainButton = ({
     setMainButtonParams({ text, isVisible, isEnabled, isLoaderVisible });
 
     const off: VoidFunction | undefined = onMainButtonClick.isAvailable()
-      ? onMainButtonClick(onClick)
+      ? onMainButtonClick(() => onClickRef.current())
       : undefined;
 
     return () => {
@@ -40,5 +45,5 @@ export const useTelegramMainButton = ({
       // Hide on unmount so the button never bleeds into the next screen.
       if (setMainButtonParams.isAvailable()) setMainButtonParams({ isVisible: false });
     };
-  }, [text, onClick, isVisible, isEnabled, isLoaderVisible]);
+  }, [text, isVisible, isEnabled, isLoaderVisible]);
 };

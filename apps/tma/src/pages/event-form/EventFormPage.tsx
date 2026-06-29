@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateEvent, useEvent, useUpdateEvent } from '@wlist/core/hooks/events';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'wouter';
@@ -89,12 +89,9 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
   };
 
   // Native MainButton mirrors the in-page submit; the in-page button is the fallback.
-  const submitFromMainButton = useCallback(() => {
-    void handleSubmit(onValid)();
-  }, [handleSubmit, onValid]);
   useTelegramMainButton({
     text: mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit'),
-    onClick: submitFromMainButton,
+    onClick: () => void handleSubmit(onValid)(),
     isLoaderVisible: isSaving,
     isEnabled: !isSaving,
   });

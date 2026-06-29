@@ -1,0 +1,73 @@
+name: Claude PR Review
+
+# Automatically review code and leave inline comments when a PR is opened.
+# Uses Anthropic's official Claude Code action. Requires the repo secret
+# ANTHROPIC_API_KEY (Settings → Secrets and variables → Actions).
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+# One review per PR head ref at a time; a force-push supersedes the previous run.
+concurrency:
+  group: claude-review-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  review:
+    name: review · comment
+    # Skip drafts and PRs from forks (forks can't read repo secrets, so the
+    # action would fail with a confusing auth error rather than no-op).
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      pull-requests: write # post review comments
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history so the action can diff against the base
+
+      - name: Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # `pull_request` mode runs a one-shot automated review (no @claude
+          # mention needed) and posts findings as inline comments on the diff.
+          track_progress: true
+          prompt: |
+            Review this pull request and leave inline comments on the diff.
+
+            This repo is `wlist` — a Telegram Mini App. pnpm monorepo, Vite +
+            React + Tailwind v4 frontend, Supabase (Postgres + RLS + Edge
+            Functions) backend, no custom backend server. Honor the conventions
+            in CLAUDE.md and docs/architecture.md.
+
+            Focus your review on, in priority order:
+            1. Correctness bugs and broken edge cases.
+            2. Package-boundary violations (see CLAUDE.md): `@wlist/core` must
+               stay platform-agnostic (no react-dom, window/document,
+               @telegram-apps/*, no concrete SupabaseApiClient — only the
+               ApiClient interface).
+            3. RLS / security regressions on Supabase tables and Edge Functions;
+               `initData` must be validated server-side only.
+            4. Convention drift: snake_case kept end-to-end, entities extending
+               generated Zod (never hand-copied columns), query keys from the
+               single factory, optimistic-only-for-toggles mutation policy,
+               no hardcoded UI strings (everything via t(...)), lucide-react
+               icons only in apps/tma, clsx for class composition.
+
+            Be concise and specific. Skip nitpicks already enforced by ESLint or
+            Prettier — CI covers those. If the PR looks clean, say so briefly.
+          claude_args: '--max-turns 25'
