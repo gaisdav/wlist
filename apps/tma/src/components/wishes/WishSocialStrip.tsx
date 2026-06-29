@@ -3,6 +3,7 @@ import { useToggleWishLike, useWishLikeState } from '@wlist/core/hooks/social';
 import { Heart, MessageCircle, Repeat2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'wouter';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { CommentsBottomSheet } from '../comments';
@@ -16,6 +17,7 @@ interface WishSocialStripProps {
 export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.JSX.Element => {
   const { t } = useTranslation('common');
   const api = useApiClient();
+  const [, setLocation] = useLocation();
   const likeState = useWishLikeState(api, isOwner ? undefined : wish.id);
   const toggleLike = useToggleWishLike(api);
 
@@ -48,7 +50,9 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               />
             </Button>
           )}
-          <span aria-label={t('social.likes_count')}>{likesDisplay}</span>
+          {likesDisplay > 0 ? (
+            <span aria-label={t('social.likes_count')}>{likesDisplay}</span>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -66,12 +70,37 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
           >
             <MessageCircle className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
           </Button>
-          <span aria-label={t('comments.title')}>{wish.comments_count}</span>
+          {wish.comments_count > 0 ? (
+            <span aria-label={t('comments.title')}>{wish.comments_count}</span>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Repeat2 className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} aria-hidden />
-          <span aria-label={t('social.reposts_count')}>{wish.reposts_count}</span>
+          {isOwner ? (
+            <Repeat2
+              className="h-4 w-4 shrink-0 text-muted-foreground"
+              strokeWidth={2}
+              aria-hidden
+            />
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="iconRound"
+              className="text-foreground"
+              aria-label={t('social.repost')}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setLocation(`/wish/new?repostFrom=${wish.id}`);
+              }}
+            >
+              <Repeat2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+            </Button>
+          )}
+          {wish.reposts_count > 0 ? (
+            <span aria-label={t('social.reposts_count')}>{wish.reposts_count}</span>
+          ) : null}
         </div>
       </div>
 
