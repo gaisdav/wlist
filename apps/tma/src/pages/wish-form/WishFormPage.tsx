@@ -132,8 +132,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
   // Open the "Add details" disclosure by default when the wish being edited or
   // reposted already uses an advanced field, so existing data isn't hidden a tap
-  // away. Native <details> reads `open` once at mount; by then the edit-mode
-  // loading guard has resolved `existing.data`, so this is stable.
+  // away. Collapsible captures `defaultOpen` once at mount; the loading guards
+  // gate the form on existing/wishEvents (edit) and repostSource (create), so by
+  // mount every input here is resolved and this value is final.
   const detailsSource = mode === 'edit' ? existing.data : repostSource.data;
   const detailsDefaultOpen =
     (detailsSource?.copy_lines?.length ?? 0) > 0 ||
@@ -301,7 +302,11 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     return <p className="p-4 text-sm text-muted">{t('social.repost_source_unavailable')}</p>;
   }
 
-  if (mode === 'edit' && (existing.isLoading || !wishId)) {
+  // Gate on wishEvents too: `detailsDefaultOpen` (and the Collapsible's
+  // mount-time read of it) depends on the linked events, so the form must not
+  // render until they're known — otherwise an events-only wish would open
+  // collapsed, hiding existing links.
+  if (mode === 'edit' && (existing.isLoading || wishEvents.isLoading || !wishId)) {
     return (
       <PageLoadingPlaceholder>
         <Skeleton className="h-10 rounded-lg" />
