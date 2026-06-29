@@ -29,7 +29,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
   return (
     <>
       <div className="flex flex-wrap items-center gap-4 border-t border-border px-3 py-2 text-sm text-muted">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {isOwner ? (
             <Heart className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={2} aria-hidden />
           ) : (
@@ -55,7 +55,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
           ) : null}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <Button
             type="button"
             variant="ghost"
@@ -75,7 +75,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
           ) : null}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {isOwner ? (
             <Repeat2
               className="h-4 w-4 shrink-0 text-muted-foreground"
