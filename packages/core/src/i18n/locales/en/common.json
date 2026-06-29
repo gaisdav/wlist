@@ -60,7 +60,10 @@
       "price": "{{amount}} {{currency}}",
       "price_no_currency": "{{amount}}",
       "has_product_link": "Includes a product link",
-      "collaborative": "Group gift"
+      "collaborative": "Group gift",
+      "visibility_public": "Visible to everyone",
+      "visibility_followers": "Visible to followers",
+      "visibility_lists": "Visible to chosen lists"
     },
     "detail": {
       "title": "Wish",
@@ -96,6 +99,13 @@
       "submit_create": "Create wish",
       "submit_edit": "Save changes",
       "add_copy_line": "Add copy line",
+      "visibility_label": "Who can see this",
+      "visibility_public": "Everyone",
+      "visibility_followers": "My followers",
+      "visibility_lists": "Chosen lists",
+      "visibility_lists_pick": "Pick at least one list",
+      "visibility_lists_empty": "You have no lists yet.",
+      "visibility_lists_manage": "Manage lists",
       "collaborative_label": "Group gift (others can book slots)",
       "collaborative_locked_hint": "Cannot be changed after the wish is created. Delete this wish and create a new one to use different group-gift settings.",
       "max_slots_label": "Max participants (optional)",
@@ -225,5 +235,24 @@
     "wish_select": {
       "label": "Add to events"
     }
+  },
+  "lists": {
+    "title": "My lists",
+    "subtitle": "Group your contacts to control who sees each wish.",
+    "manage": "Manage lists",
+    "empty": "No lists yet. Create one to share wishes with a chosen group.",
+    "create": "New list",
+    "create_placeholder": "List name (e.g. Family)",
+    "delete": "Delete",
+    "delete_confirm": "Delete this list? Wishes shared only with it become invisible to its members.",
+    "name_label": "List name",
+    "members_title": "Members",
+    "members_empty": "No members yet.",
+    "add_members": "Add members",
+    "add_members_hint": "Add from people you follow or who follow you.",
+    "no_candidates": "Nobody to add yet — follow people or get followers first.",
+    "remove_member": "Remove",
+    "tab_following": "Following",
+    "tab_followers": "Followers"
   }
 }

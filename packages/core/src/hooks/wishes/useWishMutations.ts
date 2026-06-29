@@ -11,6 +11,8 @@ export const useCreateWish = (api: ApiClient) => {
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.byOwner(row.owner_id) });
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(row.id) });
       void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
+      // `create` may also write wish_visibility_lists (visibility = 'lists').
+      void qc.invalidateQueries({ queryKey: queryKeys.lists.forWish(row.id) });
     },
   });
 };
@@ -22,6 +24,8 @@ export const useUpdateWish = (api: ApiClient) => {
     onSuccess: (row) => {
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.byOwner(row.owner_id) });
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(row.id) });
+      // `update` re-syncs share links, so the edit-form prefill must refetch.
+      void qc.invalidateQueries({ queryKey: queryKeys.lists.forWish(row.id) });
     },
   });
 };
