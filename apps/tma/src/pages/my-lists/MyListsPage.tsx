@@ -22,6 +22,7 @@ import { useApiClient } from '../../providers/ApiClientProvider';
 import { confirm } from '../../telegram/confirm';
 import { hapticMutationOptions } from '../../telegram/hapticMutation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
 const displayName = (p: { username: string | null; first_name: string }): string =>
   p.username ? `@${p.username}` : p.first_name;
@@ -135,11 +136,23 @@ export const MyListsPage = (): React.JSX.Element => {
   useTelegramBackButton(() => window.history.back(), true);
   useQueryErrorToast(lists.isError && !lists.isLoading, t('states.error'));
 
+  const canCreate = newName.trim() !== '';
+
   const onCreate = (): void => {
     const name = newName.trim();
     if (!name) return;
     createMut.mutate(name, hapticMutationOptions({ onSuccess: () => setNewName('') }));
   };
+
+  // "New list" rides Telegram's native MainButton — the platform's primary CTA,
+  // matching the wish/event forms. The in-page button stays as the browser/dev
+  // fallback and is hidden when the native button is active.
+  const mainButtonActive = useTelegramMainButton({
+    text: t('lists.create'),
+    onClick: onCreate,
+    isEnabled: canCreate && !createMut.isPending,
+    isLoaderVisible: createMut.isPending,
+  });
 
   const onDelete = async (id: string): Promise<void> => {
     const confirmed = await confirm({
@@ -177,15 +190,17 @@ export const MyListsPage = (): React.JSX.Element => {
             maxLength={100}
           />
         </FormField>
-        <Button
-          type="button"
-          size="md"
-          isLoading={createMut.isPending}
-          disabled={newName.trim() === ''}
-          onClick={onCreate}
-        >
-          {t('lists.create')}
-        </Button>
+        {!mainButtonActive ? (
+          <Button
+            type="button"
+            size="md"
+            isLoading={createMut.isPending}
+            disabled={!canCreate}
+            onClick={onCreate}
+          >
+            {t('lists.create')}
+          </Button>
+        ) : null}
       </div>
 
       {!lists.data?.length ? (
