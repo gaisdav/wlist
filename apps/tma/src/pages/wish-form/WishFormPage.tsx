@@ -289,7 +289,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     isEnabled: !isSaving,
   });
 
-  if (mode === 'create' && repostFromId && repostSource.isLoading) {
+  // Wait on the repost source's chosen lists too, so a reposted 'lists' wish
+  // doesn't render (and can't be saved) before its list prefill is seeded.
+  if (mode === 'create' && repostFromId && (repostSource.isLoading || repostLists.isLoading)) {
     return (
       <PageLoadingPlaceholder>
         <Skeleton className="h-10 rounded-lg" />
@@ -302,11 +304,15 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     return <p className="p-4 text-sm text-muted">{t('social.repost_source_unavailable')}</p>;
   }
 
-  // Gate on wishEvents too: `detailsDefaultOpen` (and the Collapsible's
-  // mount-time read of it) depends on the linked events, so the form must not
-  // render until they're known — otherwise an events-only wish would open
-  // collapsed, hiding existing links.
-  if (mode === 'edit' && (existing.isLoading || wishEvents.isLoading || !wishId)) {
+  // Gate on every prefill source — existing wish, its linked events, and its
+  // chosen lists — so the form never renders before its state is seeded. This
+  // makes "prefill before render" a hard invariant: it keeps `detailsDefaultOpen`
+  // correct at the Collapsible's mount-time read, and (more importantly) prevents
+  // a too-early save from wiping events / chosen lists with empty arrays.
+  if (
+    mode === 'edit' &&
+    (existing.isLoading || wishEvents.isLoading || wishLists.isLoading || !wishId)
+  ) {
     return (
       <PageLoadingPlaceholder>
         <Skeleton className="h-10 rounded-lg" />
