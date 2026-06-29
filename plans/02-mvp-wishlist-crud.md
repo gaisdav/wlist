@@ -89,7 +89,7 @@
 - [x] Экран карточки желания
 - [x] Экран просмотра чужого вишлиста
 - [x] Skeleton (списки, деталь, форма)
-- [ ] Optimistic updates (можно добавить позже)
+- [x] Optimistic updates — для toggle-мутаций (likes, follow/unfollow). Для create/update желаний и серверной логики (slots, comments) — `invalidateQueries`, без фейкового результата (политика — `docs/architecture.md` §6, `CLAUDE.md`).
 
 ## Definition of Done
 

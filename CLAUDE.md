@@ -42,6 +42,14 @@ touches React). New use-cases go into `services/` first, not straight into `hook
 - **Never edit `packages/api/src/generated/**`by hand** — regenerate with`pnpm db:codegen`.
 - **Query keys come from one factory** (`core/config/queryKeys.ts`). Invalidate next to
   the mutation, not scattered in components.
+- **Mutations: optimistic for toggles, invalidate for the rest.** Toggle-style
+  mutations where the UI must react instantly (like, follow/unfollow, future
+  bookmark) use the optimistic pattern: `onMutate` (cancelQueries → snapshot →
+  setQueryData), `onError` rollback, `onSettled` invalidate. For `create` and
+  mutations with server-derived state (generated id/`created_at`, photo upload,
+  slot cap, comment visibility) **don't fake the result** — just `invalidateQueries`
+  in `onSuccess`/`onSettled`. Reference: `useToggleWishLike`, `useFollowMutations`;
+  rationale in `docs/architecture.md` §6.
 - **No hardcoded UI strings** — everything user-facing goes through `t(...)` (`i18next`).
 - **Icons:** `lucide-react` only in `apps/tma`. No inline `<svg>` / `*.svg?react`.
 - **Class names:** compose with `clsx` (already a dep) — never string-concat Tailwind classes.
