@@ -14,7 +14,9 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '../../components/primitives/button';
 import { EmptyState } from '../../components/primitives/empty-state';
+import { FormField } from '../../components/primitives/form-field';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { TextInput } from '../../components/primitives/text-field';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { confirm } from '../../telegram/confirm';
@@ -164,16 +166,14 @@ export const MyListsPage = (): React.JSX.Element => {
       </header>
 
       <div className="flex items-end gap-2">
-        <label className="flex flex-1 flex-col gap-1">
-          <span className="text-sm font-medium text-foreground">{t('lists.name_label')}</span>
-          <input
+        <FormField label={t('lists.name_label')} className="flex-1">
+          <TextInput
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder={t('lists.create_placeholder')}
             maxLength={100}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
           />
-        </label>
+        </FormField>
         <Button
           type="button"
           size="md"
