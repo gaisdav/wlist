@@ -90,7 +90,6 @@
 - [x] Экран просмотра чужого вишлиста
 - [x] Skeleton (списки, деталь, форма)
 - [ ] Optimistic updates (можно добавить позже)
-- [ ] Telegram `MainButton` как дубль submit (сейчас достаточно кнопки в форме + `BackButton`)
 
 ## Definition of Done
 

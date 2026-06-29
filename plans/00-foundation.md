@@ -103,26 +103,26 @@
 
 ## Чек-лист задач
 
-- [ ] Инициализировать моно-репо на pnpm workspaces
-- [ ] Настроить TS / ESLint / Prettier / Husky
-- [ ] Создать `apps/tma` (Vite + React)
-- [ ] Создать пакеты `core`, `api`, `config` (структура `core` — layer-based)
-- [ ] Завести `packages/core/tokens` (colors, spacing, radii, typography) как plain TS
-- [ ] Подключить Tailwind CSS, прокинуть токены из `core/tokens` в `tailwind.config`
-- [ ] Настроить семантические токены под Telegram-темы (`--tg-theme-*` → `bg-background`, `text-foreground` и т.д.)
-- [ ] Подключить `tailwind-variants` (или `cva`) + `clsx`
-- [ ] Подключить TanStack Query, React Hook Form, Zod в зависимостях
-- [ ] Подключить i18next + react-i18next; завести `packages/core/src/i18n/locales/en/` и type-safe `t()`
-- [ ] Подключить Vitest и базовый `vitest.config.ts` (без тестов — будут по фактической нужде)
-- [ ] Создать Supabase-проект (dev), подключить CLI (гибридный режим)
-- [ ] Настроить `pnpm db:types` (supabase gen types → `database.types.ts`)
-- [ ] Настроить `pnpm db:zod` (supazod → `database.zod.ts`)
-- [ ] CI-проверка свежести обоих файлов при наличии миграций в PR
-- [ ] Создать Telegram-бота через BotFather
-- [ ] Подключить Mini App URL к боту
-- [ ] Захостить TMA на Vercel (HTTPS-домен)
-- [ ] Настроить GitHub Actions (lint/typecheck/build/unit)
-- [ ] Настроить preview-деплои на PR (через Vercel)
+- [x] Инициализировать моно-репо на pnpm workspaces
+- [x] Настроить TS / ESLint / Prettier / Husky
+- [x] Создать `apps/tma` (Vite + React)
+- [x] Создать пакеты `core`, `api`, `config` (структура `core` — layer-based)
+- [x] Завести `packages/core/tokens` (colors, spacing, radii, typography) как plain TS
+- [x] Подключить Tailwind CSS, прокинуть токены из `core/tokens` в `tailwind.config`
+- [x] Настроить семантические токены под Telegram-темы (`--tg-theme-*` → `bg-background`, `text-foreground` и т.д.)
+- [x] Подключить `tailwind-variants` (или `cva`) + `clsx`
+- [x] Подключить TanStack Query, React Hook Form, Zod в зависимостях
+- [x] Подключить i18next + react-i18next; завести `packages/core/src/i18n/locales/en/` и type-safe `t()`
+- [x] Подключить Vitest и базовый `vitest.config.ts` (без тестов — будут по фактической нужде)
+- [x] Создать Supabase-проект (dev), подключить CLI (гибридный режим)
+- [x] Настроить `pnpm db:types` (supabase gen types → `database.types.ts`)
+- [x] Настроить `pnpm db:zod` (supazod → `database.zod.ts`)
+- [x] CI-проверка свежести обоих файлов при наличии миграций в PR (`.github/workflows/supabase.yml`)
+- [x] Создать Telegram-бота через BotFather
+- [x] Подключить Mini App URL к боту
+- [x] Захостить TMA на Vercel (HTTPS-домен)
+- [x] Настроить GitHub Actions (lint/typecheck/build/unit — `.github/workflows/ci.yml`)
+- [x] Настроить preview-деплои на PR (через Vercel)
 
 ## Definition of Done
 

@@ -104,10 +104,17 @@ SQL-функция `can_view_wish(viewer uuid, wish_id uuid) returns boolean`:
 
 ## Чек-лист задач
 
-- [ ] Миграции: `user_lists`, `user_list_members`, `wish_visibility_lists`, поле `visibility`
+> Статус: 🟡 частично. Сделан только **Шаг 1** (схема БД) — миграция
+> `20260618100000_privacy_and_access_levels_step1.sql`: enum `wish_visibility`,
+> таблицы `user_lists` / `user_list_members` / `wish_visibility_lists` /
+> `event_visibility_lists`, колонки `visibility` в `wishes`/`events`, дата-миграция
+> `public`. RLS через `can_view_wish`, API/hooks и UI **ещё не реализованы**; поле
+> `visibility` пока **не** заведено в `core/entities/wish`.
+
+- [x] Миграции: `user_lists`, `user_list_members`, `wish_visibility_lists`, поле `visibility`
 - [ ] SQL-функция `can_view_wish`
 - [ ] **Переписать все существующие RLS-политики** через функцию
-- [ ] Миграция данных (default `visibility = 'public'`)
+- [x] Миграция данных (default `visibility = 'public'`)
 - [ ] API + hooks
 - [ ] UI: списки контактов
 - [ ] UI: селектор видимости в форме желания

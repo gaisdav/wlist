@@ -65,15 +65,15 @@
 
 ## Чек-лист задач
 
-- [ ] Создать таблицу `profiles` + миграцию
-- [ ] Прописать RLS-политики для `profiles`
-- [ ] Реализовать Edge Function `auth-telegram` с валидацией initData
-- [ ] Покрыть Edge Function `auth-telegram` unit-тестами (Vitest): валидная подпись → ок; невалидная подпись → 401; истекший `auth_date` → 401; повторный логин не дублирует профиль (security category A, см. `docs/architecture.md` §16)
-- [ ] Реализовать `signInWithTelegram` в `packages/api`
-- [ ] Реализовать `useCurrentUser` в `packages/core`
-- [ ] Подключить auth-flow в `apps/tma` (экран загрузки)
-- [ ] Минимальный экран профиля
-- [ ] E2E-проверка: запуск Mini App в Telegram → видим свой профиль
+- [x] Создать таблицу `profiles` + миграцию
+- [x] Прописать RLS-политики для `profiles`
+- [x] Реализовать Edge Function `auth-telegram` с валидацией initData
+- [x] Покрыть Edge Function `auth-telegram` unit-тестами (Vitest): валидная подпись → ок; невалидная подпись → 401; истекший `auth_date` → 401; повторный логин не дублирует профиль (security category A, см. `docs/architecture.md` §16)
+- [x] Реализовать `signInWithTelegram` в `packages/api`
+- [x] Реализовать `useCurrentUser` в `packages/core`
+- [x] Подключить auth-flow в `apps/tma` (экран загрузки — `AuthGate` / `useAuthBootstrap`)
+- [x] Минимальный экран профиля
+- [x] E2E-проверка: запуск Mini App в Telegram → видим свой профиль
 
 ## Definition of Done
 

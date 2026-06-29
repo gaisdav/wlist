@@ -149,14 +149,14 @@ API `BottomSheet` (черновик): `open`, `onClose`, `title?`, `children` **
 
 ## Чек-лист задач
 
-- [ ] Миграция `wish_comments` + `visible_to_owner_thread` + при необходимости `wishes.comments_count` (без `wishes.tg_chat_id` — см. этап 10; стратегия наследования для ответов — см. §1)
-- [ ] RLS-политики (не-автор / автор; открытые и закрытые ветки)
-- [ ] Тесты RLS (закрытые ветки не видны автору; корень автором → всегда `true`; корень не-автором → по флагу; ответы наследуют)
-- [ ] UX: чекбокс + модалка — корень **не-автора**; корень **автора** — без чекбокса/модалки, `true` на сервере
-- [ ] API: list/create/update/delete
-- [ ] Hooks: `useWishComments`, `usePostComment`
-- [ ] UI: `BottomSheet` (overlays) + `CommentsBottomSheet` (scroll body + sticky textarea footer)
-- [ ] UI: интеграция в `WishDetailPage`, `WishCard` (лента и списки), правило показа при нуле комментариев
+- [x] Миграция `wish_comments` + `visible_to_owner_thread` + при необходимости `wishes.comments_count` (без `wishes.tg_chat_id` — см. этап 10; стратегия наследования для ответов — см. §1)
+- [x] RLS-политики (не-автор / автор; открытые и закрытые ветки)
+- [ ] Тесты RLS (закрытые ветки не видны автору; корень автором → всегда `true`; корень не-автором → по флагу; ответы наследуют) — после беты, см. этап 04
+- [x] UX: чекбокс + модалка — корень **не-автора**; корень **автора** — без чекбокса/модалки, `true` на сервере
+- [x] API: list/create/update/delete
+- [x] Hooks: `useWishComments`, `usePostComment` (`useCommentMutations`)
+- [x] UI: `BottomSheet` (overlays) + `CommentsBottomSheet` (scroll body + sticky textarea footer)
+- [x] UI: интеграция в `WishDetailPage`, `WishCard` (лента и списки), правило показа при нуле комментариев
 - [ ] Маркеры непрочитанного
 
 ## Definition of Done
