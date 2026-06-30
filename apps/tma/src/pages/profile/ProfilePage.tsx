@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
 import { ProfileAvatar } from '../../components/primitives/profile-avatar';
-import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { Skeleton } from '../../components/primitives/skeleton';
 import { UserFollowsBottomSheet } from '../../components/social';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -114,11 +114,21 @@ export const ProfilePage = (): React.JSX.Element => {
 
   if (profile.isLoading) {
     return (
-      <PageLoadingPlaceholder>
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-16 rounded-xl" />
-        <Skeleton className="h-16 rounded-xl" />
-      </PageLoadingPlaceholder>
+      <div className="flex flex-col gap-5 p-4">
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <Skeleton className="size-20 rounded-full" />
+          <div className="flex flex-col items-center gap-1.5">
+            <Skeleton className="h-5 w-32 rounded" />
+            <Skeleton className="h-4 w-20 rounded" />
+          </div>
+          <Skeleton className="h-12 w-full max-w-xs rounded-xl" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 rounded-xl" />
+          <Skeleton className="h-16 rounded-xl" />
+        </div>
+      </div>
     );
   }
 
@@ -139,7 +149,7 @@ export const ProfilePage = (): React.JSX.Element => {
   return (
     <div className="flex flex-col gap-5 p-4">
       <header className="flex flex-col items-center gap-3 pt-2">
-        <ProfileAvatar photoUrl={data.photo_url} initial={initial} />
+        <ProfileAvatar photoUrl={data.photo_url} initial={initial} className="size-20" />
         <div className="flex flex-col items-center gap-0.5 text-center">
           <h1 className="text-xl font-semibold text-foreground">{fullName || displayName}</h1>
           {handle ? <p className="text-sm text-muted">{handle}</p> : null}
