@@ -58,6 +58,7 @@ export const useDeleteWish = (api: ApiClient) => {
     mutationFn: (id: string) => api.wishes.delete(id),
     onSuccess: (_, id) => {
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.all() });
+      void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
       qc.removeQueries({ queryKey: queryKeys.wishes.one(id) });
     },
   });
