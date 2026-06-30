@@ -14,7 +14,7 @@ import { Link } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
 import { ProfileAvatar } from '../../components/primitives/profile-avatar';
-import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 
@@ -43,7 +43,7 @@ const UserRow = ({
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border bg-surface p-2">
       <Link to={`/u/${user.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-        <ProfileAvatar photoUrl={user.photo_url} initial={initial} className="size-11" />
+        <ProfileAvatar photoUrl={user.photo_url} initial={initial} className="size-6 text-xs" />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-sm font-medium text-foreground">
             {fullName || getDisplayName(user)}
@@ -127,11 +127,18 @@ export const SearchUsersPage = (): React.JSX.Element => {
       </div>
 
       {isInitialLoading ? (
-        <PageLoadingPlaceholder>
-          <Skeleton className="h-14 rounded-lg" />
-          <Skeleton className="h-14 rounded-lg" />
-          <Skeleton className="h-14 rounded-lg" />
-        </PageLoadingPlaceholder>
+        <ul className="flex flex-col gap-2">
+          {[0, 1, 2].map((i) => (
+            <li key={i} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-2">
+              <Skeleton className="size-6 shrink-0 rounded-full" />
+              <div className="flex flex-1 flex-col gap-1">
+                <Skeleton className="h-3.5 w-28 rounded" />
+                <Skeleton className="h-3 w-16 rounded" />
+              </div>
+              <Skeleton className="h-7 w-16 shrink-0 rounded-md" />
+            </li>
+          ))}
+        </ul>
       ) : users.isError ? (
         <p className="text-sm text-destructive">{t('states.error')}</p>
       ) : flat.length === 0 ? (

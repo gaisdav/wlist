@@ -30,7 +30,7 @@ export const ProfileAvatar = ({
         src={photoUrl}
         alt=""
         onError={() => setImgError(true)}
-        className={clsx('size-20 shrink-0 rounded-full object-cover ring-1 ring-border', className)}
+        className={clsx('shrink-0 rounded-full object-cover ring-1 ring-border', className)}
       />
     );
   }
@@ -39,7 +39,7 @@ export const ProfileAvatar = ({
     <div
       aria-hidden
       className={clsx(
-        'flex size-20 shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl font-semibold text-primary ring-1 ring-border',
+        'flex shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl font-semibold text-primary ring-1 ring-border',
         className,
       )}
     >
