@@ -3,24 +3,16 @@ import { Redirect, Route, Router, Switch } from 'wouter';
 
 import { PageLoadingPlaceholder, Skeleton } from './components/primitives/skeleton';
 import { AppLayout } from './layout/AppLayout';
-import { ProfilePageSkeleton } from './pages/profile/ProfilePageSkeleton';
-import { SearchUsersPageSkeleton } from './pages/search-users/SearchUsersPageSkeleton';
+import { FeedPage } from './pages/feed/FeedPage';
+import { MyWishlistPage } from './pages/my-wishlist/MyWishlistPage';
+import { ProfilePage } from './pages/profile/ProfilePage';
+import { SearchUsersPage } from './pages/search-users/SearchUsersPage';
 
-const FeedPage = lazy(() => import('./pages/feed/FeedPage').then((m) => ({ default: m.FeedPage })));
 const MyBookingsPage = lazy(() =>
   import('./pages/my-bookings/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })),
 );
-const MyWishlistPage = lazy(() =>
-  import('./pages/my-wishlist/MyWishlistPage').then((m) => ({ default: m.MyWishlistPage })),
-);
-const ProfilePage = lazy(() =>
-  import('./pages/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })),
-);
 const MyListsPage = lazy(() =>
   import('./pages/my-lists/MyListsPage').then((m) => ({ default: m.MyListsPage })),
-);
-const SearchUsersPage = lazy(() =>
-  import('./pages/search-users/SearchUsersPage').then((m) => ({ default: m.SearchUsersPage })),
 );
 const UserWishlistPage = lazy(() =>
   import('./pages/user-wishlist/UserWishlistPage').then((m) => ({ default: m.UserWishlistPage })),
@@ -38,7 +30,6 @@ const EventFormPage = lazy(() =>
   import('./pages/event-form/EventFormPage').then((m) => ({ default: m.EventFormPage })),
 );
 
-
 export const AppRouter = (): React.JSX.Element => (
   <Router>
     <AppLayout>
@@ -52,20 +43,12 @@ export const AppRouter = (): React.JSX.Element => (
         }
       >
         <Switch>
-          <Route path="/profile">
-            <Suspense fallback={<ProfilePageSkeleton />}>
-              <ProfilePage />
-            </Suspense>
-          </Route>
+          <Route path="/profile" component={ProfilePage} />
           <Route path="/me/bookings" component={MyBookingsPage} />
           <Route path="/me/lists" component={MyListsPage} />
           <Route path="/me" component={MyWishlistPage} />
           <Route path="/feed" component={FeedPage} />
-          <Route path="/search">
-            <Suspense fallback={<SearchUsersPageSkeleton />}>
-              <SearchUsersPage />
-            </Suspense>
-          </Route>
+          <Route path="/search" component={SearchUsersPage} />
           <Route path="/u/:userId" component={UserWishlistPage} />
           <Route path="/wish/new">
             <WishFormPage mode="create" />

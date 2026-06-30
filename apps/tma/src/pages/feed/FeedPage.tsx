@@ -8,8 +8,9 @@ import { Link, useLocation } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
 import { EmptyState } from '../../components/primitives/empty-state';
-import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes/WishCard';
+import { WishCardSkeleton } from '../../components/wishes/WishCardSkeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 
@@ -38,10 +39,17 @@ export const FeedPage = (): React.JSX.Element => {
       </header>
 
       {feed.isLoading ? (
-        <PageLoadingPlaceholder>
-          <Skeleton className="h-16 rounded-lg" />
-          <Skeleton className="h-16 rounded-lg" />
-        </PageLoadingPlaceholder>
+        <ul className="flex flex-col gap-3">
+          {[0, 1, 2].map((i) => (
+            <li key={i} className="flex flex-col gap-1.5">
+              <WishCardSkeleton />
+              <div className="flex items-baseline justify-between gap-3 px-0.5">
+                <Skeleton className="h-3 w-24 rounded" />
+                <Skeleton className="h-3 w-16 rounded" />
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : feed.isError ? (
         <EmptyState
           icon={WifiOff}
