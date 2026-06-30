@@ -129,7 +129,10 @@ export const SearchUsersPage = (): React.JSX.Element => {
       {isInitialLoading ? (
         <ul className="flex flex-col gap-2">
           {[0, 1, 2].map((i) => (
-            <li key={i} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-2">
+            <li
+              key={i}
+              className="flex items-center gap-3 rounded-lg border border-border bg-surface p-2"
+            >
               <Skeleton className="size-6 shrink-0 rounded-full" />
               <div className="flex flex-1 flex-col gap-1">
                 <Skeleton className="h-3.5 w-28 rounded" />
