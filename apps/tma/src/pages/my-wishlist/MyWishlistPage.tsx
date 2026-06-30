@@ -7,8 +7,9 @@ import { Link, useLocation } from 'wouter';
 import { UserEventsSection } from '../../components/events';
 import { buttonVariants } from '../../components/primitives/button';
 import { EmptyState } from '../../components/primitives/empty-state';
-import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
+import { Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes';
+import { WishCardSkeleton } from '../../components/wishes/WishCardSkeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 
@@ -25,11 +26,19 @@ export const MyWishlistPage = (): React.JSX.Element => {
 
   if (profile.isLoading || wishes.isLoading) {
     return (
-      <PageLoadingPlaceholder>
-        <Skeleton className="h-10 rounded-lg" />
-        <Skeleton className="h-24 rounded-lg" />
-        <Skeleton className="h-24 rounded-lg" />
-      </PageLoadingPlaceholder>
+      <div className="flex flex-col gap-4 p-4">
+        <header className="flex items-start justify-between gap-2 border-b border-border pb-4">
+          <Skeleton className="h-7 w-36 rounded" />
+          <Skeleton className="h-7 w-20 rounded-lg" />
+        </header>
+        <ul className="flex flex-col gap-2">
+          {[0, 1, 2].map((i) => (
+            <li key={i}>
+              <WishCardSkeleton />
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
 

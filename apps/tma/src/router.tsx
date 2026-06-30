@@ -3,22 +3,16 @@ import { Redirect, Route, Router, Switch } from 'wouter';
 
 import { PageLoadingPlaceholder, Skeleton } from './components/primitives/skeleton';
 import { AppLayout } from './layout/AppLayout';
+import { FeedPage } from './pages/feed/FeedPage';
+import { MyWishlistPage } from './pages/my-wishlist/MyWishlistPage';
+import { ProfilePage } from './pages/profile/ProfilePage';
+import { SearchUsersPage } from './pages/search-users/SearchUsersPage';
 
-const FeedPage = lazy(() => import('./pages/feed/FeedPage').then((m) => ({ default: m.FeedPage })));
 const MyBookingsPage = lazy(() =>
   import('./pages/my-bookings/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })),
 );
-const MyWishlistPage = lazy(() =>
-  import('./pages/my-wishlist/MyWishlistPage').then((m) => ({ default: m.MyWishlistPage })),
-);
-const ProfilePage = lazy(() =>
-  import('./pages/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })),
-);
 const MyListsPage = lazy(() =>
   import('./pages/my-lists/MyListsPage').then((m) => ({ default: m.MyListsPage })),
-);
-const SearchUsersPage = lazy(() =>
-  import('./pages/search-users/SearchUsersPage').then((m) => ({ default: m.SearchUsersPage })),
 );
 const UserWishlistPage = lazy(() =>
   import('./pages/user-wishlist/UserWishlistPage').then((m) => ({ default: m.UserWishlistPage })),
