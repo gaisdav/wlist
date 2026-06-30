@@ -11,6 +11,9 @@ const MyBookingsPage = lazy(() =>
 const MyWishlistPage = lazy(() =>
   import('./pages/my-wishlist/MyWishlistPage').then((m) => ({ default: m.MyWishlistPage })),
 );
+const ProfilePage = lazy(() =>
+  import('./pages/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+);
 const MyListsPage = lazy(() =>
   import('./pages/my-lists/MyListsPage').then((m) => ({ default: m.MyListsPage })),
 );
@@ -46,6 +49,7 @@ export const AppRouter = (): React.JSX.Element => (
         }
       >
         <Switch>
+          <Route path="/profile" component={ProfilePage} />
           <Route path="/me/bookings" component={MyBookingsPage} />
           <Route path="/me/lists" component={MyListsPage} />
           <Route path="/me" component={MyWishlistPage} />

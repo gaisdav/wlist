@@ -10,6 +10,7 @@ import { EmptyState } from '../../components/primitives/empty-state';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 const embeddedWish = (row: WishSlotBookingRow) => {
   const w = row.wishes;
@@ -24,6 +25,7 @@ export const MyBookingsPage = (): React.JSX.Element => {
   const cancelSlot = useCancelSlot(api);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  useTelegramBackButton(() => window.history.back(), true);
   useQueryErrorToast(bookings.isError && !bookings.isLoading, t('states.error'));
 
   if (bookings.isLoading) {

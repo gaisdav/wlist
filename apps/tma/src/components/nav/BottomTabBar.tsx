@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { ClipboardList, LayoutList, Search, User } from 'lucide-react';
+import { Gift, LayoutList, Search, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
@@ -32,8 +32,8 @@ export const BottomTabBar = (): React.JSX.Element | null => {
           className={tabLinkClass(location === '/me')}
           aria-current={location === '/me' ? 'page' : undefined}
         >
-          <User className={tabIconClass} strokeWidth={1.75} aria-hidden />
-          <span className="max-w-full truncate">{t('nav.tabs.profile')}</span>
+          <Gift className={tabIconClass} strokeWidth={1.75} aria-hidden />
+          <span className="max-w-full truncate">{t('nav.tabs.my_wishes')}</span>
         </Link>
 
         <Link
@@ -46,12 +46,12 @@ export const BottomTabBar = (): React.JSX.Element | null => {
         </Link>
 
         <Link
-          to="/me/bookings"
-          className={tabLinkClass(location === '/me/bookings')}
-          aria-current={location === '/me/bookings' ? 'page' : undefined}
+          to="/profile"
+          className={tabLinkClass(location === '/profile')}
+          aria-current={location === '/profile' ? 'page' : undefined}
         >
-          <ClipboardList className={tabIconClass} strokeWidth={1.75} aria-hidden />
-          <span className="max-w-full truncate">{t('nav.tabs.bookings')}</span>
+          <User className={tabIconClass} strokeWidth={1.75} aria-hidden />
+          <span className="max-w-full truncate">{t('nav.tabs.profile')}</span>
         </Link>
 
         <Link

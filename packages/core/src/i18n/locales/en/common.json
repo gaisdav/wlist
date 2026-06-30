@@ -47,8 +47,18 @@
       "aria": "Main navigation",
       "feed": "Feed",
       "profile": "Profile",
+      "my_wishes": "My wishes",
       "bookings": "Bookings",
       "find_people": "Find people"
+    }
+  },
+  "profile": {
+    "followers": "Followers",
+    "following": "Following",
+    "cards": {
+      "my_wishes": "My wishes",
+      "lists": "User lists",
+      "bookings": "Bookings"
     }
   },
   "wishes": {
