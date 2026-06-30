@@ -11,7 +11,6 @@ type WishVisibility = Wish['visibility'];
 const VISIBILITY_OPTIONS: readonly WishVisibility[] = ['public', 'followers', 'lists'];
 
 interface WishVisibilitySectionProps {
-  isSaving: boolean;
   visibility: WishVisibility;
   onVisibilityChange: (next: WishVisibility) => void;
   /** Lists the viewer owns; minimal shape needed to render the picker. */
@@ -30,7 +29,6 @@ interface WishVisibilitySectionProps {
  * selection under "lists" shows an inline hint (submit is also guarded upstream).
  */
 export const WishVisibilitySection = ({
-  isSaving,
   visibility,
   onVisibilityChange,
   lists,
@@ -48,7 +46,6 @@ export const WishVisibilitySection = ({
           haptics.select();
           onVisibilityChange(next);
         }}
-        disabled={isSaving}
         aria-label={t('wishes.form.visibility_label')}
         options={VISIBILITY_OPTIONS.map((opt) => ({
           value: opt,
@@ -66,7 +63,6 @@ export const WishVisibilitySection = ({
                   <button
                     key={list.id}
                     type="button"
-                    disabled={isSaving}
                     aria-pressed={isSelected}
                     className={badgeVariants({
                       variant: isSelected ? 'brand' : 'neutral',

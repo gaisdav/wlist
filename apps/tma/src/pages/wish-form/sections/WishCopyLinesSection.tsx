@@ -22,7 +22,6 @@ interface WishCopyLinesSectionProps extends WishSectionBaseProps {
  */
 export const WishCopyLinesSection = ({
   form,
-  isSaving,
   visibleCount,
   onAddLine,
   onOpenInfo,
@@ -61,7 +60,6 @@ export const WishCopyLinesSection = ({
           variant="outline"
           size="sm"
           className="self-start"
-          disabled={isSaving}
           onClick={onAddLine}
         >
           <Plus className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
