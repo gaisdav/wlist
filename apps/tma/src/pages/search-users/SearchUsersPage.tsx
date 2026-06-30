@@ -89,6 +89,15 @@ export const SearchUsersPage = (): React.JSX.Element => {
   const follow = useFollowUser(api, me.data?.id);
   const unfollow = useUnfollowUser(api, me.data?.id);
 
+  // Only the row whose toggle is in flight should disable — `variables` is the
+  // id passed to the active mutateAsync, so a follow on one user leaves the rest
+  // tappable.
+  const pendingId = follow.isPending
+    ? follow.variables
+    : unfollow.isPending
+      ? unfollow.variables
+      : undefined;
+
   useQueryErrorToast(users.isError && !users.isLoading, t('states.error'));
 
   const isFiltering = query.length >= 2;
@@ -138,7 +147,7 @@ export const SearchUsersPage = (): React.JSX.Element => {
                   user={u}
                   isSelf={u.id === me.data?.id}
                   isFollowing={Boolean(status.data?.[u.id])}
-                  isPending={follow.isPending || unfollow.isPending}
+                  isPending={pendingId === u.id}
                   onFollow={() => void follow.mutateAsync(u.id)}
                   onUnfollow={() => void unfollow.mutateAsync(u.id)}
                 />

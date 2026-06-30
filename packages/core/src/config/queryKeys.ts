@@ -27,6 +27,8 @@ export const queryKeys = {
     /** Batched "do I follow these ids" map (sorted, comma-joined for stability). */
     status: (ids: string[]) =>
       [...queryKeys.all, 'follows', 'status', [...ids].sort().join(',')] as const,
+    /** Prefix matching every `status(ids)` cache — for invalidate/patch on toggle. */
+    statusAll: () => [...queryKeys.all, 'follows', 'status'] as const,
   },
 
   feed: {
