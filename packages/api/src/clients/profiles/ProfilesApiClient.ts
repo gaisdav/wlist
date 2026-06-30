@@ -1,6 +1,9 @@
 import type { SupabaseClientLike } from '../shared.js';
 
-import type { ProfilesApi, ProfileRow } from './types.js';
+import type { ListUsersParams, ProfilesApi, ProfileRow } from './types.js';
+
+/** Escape LIKE wildcards so a literal `%`/`_` in the query isn't treated as a pattern. */
+const escapeLike = (value: string): string => value.replace(/%/g, '\\%').replace(/_/g, '\\_');
 
 export const createProfilesApi = (sb: SupabaseClientLike): ProfilesApi => ({
   async getCurrent() {
@@ -22,21 +25,23 @@ export const createProfilesApi = (sb: SupabaseClientLike): ProfilesApi => ({
     return (data as ProfileRow | null) ?? null;
   },
 
-  async searchUsers(query: string) {
-    const q = query.trim();
-    if (q.length === 0) return [];
+  async listUsers({ query, limit, offset }: ListUsersParams) {
+    let q = sb
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    const pattern = `%${q.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`;
-    const [byUsername, byFirst] = await Promise.all([
-      sb.from('profiles').select('*').ilike('username', pattern).limit(20),
-      sb.from('profiles').select('*').ilike('first_name', pattern).limit(20),
-    ]);
-    if (byUsername.error) throw byUsername.error;
-    if (byFirst.error) throw byFirst.error;
-    const map = new Map<string, ProfileRow>();
-    for (const r of [...(byUsername.data ?? []), ...(byFirst.data ?? [])]) {
-      map.set(r.id, r as ProfileRow);
+    const trimmed = query?.trim() ?? '';
+    if (trimmed.length >= 2) {
+      // Single paginatable query: filter on either column with one `or`, instead
+      // of merging two capped lists client-side (which can't be offset-paged).
+      const pattern = `%${escapeLike(trimmed)}%`;
+      q = q.or(`username.ilike.${pattern},first_name.ilike.${pattern}`);
     }
-    return [...map.values()].slice(0, 20);
+
+    const { data, error } = await q;
+    if (error) throw error;
+    return (data ?? []) as ProfileRow[];
   },
 });

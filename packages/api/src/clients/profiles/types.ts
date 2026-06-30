@@ -11,8 +11,19 @@ export interface ProfileRow {
   updated_at: string;
 }
 
+export interface ListUsersParams {
+  /** Filter by username / first_name (ilike). Ignored when shorter than 2 chars. */
+  query?: string;
+  limit: number;
+  offset: number;
+}
+
 export interface ProfilesApi {
   getCurrent(): Promise<ProfileRow | null>;
   getById(id: string): Promise<ProfileRow | null>;
-  searchUsers(query: string): Promise<ProfileRow[]>;
+  /**
+   * One page of profiles, newest first. With a query, filters by
+   * username/first_name; without one, returns the most recently joined users.
+   */
+  listUsers(params: ListUsersParams): Promise<ProfileRow[]>;
 }

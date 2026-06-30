@@ -18,7 +18,34 @@ const invalidateFollowSide = (
   void qc.invalidateQueries({ queryKey: queryKeys.follows.counts(targetId) });
   void qc.invalidateQueries({ queryKey: queryKeys.follows.followersList(targetId) });
   void qc.invalidateQueries({ queryKey: queryKeys.follows.isFollowing(targetId) });
+  // The Find People list reads from batched `status(ids)` maps, keyed by the
+  // whole visible id set; invalidate by prefix so every cached page re-syncs.
+  void qc.invalidateQueries({ queryKey: queryKeys.follows.statusAll() });
   void qc.invalidateQueries({ queryKey: queryKeys.feed.infinite() });
+};
+
+type StatusSnapshot = { key: readonly unknown[]; map: Record<string, boolean> };
+
+/**
+ * Optimistically flip `followeeId` in every cached `status(ids)` map that holds
+ * it, returning snapshots so onError can roll back. These maps power the row
+ * follow buttons on the Find People screen.
+ */
+const patchStatusMaps = (
+  qc: QueryClient,
+  followeeId: string,
+  following: boolean,
+): StatusSnapshot[] => {
+  const entries = qc.getQueriesData<Record<string, boolean>>({
+    queryKey: queryKeys.follows.statusAll(),
+  });
+  const snapshots: StatusSnapshot[] = [];
+  for (const [key, map] of entries) {
+    if (!map || !(followeeId in map)) continue;
+    snapshots.push({ key, map });
+    qc.setQueryData<Record<string, boolean>>(key, { ...map, [followeeId]: following });
+  }
+  return snapshots;
 };
 
 const bumpCounts = (
@@ -53,6 +80,7 @@ const useToggleFollow = (
       const viewerCountsKey = viewerId ? queryKeys.follows.counts(viewerId) : null;
 
       await qc.cancelQueries({ queryKey: isFollowingKey });
+      await qc.cancelQueries({ queryKey: queryKeys.follows.statusAll() });
       const snapshot = {
         isFollowingKey,
         targetCountsKey,
@@ -60,6 +88,7 @@ const useToggleFollow = (
         isFollowing: qc.getQueryData<boolean>(isFollowingKey),
         targetCounts: qc.getQueryData<Counts>(targetCountsKey),
         viewerCounts: viewerCountsKey ? qc.getQueryData<Counts>(viewerCountsKey) : undefined,
+        statusSnapshots: patchStatusMaps(qc, followeeId, delta > 0),
       };
 
       qc.setQueryData<boolean>(isFollowingKey, delta > 0);
@@ -74,6 +103,7 @@ const useToggleFollow = (
       if (ctx.targetCounts !== undefined) qc.setQueryData(ctx.targetCountsKey, ctx.targetCounts);
       if (ctx.viewerCountsKey && ctx.viewerCounts !== undefined)
         qc.setQueryData(ctx.viewerCountsKey, ctx.viewerCounts);
+      for (const { key, map } of ctx.statusSnapshots) qc.setQueryData(key, map);
     },
     onSettled: (_data, _err, followeeId) => {
       invalidateFollowSide(qc, viewerId, followeeId);

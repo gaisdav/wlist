@@ -6,7 +6,8 @@ export const queryKeys = {
 
   profiles: {
     byId: (id: string) => [...queryKeys.all, 'profiles', 'byId', id] as const,
-    search: (q: string) => [...queryKeys.all, 'profiles', 'search', q] as const,
+    /** Paginated user list — empty `q` is the "recent users" feed, non-empty filters it. */
+    list: (q: string) => [...queryKeys.all, 'profiles', 'list', q] as const,
   },
 
   lists: {
@@ -23,6 +24,11 @@ export const queryKeys = {
       [...queryKeys.all, 'follows', 'isFollowing', followeeId] as const,
     followingList: (userId: string) => [...queryKeys.all, 'follows', 'following', userId] as const,
     followersList: (userId: string) => [...queryKeys.all, 'follows', 'followers', userId] as const,
+    /** Batched "do I follow these ids" map (sorted, comma-joined for stability). */
+    status: (ids: string[]) =>
+      [...queryKeys.all, 'follows', 'status', [...ids].sort().join(',')] as const,
+    /** Prefix matching every `status(ids)` cache — for invalidate/patch on toggle. */
+    statusAll: () => [...queryKeys.all, 'follows', 'status'] as const,
   },
 
   feed: {
