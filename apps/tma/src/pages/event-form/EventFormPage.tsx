@@ -94,7 +94,7 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
   };
 
   // Native MainButton mirrors the in-page submit; the in-page button is the fallback.
-  useTelegramMainButton({
+  const mainButtonActive = useTelegramMainButton({
     text: mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit'),
     onClick: () => void handleSubmit(onValid)(),
     isLoaderVisible: isSaving,
@@ -158,9 +158,11 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
           }
         />
 
-        <Button type="submit" isLoading={isSaving} className="mt-2">
-          {mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit')}
-        </Button>
+        {!mainButtonActive ? (
+          <Button type="submit" isLoading={isSaving} className="mt-2">
+            {mode === 'create' ? t('events.form.submit_create') : t('events.form.submit_edit')}
+          </Button>
+        ) : null}
       </fieldset>
     </form>
   );
