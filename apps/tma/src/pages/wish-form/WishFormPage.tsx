@@ -20,10 +20,13 @@ import { z } from 'zod';
 
 import { BottomSheet } from '../../components/overlays';
 import { Button } from '../../components/primitives/button';
+import { Collapsible } from '../../components/primitives/collapsible';
+import { FormSection } from '../../components/primitives/form-section';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { showErrorToast } from '../../lib/errorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { haptics } from '../../telegram/haptics';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
@@ -126,6 +129,17 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
   });
 
   const { handleSubmit, reset } = form;
+
+  // Open the "Add details" disclosure by default when the wish being edited or
+  // reposted already uses an advanced field, so existing data isn't hidden a tap
+  // away. Collapsible captures `defaultOpen` once at mount; the loading guards
+  // gate the form on existing/wishEvents (edit) and repostSource (create), so by
+  // mount every input here is resolved and this value is final.
+  const detailsSource = mode === 'edit' ? existing.data : repostSource.data;
+  const detailsDefaultOpen =
+    (detailsSource?.copy_lines?.length ?? 0) > 0 ||
+    detailsSource?.is_collaborative === true ||
+    (mode === 'edit' && (wishEvents.data?.length ?? 0) > 0);
 
   useEffect(() => {
     if (!existing.data) return;
@@ -235,6 +249,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         if (selectedEventIds.length > 0) {
           await setWishEventsMut.mutateAsync({ wishId: row.id, eventIds: selectedEventIds });
         }
+        haptics.notify('success');
         setLocation(`/wish/${row.id}`, { replace: true });
         return;
       }
@@ -253,7 +268,12 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
       });
       if (photo) await uploadPhotoIfNeeded(wishId, photo, previousPhotoPath);
       await setWishEventsMut.mutateAsync({ wishId, eventIds: selectedEventIds });
+      haptics.notify('success');
       setLocation(`/wish/${wishId}`, { replace: true });
+    } catch (err) {
+      // Outcome cue on failure; the mutation hooks surface the error UI/toast.
+      haptics.notify('error');
+      throw err;
     } finally {
       setIsSaving(false);
     }
@@ -269,7 +289,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     isEnabled: !isSaving,
   });
 
-  if (mode === 'create' && repostFromId && repostSource.isLoading) {
+  // Wait on the repost source's chosen lists too, so a reposted 'lists' wish
+  // doesn't render (and can't be saved) before its list prefill is seeded.
+  if (mode === 'create' && repostFromId && (repostSource.isLoading || repostLists.isLoading)) {
     return (
       <PageLoadingPlaceholder>
         <Skeleton className="h-10 rounded-lg" />
@@ -282,7 +304,15 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     return <p className="p-4 text-sm text-muted">{t('social.repost_source_unavailable')}</p>;
   }
 
-  if (mode === 'edit' && (existing.isLoading || !wishId)) {
+  // Gate on every prefill source — existing wish, its linked events, and its
+  // chosen lists — so the form never renders before its state is seeded. This
+  // makes "prefill before render" a hard invariant: it keeps `detailsDefaultOpen`
+  // correct at the Collapsible's mount-time read, and (more importantly) prevents
+  // a too-early save from wiping events / chosen lists with empty arrays.
+  if (
+    mode === 'edit' &&
+    (existing.isLoading || wishEvents.isLoading || wishLists.isLoading || !wishId)
+  ) {
     return (
       <PageLoadingPlaceholder>
         <Skeleton className="h-10 rounded-lg" />
@@ -306,52 +336,63 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
 
       <fieldset
         disabled={isSaving}
-        className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0 disabled:opacity-60"
+        className="m-0 flex min-w-0 flex-col gap-6 border-0 p-0 disabled:opacity-60"
       >
-        <WishCoreSection form={form} />
+        {/* Level 1 — the essentials: photo, title, description, link, price. */}
+        <FormSection title={t('wishes.form.core_section')}>
+          <WishPhotoSection
+            isSaving={isSaving}
+            photo={photo}
+            onPhotoChange={setPhoto}
+            photoError={photoError}
+            onPhotoError={setPhotoError}
+          />
+          <WishCoreSection form={form} />
+        </FormSection>
 
-        <WishCopyLinesSection
-          form={form}
-          isSaving={isSaving}
-          visibleCount={copyLinesVisible}
-          onAddLine={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
-          onOpenInfo={() => setIsCopyInfoOpen(true)}
-        />
+        {/* Level 2 — who can see it: visibility + (when "lists") list picker. */}
+        <FormSection title={t('wishes.form.visibility_section')} divided>
+          <WishVisibilitySection
+            isSaving={isSaving}
+            visibility={visibility}
+            onVisibilityChange={setVisibility}
+            lists={userLists.data}
+            selectedListIds={selectedListIds}
+            onToggleList={(listId) =>
+              setSelectedListIds((prev) =>
+                prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId],
+              )
+            }
+            onManageLists={() => setLocation('/me/lists')}
+          />
+        </FormSection>
 
-        <WishGroupGiftSection form={form} isSaving={isSaving} mode={mode} />
+        {/* Level 3 — advanced/optional, tucked under one tap. Opens by default
+            when any of its fields already has content (e.g. editing a wish). */}
+        <div className="border-t border-border pt-2">
+          <Collapsible summary={t('wishes.form.details_toggle')} defaultOpen={detailsDefaultOpen}>
+            <WishCopyLinesSection
+              form={form}
+              isSaving={isSaving}
+              visibleCount={copyLinesVisible}
+              onAddLine={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
+              onOpenInfo={() => setIsCopyInfoOpen(true)}
+            />
 
-        <WishVisibilitySection
-          isSaving={isSaving}
-          visibility={visibility}
-          onVisibilityChange={setVisibility}
-          lists={userLists.data}
-          selectedListIds={selectedListIds}
-          onToggleList={(listId) =>
-            setSelectedListIds((prev) =>
-              prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId],
-            )
-          }
-          onManageLists={() => setLocation('/me/lists')}
-        />
+            <WishEventsSection
+              events={userEvents.data}
+              selectedEventIds={selectedEventIds}
+              onToggleEvent={(eventId) =>
+                setSelectedEventIds((prev) =>
+                  prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId],
+                )
+              }
+              onCreateEvent={() => setLocation('/event/new')}
+            />
 
-        <WishEventsSection
-          events={userEvents.data}
-          selectedEventIds={selectedEventIds}
-          onToggleEvent={(eventId) =>
-            setSelectedEventIds((prev) =>
-              prev.includes(eventId) ? prev.filter((id) => id !== eventId) : [...prev, eventId],
-            )
-          }
-          onCreateEvent={() => setLocation('/event/new')}
-        />
-
-        <WishPhotoSection
-          isSaving={isSaving}
-          photo={photo}
-          onPhotoChange={setPhoto}
-          photoError={photoError}
-          onPhotoError={setPhotoError}
-        />
+            <WishGroupGiftSection form={form} isSaving={isSaving} mode={mode} />
+          </Collapsible>
+        </div>
 
         {!mainButtonActive ? (
           <Button type="submit" isLoading={isSaving}>
