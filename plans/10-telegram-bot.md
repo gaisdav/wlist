@@ -23,6 +23,13 @@
 - **Бот = Edge Function `telegram-bot`** (Deno), приём вебхуков от Telegram. Тот
   же паттерн, что `auth-telegram` (`_shared/cors.ts`, `_lib/`, `deno.json`,
   контракт + тесты). Никакого long-running worker в MVP бота.
+- **Канал доставки открывает сам пользователь — двумя путями.** Бот может писать
+  в личку только в чат, который пользователь сам инициировал. Поэтому
+  `tg_private_chat_id` заполняется через (а) `/start` боту и (б) фронтовый
+  `requestWriteAccess()` в Mini App (TMA), который выдаёт боту право писать без
+  выхода из приложения. Запрос делаем **контекстно** (после первой брони /
+  включения напоминаний), а не на старте. Без выданного доступа уведомления для
+  юзера просто не ставятся в outbox.
 - **Доставка через outbox, не из триггеров напрямую.** Доменные события пишут
   строку в `public.notification_outbox` (через `SECURITY DEFINER` триггеры/функции).
   Отдельный «drainer» (Edge Function, запускается `pg_cron` + `pg_net` раз в
@@ -58,6 +65,34 @@
 - `_lib` + unit-тесты на разбор update и роутинг команд (Node/Deno, как у
   `auth-telegram`).
 - Регистрация вебхука — ручной шаг (документировать в README функции), не код.
+
+**Фронтовая часть (TMA) — `requestWriteAccess`.** Второй (и основной для
+Mini-App-юзеров) путь заполнить `tg_private_chat_id` — не выходя в чат с ботом.
+
+- Обёртка `apps/tma/src/telegram/writeAccess.ts` по паттерну `confirm.ts` /
+  `haptics.ts` (`.isAvailable()`-гард + dev-фоллбэк):
+
+  ```ts
+  import { requestWriteAccess } from '@telegram-apps/sdk-react';
+
+  /** true — доступ выдан. Вне Telegram (dev/браузер) → false (канала нет). */
+  export const requestNotifications = async (): Promise<boolean> => {
+    if (!requestWriteAccess.isAvailable()) return false;
+    const status = await requestWriteAccess(); // 'allowed' | 'cancelled'
+    return status === 'allowed';
+  };
+  ```
+
+- **Когда спрашивать (контекстно, не на старте):** после первой брони слота,
+  при включении напоминаний о событии, либо мягким баннером в `ProfilePage` /
+  на будущем экране `/me/notifications` (PR C). Один раз; факт показа/выдачи
+  хранить (в `notification_settings` из PR C или локально), отказавшихся не долбить.
+- **Связь с бэком:** само `requestWriteAccess` лишь выдаёт боту право. Сервер
+  узнаёт `chat_id` так же, как для `/start` — при первом апдейте от юзера к боту
+  (либо разовый serverless-резолв `getChat`/первый contact). Поведение
+  «как заполняется `tg_private_chat_id` после write-access» зафиксировать в этом PR.
+- Граница пакетов соблюдена: SDK-вызов живёт в `apps/tma/src/telegram/`, `core`
+  его не импортирует.
 
 ### PR B — outbox + drainer (доставка)
 - Миграция: `public.notification_outbox` (`id`, `recipient_user_id`,
@@ -112,6 +147,8 @@
 - Все типы уведомлений (кроме намеренно исключённого «забронировали твой слот»)
   ставятся в outbox, доставляются и логируются; выключаются в настройках.
 - Бот обрабатывает `/start`, deep-link payload, `/help`, `/notifications`.
+- Канал доставки открывается двумя путями: `/start` боту **и** `requestWriteAccess`
+  из Mini App; `tg_private_chat_id` заполняется в обоих случаях.
 - Упоминания: кликабельные `@username` в TMA + доставка уведомления.
 - Ни одно уведомление не раскрывает скрытое RLS (проверка на этапе ревью PR D/E/F).
 
@@ -129,3 +166,6 @@
 - Локализация уведомлений по `profiles.language_code` (сейчас только en).
 - Порог напоминания о событии (N дней) и поведение для `is_recurring_yearly`.
 - `pg_cron`/`pg_net` доступность на текущем Supabase-плане — проверить до PR B.
+- Как сервер получает `tg_private_chat_id` после `requestWriteAccess` (юзер выдал
+  право, но не нажал `/start`): ждать первого апдейта от него к боту, или резолвить
+  серверно — уточнить в PR A.
