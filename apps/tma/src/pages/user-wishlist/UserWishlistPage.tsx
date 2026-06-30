@@ -9,19 +9,38 @@ import {
 } from '@wlist/core/hooks/social';
 import { useUserWishes } from '@wlist/core/hooks/wishes';
 import { Gift, WifiOff } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Redirect, useParams } from 'wouter';
 
 import { UserEventsSection } from '../../components/events';
 import { Button } from '../../components/primitives/button';
 import { EmptyState } from '../../components/primitives/empty-state';
+import { ProfileAvatar } from '../../components/primitives/profile-avatar';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
-import { UserFollowsBottomSheet } from '../../components/social';
 import { WishCard } from '../../components/wishes';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+
+/** A follow/following count rendered as a stacked, read-only stat. */
+const FollowStat = ({
+  value,
+  label,
+  isLoading,
+}: {
+  value: number;
+  label: string;
+  isLoading: boolean;
+}): React.JSX.Element => (
+  <div className="flex flex-1 flex-col items-center px-2 py-1">
+    {isLoading ? (
+      <Skeleton className="h-[18px] w-6 rounded" />
+    ) : (
+      <span className="text-lg font-semibold leading-none text-foreground">{value}</span>
+    )}
+    <span className="mt-1 text-xs text-muted">{label}</span>
+  </div>
+);
 
 export const UserWishlistPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -34,14 +53,6 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const isFollowing = useIsFollowing(api, userId);
   const follow = useFollowUser(api, profile.data?.id);
   const unfollow = useUnfollowUser(api, profile.data?.id);
-
-  const [followSheet, setFollowSheet] = useState<{
-    isOpen: boolean;
-    initialTab: 'following' | 'followers';
-  }>({
-    isOpen: false,
-    initialTab: 'following',
-  });
 
   useQueryErrorToast(Boolean(userId) && wishes.isError && !wishes.isLoading, t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
@@ -59,77 +70,71 @@ export const UserWishlistPage = (): React.JSX.Element => {
     return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
   }
 
+  // Searching for yourself lands here — send it to the own-profile hub instead
+  // of rendering a stripped-down copy of your own wishlist.
   if (profile.data?.id === userId) {
-    return <Redirect to="/me" replace />;
+    return <Redirect to="/profile" replace />;
   }
 
   if (wishes.isLoading || ownerProfile.isLoading) {
     return (
       <PageLoadingPlaceholder>
-        <Skeleton className="h-10 rounded-lg" />
+        <Skeleton className="mx-auto size-20 rounded-full" />
+        <Skeleton className="mx-auto h-6 w-40 rounded-lg" />
+        <Skeleton className="h-9 w-full rounded-lg" />
         <Skeleton className="h-24 rounded-lg" />
       </PageLoadingPlaceholder>
     );
   }
 
-  const displayName = ownerProfile.data ? getDisplayName(ownerProfile.data) : '…';
-
-  const openFollowSheet = (tab: 'following' | 'followers') => {
-    setFollowSheet({
-      isOpen: true,
-      initialTab: tab,
-    });
-  };
+  const owner = ownerProfile.data;
+  const displayName = owner ? getDisplayName(owner) : '…';
+  const fullName = owner
+    ? [owner.first_name, owner.last_name].filter(Boolean).join(' ').trim()
+    : '';
+  const initial =
+    (owner?.first_name || owner?.username || '?').trim().charAt(0).toUpperCase() || '?';
+  const handle = owner?.username ? `@${owner.username}` : null;
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <header className="flex flex-col gap-3 border-b border-border pb-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <h1 className="text-xl font-semibold text-foreground">{displayName}</h1>
-              <p className="text-sm text-muted">{t('wishes.list.user_title')}</p>
-            </div>
-            {profile.data ? (
-              <Button
-                type="button"
-                size="sm"
-                variant={isFollowing.data ? 'outline' : 'primary'}
-                disabled={
-                  follow.isPending || unfollow.isPending || isFollowing.isLoading || !userId
-                }
-                onClick={() =>
-                  void (isFollowing.data
-                    ? unfollow.mutateAsync(userId)
-                    : follow.mutateAsync(userId))
-                }
-              >
-                {isFollowing.data ? t('social.unfollow') : t('social.follow')}
-              </Button>
-            ) : null}
-          </div>
-          {counts.data ? (
-            <div className="flex flex-wrap gap-3 text-sm text-muted">
-              <button
-                type="button"
-                onClick={() => openFollowSheet('following')}
-                className="underline hover:text-foreground transition-colors"
-              >
-                {t('social.counts.following', { n: counts.data.following })}
-              </button>
-              <button
-                type="button"
-                onClick={() => openFollowSheet('followers')}
-                className="underline hover:text-foreground transition-colors"
-              >
-                {t('social.counts.followers', { n: counts.data.followers })}
-              </button>
-            </div>
-          ) : null}
+    <div className="flex flex-col gap-5 p-4">
+      <header className="flex flex-col items-center gap-3 pt-2">
+        <ProfileAvatar photoUrl={owner?.photo_url ?? null} initial={initial} />
+        <div className="flex flex-col items-center gap-0.5 text-center">
+          <h1 className="text-xl font-semibold text-foreground">{fullName || displayName}</h1>
+          {handle ? <p className="text-sm text-muted">{handle}</p> : null}
+        </div>
+
+        {profile.data ? (
+          <Button
+            type="button"
+            className="w-full max-w-xs"
+            variant={isFollowing.data ? 'outline' : 'primary'}
+            disabled={follow.isPending || unfollow.isPending || isFollowing.isLoading}
+            onClick={() =>
+              void (isFollowing.data ? unfollow.mutateAsync(userId) : follow.mutateAsync(userId))
+            }
+          >
+            {isFollowing.data ? t('social.unfollow') : t('social.follow')}
+          </Button>
+        ) : null}
+
+        <div className="flex w-full max-w-xs items-stretch rounded-xl border border-border bg-surface">
+          <FollowStat
+            value={counts.data?.followers ?? 0}
+            label={t('profile.followers')}
+            isLoading={counts.isLoading}
+          />
+          <span aria-hidden className="my-2 w-px self-stretch bg-border" />
+          <FollowStat
+            value={counts.data?.following ?? 0}
+            label={t('profile.following')}
+            isLoading={counts.isLoading}
+          />
         </div>
       </header>
 
-      {userId && <UserEventsSection ownerId={userId} />}
+      <UserEventsSection ownerId={userId} />
 
       {wishes.isError ? (
         <EmptyState
@@ -157,15 +162,6 @@ export const UserWishlistPage = (): React.JSX.Element => {
             </li>
           ))}
         </ul>
-      )}
-
-      {userId && (
-        <UserFollowsBottomSheet
-          userId={userId}
-          isOpen={followSheet.isOpen}
-          initialTab={followSheet.initialTab}
-          onClose={() => setFollowSheet((prev) => ({ ...prev, isOpen: false }))}
-        />
       )}
     </div>
   );

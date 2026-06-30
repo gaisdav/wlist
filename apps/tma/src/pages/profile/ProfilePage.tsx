@@ -5,56 +5,15 @@ import { useMySlotBookings } from '@wlist/core/hooks/slots';
 import { useFollowsCounts } from '@wlist/core/hooks/social';
 import { useMyWishes } from '@wlist/core/hooks/wishes';
 import { ChevronRight, ClipboardList, FolderHeart, Gift, type LucideIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
+import { ProfileAvatar } from '../../components/primitives/profile-avatar';
 import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/skeleton';
 import { UserFollowsBottomSheet } from '../../components/social';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
-
-/**
- * Avatar with a graceful initials fallback. Mirrors the pattern used in
- * UserFollowsBottomSheet / CommentsBottomSheet so the same user reads the
- * same way everywhere.
- */
-const ProfileAvatar = ({
-  photoUrl,
-  initial,
-}: {
-  photoUrl: string | null;
-  initial: string;
-}): React.JSX.Element => {
-  const [imgError, setImgError] = useState(false);
-
-  // Reset the error flag when the source changes — a react-query cache refresh
-  // can swap in a new photo_url without remounting, and a stale `true` would
-  // keep the fallback initial visible over a perfectly good image.
-  useEffect(() => {
-    setImgError(false);
-  }, [photoUrl]);
-
-  if (photoUrl && !imgError) {
-    return (
-      <img
-        src={photoUrl}
-        alt=""
-        onError={() => setImgError(true)}
-        className="size-20 shrink-0 rounded-full object-cover ring-1 ring-border"
-      />
-    );
-  }
-
-  return (
-    <div
-      aria-hidden
-      className="flex size-20 shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl font-semibold text-primary ring-1 ring-border"
-    >
-      {initial}
-    </div>
-  );
-};
 
 /** A tappable follow/following count, styled as a stacked stat. */
 const FollowStat = ({
