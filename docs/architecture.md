@@ -407,6 +407,13 @@ sequenceDiagram
   пользователя/профиль через service-role и отдаёт **одноразовый `tokenHash`**
   (magic-link OTP). Клиент обменивает его на сессию через `supabase.auth.verifyOtp(...)`
   — так refresh-токен не путешествует по сети вручную. Поле `isNewUser` — для онбординга.
+- Личность пользователя ключуется на `telegram_id`. Синтетический email
+  (`tg-<telegram_id>@wlist-tg.local`) — только технический идентификатор GoTrue,
+  которого требуют `generateLink`/`verifyOtp`; он не виден пользователю и **не**
+  используется как ключ поиска. Существующий пользователь резолвится через
+  `profiles.telegram_id` (UNIQUE, PK == `auth.users.id`), новый — из ответа
+  `createUser`. `listUsers` не используется: у него нет фильтра по email,
+  и перебор страниц молча мисматчит всех, кроме первого пользователя.
 - Валидация `initData` — только на сервере. Клиентская проверка обходится за минуту через DevTools.
 - Переменная `TG_BOT_TOKEN` живёт в Supabase Function Secrets, не в репо.
 - Сессией управляет `supabase-js` (`persistSession: true`, `autoRefreshToken: true`,

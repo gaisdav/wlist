@@ -12,10 +12,13 @@
  *   3. HMAC-verify `initData` with `TG_BOT_TOKEN` (24h TTL).
  *   4. Anti-replay: insert sha256(initData) into
  *      `public.auth_telegram_used_init_data`. Conflict ⇒ replay ⇒ 401.
- *   5. Extract Telegram user → derive synthetic email
- *      (`<telegram_id>@wlist-tg.local`).
- *   6. `auth.admin.createUser({ email, email_confirm: true })` if new,
- *      otherwise look up the existing one.
+ *   5. Extract Telegram user. Identity is keyed on `telegram_id`; a synthetic
+ *      non-routable email (`tg-<telegram_id>@wlist-tg.local`) is used only as
+ *      the GoTrue identifier that `generateLink`/`verifyOtp` require — never
+ *      as a lookup key, and never shown to the user.
+ *   6. `auth.admin.createUser` if new (id comes straight from the response);
+ *      otherwise resolve the id from `public.profiles` by `telegram_id`
+ *      (UNIQUE, PK == auth.users.id).
  *   7. Upsert `public.profiles` with the latest Telegram-side fields.
  *   8. `auth.admin.generateLink({ type: 'magiclink', email })` →
  *      hand the resulting `token_hash` back to the client.
@@ -35,6 +38,7 @@ import {
   type AuthTelegramResponse,
 } from './_lib/contract.ts';
 import { extractTelegramUser, sha256Hex } from './_lib/extractTelegramUser.ts';
+import { resolveUserId, type ResolveUserIdPort } from './_lib/resolveUserId.ts';
 import { verifyInitData } from './_lib/verifyInitData.ts';
 
 // =============================================================================
@@ -63,6 +67,47 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 
 const fail = (code: AuthTelegramErrorCode, status: number, message?: string): Response =>
   jsonResponse({ error: code, ...(message ? { message } : {}) }, { status });
+
+/**
+ * Adapter binding the service-role admin client to the `resolveUserId` port.
+ * Keeps the resolution logic (and its tests) free of supabase-js/Deno types.
+ */
+const userIdPort: ResolveUserIdPort = {
+  async createUser({ email, telegramId }) {
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { telegram_id: telegramId, login_source: 'telegram_mini_app' },
+    });
+    if (error) {
+      // 'A user with this email address has already been registered' is the
+      // only expected error path — anything else is fatal.
+      const isAlreadyExists =
+        error.code === 'email_exists' ||
+        error.code === 'user_already_exists' ||
+        error.message.includes('already');
+      if (isAlreadyExists) return { ok: true, alreadyExists: true };
+      console.error('auth-telegram: createUser failed', error);
+      return { ok: false, error };
+    }
+    const id = data.user?.id;
+    if (!id) return { ok: false, error: new Error('createUser returned no user') };
+    return { ok: true, id };
+  },
+
+  async findProfileIdByTelegramId(telegramId) {
+    const { data, error } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('telegram_id', telegramId)
+      .maybeSingle();
+    if (error) {
+      console.error('auth-telegram: profile lookup failed', error);
+      return { ok: false, error };
+    }
+    return { ok: true, id: data?.id ?? null };
+  },
+};
 
 Deno.serve(async (req: Request) => {
   const preflight = handlePreflight(req);
@@ -119,59 +164,38 @@ Deno.serve(async (req: Request) => {
   const tgUser = userResult.user;
 
   // --- ensure auth.users + profiles row ------------------------------------
-  // Synthetic email — Supabase Auth requires SOME stable identifier per user.
-  // The address is intentionally non-routable (.local) so no real mailbox is
-  // ever created. The user only sees Telegram, never an email.
+  // Supabase Auth requires SOME stable identifier per user, and the only
+  // admin-side way to mint a session (`generateLink` + client `verifyOtp`)
+  // is email- or phone-based. We use a synthetic, non-routable `.local`
+  // address purely as that GoTrue identifier — it is NEVER a lookup key and
+  // the user never sees it. Identity is keyed on `telegram_id` everywhere.
   const email = `tg-${tgUser.id}@wlist-tg.local`;
 
-  let isNewUser = false;
+  // Resolve the canonical user id authoritatively (see `resolveUserId`):
+  // new users come straight from `createUser`, existing ones from
+  // `profiles.telegram_id`. We never key off the email or page `listUsers`
+  // on the happy path — that was the original RLS-mismatch bug.
+  let resolved: Awaited<ReturnType<typeof resolveUserId>>;
   try {
-    const { error: createError } = await admin.auth.admin.createUser({
-      email,
-      email_confirm: true,
-      user_metadata: { telegram_id: tgUser.id, login_source: 'telegram_mini_app' },
-    });
-    if (createError) {
-      // 'A user with this email address has already been registered'
-      // is the only expected error path — anything else is fatal.
-      const isAlreadyExists =
-        createError.code === 'email_exists' ||
-        createError.code === 'user_already_exists' ||
-        createError.message.includes('already');
-      if (!isAlreadyExists) {
-        console.error('auth-telegram: createUser failed', createError);
-        return fail('internal_error', 500);
-      }
-    } else {
-      isNewUser = true;
-    }
+    resolved = await resolveUserId(userIdPort, email, tgUser.id);
   } catch (e) {
-    console.error('auth-telegram: createUser threw', e);
+    console.error('auth-telegram: resolveUserId threw', e);
     return fail('internal_error', 500);
   }
-
-  // Look up the canonical user id via listUsers (filtered by email). We need
-  // it for the profiles row PK.
-  const { data: foundUsers, error: listError } = await admin.auth.admin.listUsers({
-    page: 1,
-    perPage: 1,
-  });
-  if (listError) {
-    console.error('auth-telegram: listUsers failed', listError);
+  if (!resolved.ok) {
+    if (resolved.reason === 'not_found') {
+      console.error('auth-telegram: user not found after create/lookup', {
+        telegram_id: tgUser.id,
+      });
+    }
     return fail('internal_error', 500);
   }
-  const userRow = foundUsers.users.find((u) => u.email === email);
-  if (!userRow) {
-    // Should be impossible — we just created (or confirmed existence of) this
-    // user. Treat as a server bug, not a client error.
-    console.error('auth-telegram: user not found after create/lookup', { email });
-    return fail('internal_error', 500);
-  }
+  const { userId, isNewUser } = resolved;
 
   // Upsert profile (refresh Telegram-side fields on every login).
   const { error: profileError } = await admin.from('profiles').upsert(
     {
-      id: userRow.id,
+      id: userId,
       telegram_id: tgUser.id,
       username: tgUser.username ?? null,
       first_name: tgUser.first_name,
