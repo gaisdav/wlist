@@ -206,11 +206,10 @@
       "load_more": "Load more"
     },
     "search": {
-      "title": "Find people",
       "placeholder": "Search by name or @username",
-      "submit": "Search",
       "hint": "Enter at least 2 characters.",
-      "no_results": "No matching profiles."
+      "no_results": "No matching profiles.",
+      "empty": "No people to show yet."
     },
     "follows": {
       "following_title": "Following",

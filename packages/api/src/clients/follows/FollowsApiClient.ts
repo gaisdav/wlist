@@ -37,6 +37,21 @@ export const createFollowsApi = (sb: SupabaseClientLike): FollowsApi => ({
     return (count ?? 0) > 0;
   },
 
+  async followingStatus(followeeIds: string[]) {
+    if (followeeIds.length === 0) return {};
+    const { data: userData, error: userError } = await sb.auth.getUser();
+    if (userError || !userData.user) return {};
+    const { data, error } = await sb
+      .from('follows')
+      .select('followee_id')
+      .eq('follower_id', userData.user.id)
+      .in('followee_id', followeeIds);
+    if (error) throw error;
+    const map: Record<string, boolean> = {};
+    for (const row of data ?? []) map[row.followee_id] = true;
+    return map;
+  },
+
   async getCounts(userId: string) {
     const [followingRes, followersRes] = await Promise.all([
       sb.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId),

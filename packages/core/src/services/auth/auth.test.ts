@@ -36,12 +36,13 @@ const buildApi = (overrides: {
     profiles: {
       getCurrent: overrides.getCurrent ?? vi.fn().mockResolvedValue(buildProfileRow()),
       getById: vi.fn().mockResolvedValue(null),
-      searchUsers: vi.fn().mockResolvedValue([]),
+      listUsers: vi.fn().mockResolvedValue([]),
     },
     follows: {
       follow: vi.fn(),
       unfollow: vi.fn(),
       isFollowing: vi.fn().mockResolvedValue(false),
+      followingStatus: vi.fn().mockResolvedValue({}),
       getCounts: vi.fn().mockResolvedValue({ following: 0, followers: 0 }),
       listFollowing: vi.fn().mockResolvedValue([]),
       listFollowers: vi.fn().mockResolvedValue([]),
