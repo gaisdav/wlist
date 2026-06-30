@@ -156,7 +156,6 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
           onChange={(checked) =>
             setValue('is_recurring_yearly', checked, { shouldDirty: true, shouldValidate: true })
           }
-          disabled={isSaving}
         />
 
         <Button type="submit" isLoading={isSaving} className="mt-2">

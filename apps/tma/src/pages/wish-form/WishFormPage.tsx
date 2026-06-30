@@ -341,7 +341,6 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         {/* Level 1 — the essentials: photo, title, description, link, price. */}
         <FormSection title={t('wishes.form.core_section')}>
           <WishPhotoSection
-            isSaving={isSaving}
             photo={photo}
             onPhotoChange={setPhoto}
             photoError={photoError}
@@ -353,7 +352,6 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         {/* Level 2 — who can see it: visibility + (when "lists") list picker. */}
         <FormSection title={t('wishes.form.visibility_section')} divided>
           <WishVisibilitySection
-            isSaving={isSaving}
             visibility={visibility}
             onVisibilityChange={setVisibility}
             lists={userLists.data}
@@ -373,7 +371,6 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
           <Collapsible summary={t('wishes.form.details_toggle')} defaultOpen={detailsDefaultOpen}>
             <WishCopyLinesSection
               form={form}
-              isSaving={isSaving}
               visibleCount={copyLinesVisible}
               onAddLine={() => setCopyLinesVisible((n) => Math.min(WISH_COPY_LINES_MAX, n + 1))}
               onOpenInfo={() => setIsCopyInfoOpen(true)}
@@ -390,7 +387,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
               onCreateEvent={() => setLocation('/event/new')}
             />
 
-            <WishGroupGiftSection form={form} isSaving={isSaving} mode={mode} />
+            <WishGroupGiftSection form={form} mode={mode} />
           </Collapsible>
         </div>
 

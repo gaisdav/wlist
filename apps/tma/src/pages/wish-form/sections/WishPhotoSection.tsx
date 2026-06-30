@@ -6,7 +6,6 @@ import { Button } from '../../../components/primitives/button';
 import { PrepareWishPhotoError, prepareWishPhotoUpload } from '../prepareWishPhotoUpload';
 
 interface WishPhotoSectionProps {
-  isSaving: boolean;
   /** The prepared photo to upload, or null if none chosen. */
   photo: File | null;
   /** Receives the prepared (resized/validated) file, or null when cleared. */
@@ -24,7 +23,6 @@ interface WishPhotoSectionProps {
  * input is driven by a styled button; errors surface inline.
  */
 export const WishPhotoSection = ({
-  isSaving,
   photo,
   onPhotoChange,
   photoError,
@@ -41,7 +39,6 @@ export const WishPhotoSection = ({
         ref={photoInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
-        disabled={isSaving}
         className="sr-only"
         aria-label={t('wishes.form.photo_label')}
         onChange={(e) => {
@@ -80,7 +77,6 @@ export const WishPhotoSection = ({
           type="button"
           variant="outline"
           size="sm"
-          disabled={isSaving}
           onClick={() => photoInputRef.current?.click()}
         >
           {photo ? t('wishes.form.photo_change') : t('wishes.form.photo_choose')}
@@ -97,7 +93,6 @@ export const WishPhotoSection = ({
               type="button"
               variant="link"
               className="shrink-0"
-              disabled={isSaving}
               onClick={() => {
                 onPhotoChange(null);
                 onPhotoError(null);
