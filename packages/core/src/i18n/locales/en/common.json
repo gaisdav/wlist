@@ -81,7 +81,6 @@
       "archived": "Archived"
     },
     "card": {
-      "no_description": "No description",
       "price": "{{amount}} {{currency}}",
       "price_no_currency": "{{amount}}",
       "has_product_link": "Includes a product link",
@@ -103,6 +102,8 @@
       "prev_wish": "Previous wish",
       "next_wish": "Next wish",
       "sibling_nav": "Other wishes in this list",
+      "action_bar": "Wish actions",
+      "gift_slots_cta": "Gift slots",
       "copy_lines": "Text to copy",
       "copy_line": "Copy text"
     },

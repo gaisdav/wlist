@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateEvent, useEvent, useUpdateEvent } from '@wlist/core/hooks/events';
+import { Calendar } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { useApiClient } from '../../providers/ApiClientProvider';
 import { useClosingConfirmation } from '../../telegram/useClosingConfirmation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
+import { useTelegramSecondaryButton } from '../../telegram/useTelegramSecondaryButton';
 
 const eventFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -105,6 +107,16 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
     isEnabled: !isSaving,
   });
 
+  // Cancel as the SecondaryButton beside Save, only while the MainButton drives
+  // the CTA (inside Telegram). In-page forms fall back to BackButton / navigation.
+  useTelegramSecondaryButton({
+    text: t('actions.cancel'),
+    position: 'left',
+    onClick: goBack,
+    isVisible: mainButtonActive,
+    isEnabled: !isSaving,
+  });
+
   if (mode === 'edit' && (event.isLoading || !eventId)) {
     return (
       <PageLoadingPlaceholder>
@@ -119,21 +131,21 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
   }
 
   return (
-    <form className="flex flex-col gap-4 p-4" onSubmit={handleSubmit(onValid)}>
+    <form className="flex flex-col gap-6 p-4" onSubmit={handleSubmit(onValid)}>
       <h1 className="text-xl font-semibold text-foreground">
         {mode === 'create' ? t('events.form.create_title') : t('events.form.edit_title')}
       </h1>
 
       <fieldset
         disabled={isSaving}
-        className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0 disabled:opacity-60"
+        className="m-0 flex min-w-0 flex-col gap-5 border-0 p-0 disabled:opacity-60"
       >
-        <label className="flex flex-col gap-1">
+        <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">
             {t('events.form.title_label')}
           </span>
           <input
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none"
             placeholder={t('events.form.title_placeholder')}
             {...register('title')}
           />
@@ -144,14 +156,21 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
           ) : null}
         </label>
 
-        <label className="flex flex-col gap-1">
+        <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">{t('events.form.date_label')}</span>
-          <input
-            type="date"
-            min={minDate}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-            {...register('event_date')}
-          />
+          <div className="relative">
+            <Calendar
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted"
+              strokeWidth={2}
+              aria-hidden
+            />
+            <input
+              type="date"
+              min={minDate}
+              className="w-full rounded-lg border border-border bg-background py-2.5 pl-9 pr-3 text-sm text-foreground focus:border-primary focus:outline-none"
+              {...register('event_date')}
+            />
+          </div>
         </label>
 
         <SwitchField

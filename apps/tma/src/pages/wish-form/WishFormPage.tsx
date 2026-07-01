@@ -30,6 +30,7 @@ import { haptics } from '../../telegram/haptics';
 import { useClosingConfirmation } from '../../telegram/useClosingConfirmation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
+import { useTelegramSecondaryButton } from '../../telegram/useTelegramSecondaryButton';
 
 import { wishPhotoMimeForApi } from './prepareWishPhotoUpload';
 import {
@@ -290,6 +291,16 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     text: mode === 'create' ? t('wishes.form.submit_create') : t('wishes.form.submit_edit'),
     onClick: () => void handleSubmit(onValid)(),
     isLoaderVisible: isSaving,
+    isEnabled: !isSaving,
+  });
+
+  // Cancel as the SecondaryButton beside Save, only while the MainButton drives
+  // the CTA (inside Telegram). In-page forms fall back to BackButton / navigation.
+  useTelegramSecondaryButton({
+    text: t('actions.cancel'),
+    position: 'left',
+    onClick: goBack,
+    isVisible: mainButtonActive,
     isEnabled: !isSaving,
   });
 
