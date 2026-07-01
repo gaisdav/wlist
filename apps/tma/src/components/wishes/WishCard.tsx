@@ -54,7 +54,7 @@ export const WishCard = ({ wish, isOwner = false, viewerId }: WishCardProps): Re
         </div>
         <div className={clsx('min-w-0 flex-1', hasLink && 'pr-7')}>
           <p className="truncate font-medium text-foreground">{wish.title}</p>
-          <p className="mt-0.5 line-clamp-2 text-sm text-muted">{preview}</p>
+          {preview ? <p className="mt-0.5 line-clamp-2 text-sm text-muted">{preview}</p> : null}
           {wish.price != null ? (
             <p className="mt-1 text-xs text-muted">
               {wish.currency
