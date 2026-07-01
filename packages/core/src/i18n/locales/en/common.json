@@ -103,6 +103,8 @@
       "prev_wish": "Previous wish",
       "next_wish": "Next wish",
       "sibling_nav": "Other wishes in this list",
+      "action_bar": "Wish actions",
+      "gift_slots_cta": "Gift slots",
       "copy_lines": "Text to copy",
       "copy_line": "Copy text"
     },
