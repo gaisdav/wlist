@@ -276,7 +276,10 @@ export const WishDetailPage = (): React.JSX.Element => {
           </Link>
         ) : null}
 
-        {!isOwner && !w.is_archived && viewerId ? (
+        {/* Ordinary wishes: reserve/cancel lives only in the bottom bar (no
+            duplicate here). Group gifts keep the rich multi-slot section, which
+            the bar's "Gift slots" action scrolls to via this anchor. */}
+        {!isOwner && !w.is_archived && viewerId && w.is_collaborative ? (
           <div id={SLOTS_ANCHOR_ID} className="scroll-mt-4">
             <WishReservationSection wish={w} viewerId={viewerId} />
           </div>

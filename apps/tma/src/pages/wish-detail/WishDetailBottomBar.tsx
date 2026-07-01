@@ -58,7 +58,11 @@ const ReserveAction = ({
     );
   }
 
-  if (!summary) return null;
+  // Hold the action's footprint while the slots query resolves, so the reserve
+  // button doesn't pop in and nudge the bar (matches the arrows' stable layout).
+  if (!summary) {
+    return <span aria-hidden className="h-11 flex-1 rounded-xl bg-muted/10" />;
+  }
 
   const myActiveSlot = (slotsQuery.data ?? []).find(
     (s) => s.status === 'active' && s.booked_by === viewerId,
