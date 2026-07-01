@@ -11,6 +11,7 @@ import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/sk
 import { SwitchField } from '../../components/primitives/switch';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { useClosingConfirmation } from '../../telegram/useClosingConfirmation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
@@ -66,6 +67,9 @@ export const EventFormPage = ({ mode }: EventFormPageProps): React.JSX.Element =
     window.history.back();
   };
   useTelegramBackButton(goBack, true);
+
+  // Confirm closing the app while there are unsaved edits.
+  useClosingConfirmation(formState.isDirty && !isSaving);
 
   const onValid = async (data: EventFormInput): Promise<void> => {
     setIsSaving(true);

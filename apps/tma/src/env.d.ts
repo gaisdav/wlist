@@ -3,6 +3,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_PUBLIC_APP_URL: string;
+  /** Bot username (without @) for `t.me/<bot>?startapp=…` share links. Optional. */
+  readonly VITE_PUBLIC_BOT_USERNAME?: string;
   readonly VITE_SUPABASE_URL: string;
   readonly VITE_SUPABASE_ANON_KEY: string;
 }

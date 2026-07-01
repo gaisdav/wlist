@@ -4,16 +4,26 @@ import { useUserLists } from '@wlist/core/hooks/lists';
 import { useMySlotBookings } from '@wlist/core/hooks/slots';
 import { useFollowsCounts } from '@wlist/core/hooks/social';
 import { useMyWishes } from '@wlist/core/hooks/wishes';
-import { ChevronRight, ClipboardList, FolderHeart, Gift, type LucideIcon } from 'lucide-react';
+import {
+  ChevronRight,
+  ClipboardList,
+  FolderHeart,
+  Gift,
+  type LucideIcon,
+  Share2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
+import { Button } from '../../components/primitives/button';
 import { ProfileAvatar } from '../../components/primitives/profile-avatar';
 import { Skeleton } from '../../components/primitives/skeleton';
 import { UserFollowsBottomSheet } from '../../components/social';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { haptics } from '../../telegram/haptics';
+import { share } from '../../telegram/share';
 
 /** A tappable follow/following count, styled as a stacked stat. */
 const FollowStat = ({
@@ -154,6 +164,25 @@ export const ProfilePage = (): React.JSX.Element => {
           <h1 className="text-xl font-semibold text-foreground">{fullName || displayName}</h1>
           {handle ? <p className="text-sm text-muted">{handle}</p> : null}
         </div>
+
+        {userId ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="inline-flex items-center gap-2"
+            onClick={() => {
+              haptics.impact('light');
+              void share({
+                target: { kind: 'user', id: userId },
+                text: t('share.profile'),
+              });
+            }}
+          >
+            <Share2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+            {t('actions.share')}
+          </Button>
+        ) : null}
 
         <div className="flex w-full max-w-xs items-stretch rounded-xl border border-border bg-surface">
           <FollowStat

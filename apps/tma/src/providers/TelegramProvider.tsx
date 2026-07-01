@@ -4,6 +4,7 @@ import {
   retrieveLaunchParams,
   swipeBehavior,
   themeParams,
+  viewport,
 } from '@telegram-apps/sdk-react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
 
@@ -35,6 +36,15 @@ export const TelegramProvider = ({ children }: PropsWithChildren): React.JSX.Ele
         if (swipeBehavior.mount.isAvailable()) {
           swipeBehavior.mount();
           swipeBehavior.disableVertical();
+        }
+        // Open at full height instead of Telegram's default half-sheet, and
+        // expose viewport CSS vars (--tg-viewport-height, *-stable-height) for
+        // layout. `mount` is async in SDK v3; `expand` is idempotent + no-ops
+        // outside Telegram, so this is safe in every host.
+        if (viewport.mount.isAvailable()) {
+          await viewport.mount();
+          if (viewport.expand.isAvailable()) viewport.expand();
+          if (viewport.bindCssVars.isAvailable()) viewport.bindCssVars();
         }
         setState({ ready: true, isMockEnv: false });
       } catch (err) {

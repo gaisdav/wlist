@@ -27,6 +27,7 @@ import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { showErrorToast } from '../../lib/errorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { haptics } from '../../telegram/haptics';
+import { useClosingConfirmation } from '../../telegram/useClosingConfirmation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
 
@@ -189,6 +190,9 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     window.history.back();
   };
   useTelegramBackButton(goBack, true);
+
+  // Confirm closing the app while there are unsaved edits.
+  useClosingConfirmation(form.formState.isDirty && !isSaving);
 
   const uploadPhotoIfNeeded = async (
     id: string,
