@@ -14,10 +14,10 @@
   },
   "share": {
     "wish": "Check out this wish: {{title}}",
-    "list_own": "Here's my wishlist",
     "list_other": "Check out {{name}}'s wishlist",
     "profile": "Check out my wishlist on wlist",
-    "event": "Let's coordinate a gift for {{title}}"
+    "event": "Let's coordinate a gift for {{title}}",
+    "copied": "Link copied to clipboard"
   },
   "states": {
     "loading": "Loading…",

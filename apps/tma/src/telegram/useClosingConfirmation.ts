@@ -23,8 +23,10 @@ export const useClosingConfirmation = (active: boolean): void => {
       disableClosingConfirmation();
     }
 
+    // Only undo the flag this effect actually set, so a future co-mounted
+    // consumer's enabled state isn't cleared out from under it.
     return () => {
-      if (disableClosingConfirmation.isAvailable()) disableClosingConfirmation();
+      if (active && disableClosingConfirmation.isAvailable()) disableClosingConfirmation();
     };
   }, [active]);
 };

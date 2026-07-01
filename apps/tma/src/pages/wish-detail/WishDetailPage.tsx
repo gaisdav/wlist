@@ -81,8 +81,10 @@ export const WishDetailPage = (): React.JSX.Element => {
       text: t('share.wish', { title: wish.data.title }),
     });
   };
-  // Native SecondaryButton for Share; the in-page button below is the fallback.
-  const shareButtonActive = useTelegramSecondaryButton({
+  // Native SecondaryButton for Share, when the client renders it. The in-page
+  // Share button below is always rendered too, so the action is never lost even
+  // if the standalone secondary button doesn't appear (no MainButton here).
+  useTelegramSecondaryButton({
     text: t('actions.share'),
     onClick: onShare,
     isVisible: Boolean(wish.data),
@@ -268,18 +270,20 @@ export const WishDetailPage = (): React.JSX.Element => {
 
         <WishSocialStrip wish={w} isOwner={isOwner} />
 
-        {!shareButtonActive ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="inline-flex items-center gap-2 self-start"
-            onClick={onShare}
-          >
-            <Share2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-            {t('actions.share')}
-          </Button>
-        ) : null}
+        {/* Always render the in-page Share button. The native SecondaryButton is
+            a companion to the MainButton, which this screen doesn't have, so it
+            may not render standalone in some Telegram clients — the in-page
+            button guarantees the affordance is never lost. */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="inline-flex items-center gap-2 self-start"
+          onClick={onShare}
+        >
+          <Share2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+          {t('actions.share')}
+        </Button>
 
         {!isOwner && !w.is_archived ? (
           <Link

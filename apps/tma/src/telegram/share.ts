@@ -1,5 +1,8 @@
 import { shareURL } from '@telegram-apps/sdk-react';
 
+import { i18n } from '../i18n';
+import { showSuccessToast } from '../lib/errorToast';
+
 import { type DeepLinkTarget, encodeStartParam, targetToRoute } from './deepLink';
 
 const APP_URL = import.meta.env.VITE_PUBLIC_APP_URL;
@@ -47,5 +50,7 @@ export const share = async ({ target, text }: ShareOptions): Promise<void> => {
   }
   if (typeof navigator !== 'undefined' && navigator.clipboard) {
     await navigator.clipboard.writeText(`${text} ${url}`);
+    // The clipboard fallback is silent otherwise — confirm the copy happened.
+    showSuccessToast(i18n.t('share.copied'));
   }
 };
