@@ -3,7 +3,7 @@ import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useDeleteEvent, useEvent, useEventWishes } from '@wlist/core/hooks/events';
 import { useProfileById } from '@wlist/core/hooks/social';
 import { calculateDaysLeft, formatDate } from '@wlist/core/lib';
-import { Calendar, Edit, Gift, Trash2, WifiOff } from 'lucide-react';
+import { Calendar, Edit, Gift, Share2, Trash2, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
 
@@ -16,6 +16,7 @@ import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { confirm } from '../../telegram/confirm';
 import { haptics } from '../../telegram/haptics';
+import { share } from '../../telegram/share';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 export const EventDetailPage = (): React.JSX.Element => {
@@ -108,28 +109,46 @@ export const EventDetailPage = (): React.JSX.Element => {
             ) : null}
           </div>
 
-          {isOwner ? (
-            <div className="flex items-center gap-1 shrink-0">
-              <Link
-                to={`/event/${ev.id}/edit`}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground hover:bg-muted/10 transition shadow-sm"
-                title={t('actions.edit')}
-              >
-                <Edit className="h-4 w-4" />
-              </Link>
-              <Button
-                type="button"
-                variant="destructive"
-                size="iconRound"
-                className="h-9 w-9 border border-destructive/20 shadow-sm"
-                disabled={deleteMut.isPending}
-                onClick={() => void onDelete()}
-                title={t('actions.delete')}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : null}
+          <div className="flex items-center gap-1 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="iconRound"
+              className="h-9 w-9 shadow-sm"
+              onClick={() => {
+                haptics.impact('light');
+                void share({
+                  target: { kind: 'event', id: ev.id },
+                  text: t('share.event', { title: ev.title }),
+                });
+              }}
+              title={t('actions.share')}
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+            {isOwner ? (
+              <>
+                <Link
+                  to={`/event/${ev.id}/edit`}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-foreground hover:bg-muted/10 transition shadow-sm"
+                  title={t('actions.edit')}
+                >
+                  <Edit className="h-4 w-4" />
+                </Link>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="iconRound"
+                  className="h-9 w-9 border border-destructive/20 shadow-sm"
+                  disabled={deleteMut.isPending}
+                  onClick={() => void onDelete()}
+                  title={t('actions.delete')}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            ) : null}
+          </div>
         </div>
 
         {daysLeft !== null ? (

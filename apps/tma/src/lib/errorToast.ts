@@ -12,3 +12,8 @@ import { i18n } from '../i18n';
 export const showErrorToast = (message?: string): void => {
   toast.error(message ?? i18n.t('states.error'));
 };
+
+/** Success feedback; `message` should already be localized. */
+export const showSuccessToast = (message: string): void => {
+  toast.success(message);
+};

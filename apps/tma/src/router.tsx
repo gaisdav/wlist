@@ -7,6 +7,7 @@ import { FeedPage } from './pages/feed/FeedPage';
 import { MyWishlistPage } from './pages/my-wishlist/MyWishlistPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { SearchUsersPage } from './pages/search-users/SearchUsersPage';
+import { useStartParamRedirect } from './telegram/useStartParamRedirect';
 
 const MyBookingsPage = lazy(() =>
   import('./pages/my-bookings/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })),
@@ -30,8 +31,15 @@ const EventFormPage = lazy(() =>
   import('./pages/event-form/EventFormPage').then((m) => ({ default: m.EventFormPage })),
 );
 
-export const AppRouter = (): React.JSX.Element => (
-  <Router>
+/**
+ * Routes, plus the one-shot `startapp` deep-link redirect. Split from
+ * `AppRouter` so `useStartParamRedirect` runs inside `<Router>` (it needs
+ * wouter's location context).
+ */
+const AppRoutes = (): React.JSX.Element => {
+  useStartParamRedirect();
+
+  return (
     <AppLayout>
       <Suspense
         fallback={
@@ -70,5 +78,11 @@ export const AppRouter = (): React.JSX.Element => (
         </Switch>
       </Suspense>
     </AppLayout>
+  );
+};
+
+export const AppRouter = (): React.JSX.Element => (
+  <Router>
+    <AppRoutes />
   </Router>
 );

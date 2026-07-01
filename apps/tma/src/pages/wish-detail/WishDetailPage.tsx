@@ -8,7 +8,7 @@ import {
   useWish,
 } from '@wlist/core/hooks/wishes';
 import { formatDate, formatWishAmount } from '@wlist/core/lib';
-import { Check, ChevronLeft, ChevronRight, Copy, Lock, Repeat2, Users } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Copy, Lock, Repeat2, Share2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
@@ -25,7 +25,9 @@ import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
 import { confirm } from '../../telegram/confirm';
 import { haptics } from '../../telegram/haptics';
+import { share } from '../../telegram/share';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
+import { useTelegramSecondaryButton } from '../../telegram/useTelegramSecondaryButton';
 
 import { WishDetailHero } from './WishDetailHero';
 
@@ -70,6 +72,23 @@ export const WishDetailPage = (): React.JSX.Element => {
     setLocation(listPath, { replace: true });
   };
   useTelegramBackButton(goTelegramBack, Boolean(wishId));
+
+  const onShare = (): void => {
+    if (!wish.data) return;
+    haptics.impact('light');
+    void share({
+      target: { kind: 'wish', id: wish.data.id },
+      text: t('share.wish', { title: wish.data.title }),
+    });
+  };
+  // Native SecondaryButton for Share, when the client renders it. The in-page
+  // Share button below is always rendered too, so the action is never lost even
+  // if the standalone secondary button doesn't appear (no MainButton here).
+  useTelegramSecondaryButton({
+    text: t('actions.share'),
+    onClick: onShare,
+    isVisible: Boolean(wish.data),
+  });
 
   if (!wishId) {
     return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
@@ -250,6 +269,21 @@ export const WishDetailPage = (): React.JSX.Element => {
         ) : null}
 
         <WishSocialStrip wish={w} isOwner={isOwner} />
+
+        {/* Always render the in-page Share button. The native SecondaryButton is
+            a companion to the MainButton, which this screen doesn't have, so it
+            may not render standalone in some Telegram clients — the in-page
+            button guarantees the affordance is never lost. */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="inline-flex items-center gap-2 self-start"
+          onClick={onShare}
+        >
+          <Share2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+          {t('actions.share')}
+        </Button>
 
         {!isOwner && !w.is_archived ? (
           <Link

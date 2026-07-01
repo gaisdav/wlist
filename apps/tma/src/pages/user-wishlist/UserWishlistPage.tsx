@@ -8,7 +8,7 @@ import {
   useUnfollowUser,
 } from '@wlist/core/hooks/social';
 import { useUserWishes } from '@wlist/core/hooks/wishes';
-import { Gift, WifiOff } from 'lucide-react';
+import { Gift, Share2, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Redirect, useParams } from 'wouter';
 
@@ -20,6 +20,8 @@ import { PageLoadingPlaceholder, Skeleton } from '../../components/primitives/sk
 import { WishCard } from '../../components/wishes';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
 import { useApiClient } from '../../providers/ApiClientProvider';
+import { haptics } from '../../telegram/haptics';
+import { share } from '../../telegram/share';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 
 /** A follow/following count rendered as a stacked, read-only stat. */
@@ -104,6 +106,23 @@ export const UserWishlistPage = (): React.JSX.Element => {
           <h1 className="text-xl font-semibold text-foreground">{fullName || displayName}</h1>
           {handle ? <p className="text-sm text-muted">{handle}</p> : null}
         </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="inline-flex items-center gap-2"
+          onClick={() => {
+            haptics.impact('light');
+            void share({
+              target: { kind: 'user', id: userId },
+              text: t('share.list_other', { name: fullName || displayName }),
+            });
+          }}
+        >
+          <Share2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+          {t('actions.share')}
+        </Button>
 
         {profile.data ? (
           <Button
