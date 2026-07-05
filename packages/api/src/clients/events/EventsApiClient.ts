@@ -97,4 +97,21 @@ export const createEventsApi = (sb: SupabaseClientLike): EventsApi => ({
     if (error) throw error;
     return (data?.map((item) => item.events).filter(Boolean) ?? []) as EventRow[];
   },
+
+  async listForWishes(wishIds) {
+    const unique = [...new Set(wishIds.filter(Boolean))];
+    if (unique.length === 0) return {};
+    const { data, error } = await sb
+      .from('event_wishes')
+      .select('wish_id, events(*)')
+      .in('wish_id', unique);
+    if (error) throw error;
+    const out: Record<string, EventRow[]> = {};
+    for (const row of data ?? []) {
+      const event = row.events;
+      if (!event) continue;
+      (out[row.wish_id] ??= []).push(event as EventRow);
+    }
+    return out;
+  },
 });

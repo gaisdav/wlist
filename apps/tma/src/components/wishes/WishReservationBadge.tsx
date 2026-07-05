@@ -1,5 +1,6 @@
 import { type Wish } from '@wlist/core/entities/wish';
 import { useWishReservation } from '@wlist/core/hooks/slots';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useApiClient } from '../../providers/ApiClientProvider';
@@ -13,12 +14,12 @@ interface WishReservationBadgeProps {
   variant?: 'compact' | 'inline';
 }
 
-export const WishReservationBadge = ({
+export const WishReservationBadge = memo(function WishReservationBadge({
   wish,
   isOwner,
   viewerId,
   variant = 'inline',
-}: WishReservationBadgeProps): React.JSX.Element | null => {
+}: WishReservationBadgeProps): React.JSX.Element | null {
   const { t } = useTranslation('common');
   const api = useApiClient();
   const { slotsQuery, summary, enabled } = useWishReservation(
@@ -64,7 +65,7 @@ export const WishReservationBadge = ({
       {reservationLabel(t, wish, summary)}
     </Badge>
   );
-};
+});
 
 type Summary = NonNullable<ReturnType<typeof useWishReservation>['summary']>;
 

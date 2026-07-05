@@ -21,6 +21,8 @@ export interface ListUsersParams {
 export interface ProfilesApi {
   getCurrent(): Promise<ProfileRow | null>;
   getById(id: string): Promise<ProfileRow | null>;
+  /** Batched `getById`: one round trip for a page of profile ids. */
+  getByIds(ids: string[]): Promise<ProfileRow[]>;
   /**
    * One page of profiles, newest first. With a query, filters by
    * username/first_name; without one, returns the most recently joined users.

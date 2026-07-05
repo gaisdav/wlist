@@ -9,7 +9,7 @@ import {
 import { useProfileById } from '@wlist/core/hooks/social';
 import { formatRelativeTime } from '@wlist/core/lib';
 import { Send } from 'lucide-react';
-import { useMemo, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
@@ -175,73 +175,160 @@ const CommentItem = ({
   );
 };
 
+interface CommentComposerProps {
+  /** Whether the owning bottom sheet is open — used to clear the draft once it closes. */
+  isOpen: boolean;
+  isOwner: boolean;
+  replyToId: string | null;
+  editingComment: WishCommentRow | null;
+  isSubmitting: boolean;
+  /** Resolves `true` once the comment is committed (composer clears its draft). */
+  onSubmit: (body: string, showToOwner: boolean) => Promise<boolean>;
+  onCancel: () => void;
+}
+
+/**
+ * Owns its own `body`/`showToOwner` draft state so keystrokes only re-render
+ * this component, not the whole comment thread above it.
+ */
+const CommentComposer = ({
+  isOpen,
+  isOwner,
+  replyToId,
+  editingComment,
+  isSubmitting,
+  onSubmit,
+  onCancel,
+}: CommentComposerProps): React.JSX.Element => {
+  const { t } = useTranslation('common');
+  const [body, setBody] = useState('');
+  const [showToOwner, setShowToOwner] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Prefill on entering edit mode, and focus the input for both reply and edit —
+  // this component is always mounted (it's the sheet's footer), so a plain
+  // effect fires after the DOM is committed and doesn't need the old
+  // setTimeout(..., 50) workaround.
+  useEffect(() => {
+    if (editingComment) {
+      setBody(editingComment.body);
+      inputRef.current?.focus();
+    } else if (replyToId) {
+      setBody('');
+      inputRef.current?.focus();
+    }
+  }, [editingComment, replyToId]);
+
+  // Drop any unsent draft once the sheet closes, matching the previous behavior.
+  useEffect(() => {
+    if (!isOpen) {
+      setBody('');
+      setShowToOwner(false);
+    }
+  }, [isOpen]);
+
+  const handleCancel = (): void => {
+    setBody('');
+    onCancel();
+  };
+
+  const handleSubmit = async (): Promise<void> => {
+    if (!body.trim()) return;
+    const committed = await onSubmit(body.trim(), showToOwner);
+    if (committed) setBody('');
+  };
+
+  return (
+    <div className="flex flex-col gap-2 px-2 pt-2">
+      {!isOwner && !replyToId && !editingComment && (
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            checked={showToOwner}
+            onChange={(e) => setShowToOwner(e.target.checked)}
+            className="rounded border-border accent-primary"
+          />
+          {t('comments.show_to_owner')}
+        </label>
+      )}
+      {(replyToId || editingComment) && (
+        <div className="flex items-center justify-between text-xs text-muted">
+          {replyToId ? <span>{t('comments.replying')}</span> : <span>{t('actions.edit')}</span>}
+          <button type="button" onClick={handleCancel} className="underline hover:text-foreground">
+            {t('actions.cancel')}
+          </button>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRef}
+          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+          placeholder={t('comments.placeholder')}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          maxLength={2000}
+        />
+
+        <Button size="iconRound" onClick={handleSubmit} disabled={!body.trim() || isSubmitting}>
+          <Send className="size-4 shrink-0" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export function CommentsBottomSheet({
   wishId,
   isOwner,
   isOpen,
   onClose,
 }: CommentsBottomSheetProps) {
-  const { t } = useTranslation('common');
   const api = useApiClient();
   const { data: comments, isLoading } = useWishComments(api, isOpen ? wishId : '');
+  const { t } = useTranslation('common');
   const { data: user } = useCurrentUser(api);
 
   const createComment = useCreateWishComment(api);
   const updateComment = useUpdateWishComment(api);
 
-  const [body, setBody] = useState('');
-  const [showToOwner, setShowToOwner] = useState(false);
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [editingComment, setEditingComment] = useState<WishCommentRow | null>(null);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const handleEdit = (comment: WishCommentRow) => {
     setEditingComment(comment);
-    setBody(comment.body);
     setReplyToId(null);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
   };
 
   const handleCancel = () => {
     setEditingComment(null);
     setReplyToId(null);
-    setBody('');
   };
 
   const handleReply = (id: string) => {
     setReplyToId(id);
     setEditingComment(null);
-    setBody('');
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 50);
   };
 
   const handleClose = () => {
-    setBody('');
     setReplyToId(null);
     setEditingComment(null);
     onClose();
   };
 
-  const handleSubmit = async () => {
-    if (!body.trim()) return;
-
+  const handleComposerSubmit = async (body: string, showToOwner: boolean): Promise<boolean> => {
     if (editingComment) {
       try {
         await updateComment.mutateAsync({
           id: editingComment.id,
-          body: body.trim(),
+          body,
         });
-        setBody('');
         setEditingComment(null);
+        return true;
       } catch (e) {
         console.error('Failed to update comment', e);
+        return false;
       }
-      return;
     }
 
     if (!isOwner && !replyToId && showToOwner) {
@@ -249,82 +336,36 @@ export function CommentsBottomSheet({
         message: t('comments.confirm_show_owner'),
         confirmLabel: t('comments.show_to_owner'),
       });
-      if (!confirmed) return;
+      if (!confirmed) return false;
     }
 
     await createComment.mutateAsync({
       wish_id: wishId,
-      body: body.trim(),
+      body,
       parent_id: replyToId,
       visible_to_owner_thread: isOwner ? true : showToOwner,
     });
 
-    setBody('');
     setReplyToId(null);
+    return true;
   };
 
-  const footer = useMemo(
-    () => (
-      <div className="flex flex-col gap-2 px-2 pt-2">
-        {!isOwner && !replyToId && !editingComment && (
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={showToOwner}
-              onChange={(e) => setShowToOwner(e.target.checked)}
-              className="rounded border-border accent-primary"
-            />
-            {t('comments.show_to_owner')}
-          </label>
-        )}
-        {(replyToId || editingComment) && (
-          <div className="flex items-center justify-between text-xs text-muted">
-            {replyToId ? <span>{t('comments.replying')}</span> : <span>{t('actions.edit')}</span>}
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="underline hover:text-foreground"
-            >
-              {t('actions.cancel')}
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2">
-          <input
-            ref={inputRef}
-            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-            placeholder={t('comments.placeholder')}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            maxLength={2000}
-          />
-
-          <Button
-            size="iconRound"
-            onClick={handleSubmit}
-            disabled={!body.trim() || createComment.isPending || updateComment.isPending}
-          >
-            <Send className="size-4 shrink-0" />
-          </Button>
-        </div>
-      </div>
-    ),
-    [
-      isOwner,
-      replyToId,
-      editingComment,
-      showToOwner,
-      body,
-      createComment.isPending,
-      updateComment.isPending,
-      handleSubmit,
-      t,
-    ],
-  );
-
   return (
-    <BottomSheet isOpen={isOpen} onClose={handleClose} footerSlot={footer}>
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={handleClose}
+      footerSlot={
+        <CommentComposer
+          isOpen={isOpen}
+          isOwner={isOwner}
+          replyToId={replyToId}
+          editingComment={editingComment}
+          isSubmitting={createComment.isPending || updateComment.isPending}
+          onSubmit={handleComposerSubmit}
+          onCancel={handleCancel}
+        />
+      }
+    >
       <div className="flex flex-col gap-4 p-2 px-1">
         {isLoading && <div className="text-center text-sm text-muted">{t('states.loading')}</div>}
 

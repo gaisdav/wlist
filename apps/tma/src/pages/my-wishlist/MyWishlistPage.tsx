@@ -1,6 +1,7 @@
 import { useCurrentUser } from '@wlist/core/hooks/auth';
-import { useMyWishes } from '@wlist/core/hooks/wishes';
+import { useMyWishes, useWishListAncillary } from '@wlist/core/hooks/wishes';
 import { Gift, WifiOff } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
@@ -20,6 +21,8 @@ export const MyWishlistPage = (): React.JSX.Element => {
   const profile = useCurrentUser(api);
   const userId = profile.data?.id;
   const wishes = useMyWishes(api, userId);
+  const wishIds = useMemo(() => wishes.data?.map((w) => w.id) ?? [], [wishes.data]);
+  useWishListAncillary(api, wishIds);
 
   useQueryErrorToast(wishes.isError && !wishes.isLoading && Boolean(userId), t('states.error'));
   useQueryErrorToast(profile.isError && !profile.isLoading, t('states.error'));
