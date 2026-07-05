@@ -1,5 +1,15 @@
 // Single source of truth for TanStack Query keys. Never inline `['wishes', id]`
 // in a component — always reach for queryKeys.x.y(...).
+
+/**
+ * Stable, non-colliding key for a query that's temporarily `enabled: false`
+ * because its real id argument (`wishId`, `userId`, ...) isn't known yet.
+ * Every disabled instance of a given hook shares one such key — that's fine
+ * since the query never runs — but it must never collide with a real key.
+ */
+export const disabledQueryKey = (base: readonly unknown[]): readonly unknown[] =>
+  [...base, '__disabled__'] as const;
+
 export const queryKeys = {
   all: ['wlist'] as const,
   currentUser: () => [...queryKeys.all, 'currentUser'] as const,
@@ -49,6 +59,12 @@ export const queryKeys = {
     one: (wishId: string) => [...queryKeys.wishes.all(), 'one', wishId] as const,
   },
 
+  /** Batched events/likes/slots fetch for a page of wish ids — seeds the per-item caches below. */
+  wishesAncillary: {
+    batch: (wishIds: string[]) =>
+      [...queryKeys.all, 'wishesAncillary', [...wishIds].sort().join(',')] as const,
+  },
+
   slots: {
     byWish: (wishId: string) => [...queryKeys.all, 'slots', 'byWish', wishId] as const,
     myBookings: () => [...queryKeys.all, 'slots', 'myBookings'] as const,
@@ -64,5 +80,11 @@ export const queryKeys = {
     one: (eventId: string) => [...queryKeys.events.all(), 'one', eventId] as const,
     wishes: (eventId: string) => [...queryKeys.events.all(), 'wishes', eventId] as const,
     forWish: (wishId: string) => [...queryKeys.events.all(), 'forWish', wishId] as const,
+  },
+
+  storage: {
+    /** Signed read URL for a private `wish-photos` object, cached until near its TTL. */
+    wishPhotoSignedUrl: (path: string) =>
+      [...queryKeys.all, 'storage', 'wishPhotoSignedUrl', path] as const,
   },
 } as const;

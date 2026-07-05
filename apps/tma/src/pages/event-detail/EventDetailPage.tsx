@@ -162,9 +162,7 @@ export const EventDetailPage = (): React.JSX.Element => {
                 ? t('events.list.passed')
                 : daysLeft === 0
                   ? t('events.list.days_left_today')
-                  : daysLeft === 1
-                    ? t('events.list.days_left_one', { count: daysLeft })
-                    : t('events.list.days_left_other', { count: daysLeft })}
+                  : t('events.list.days_left', { count: daysLeft })}
             </Badge>
           </div>
         ) : null}

@@ -1,7 +1,7 @@
 import { type Wish } from '@wlist/core/entities/wish';
 import { useToggleWishLike, useWishLikeState } from '@wlist/core/hooks/social';
 import { Heart, MessageCircle, Repeat2 } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'wouter';
 
@@ -15,7 +15,10 @@ interface WishSocialStripProps {
   isOwner: boolean;
 }
 
-export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.JSX.Element => {
+export const WishSocialStrip = memo(function WishSocialStrip({
+  wish,
+  isOwner,
+}: WishSocialStripProps): React.JSX.Element {
   const { t } = useTranslation('common');
   const api = useApiClient();
   const [, setLocation] = useLocation();
@@ -45,7 +48,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
                   : t('social.like_with_count', { count: likesDisplay })
               }
               aria-pressed={likedByMe}
-              disabled={likeState.isLoading || toggleLike.isPending}
+              disabled={likeState.isLoading}
               onClick={() => {
                 haptics.impact('light');
                 void toggleLike.mutateAsync({ wishId: wish.id, liked: !likedByMe });
@@ -114,4 +117,4 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
       />
     </>
   );
-};
+});

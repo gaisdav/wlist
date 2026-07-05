@@ -10,10 +10,13 @@ export const ProfileAvatar = ({
   photoUrl,
   initial,
   className,
+  eager = false,
 }: {
   photoUrl: string | null;
   initial: string;
   className?: string;
+  /** Set for the always-visible-at-mount header avatar (own profile hub, wishlist owner). Everywhere else (lists, sheets) stays lazy. */
+  eager?: boolean;
 }): React.JSX.Element => {
   const [imgError, setImgError] = useState(false);
 
@@ -29,6 +32,8 @@ export const ProfileAvatar = ({
       <img
         src={photoUrl}
         alt=""
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
         onError={() => setImgError(true)}
         className={clsx('shrink-0 rounded-full object-cover ring-1 ring-border', className)}
       />

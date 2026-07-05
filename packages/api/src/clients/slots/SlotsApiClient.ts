@@ -38,4 +38,18 @@ export const createSlotsApi = (sb: SupabaseClientLike): SlotsApi => ({
     if (error) throw error;
     return (data ?? []) as WishSlotBookingRow[];
   },
+
+  async listByWishes(wishIds) {
+    const unique = [...new Set(wishIds.filter(Boolean))];
+    if (unique.length === 0) return {};
+    const { data, error } = await sb
+      .from('wish_slots')
+      .select('*')
+      .in('wish_id', unique)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    const out: Record<string, WishSlotRow[]> = {};
+    for (const row of (data ?? []) as WishSlotRow[]) (out[row.wish_id] ??= []).push(row);
+    return out;
+  },
 });

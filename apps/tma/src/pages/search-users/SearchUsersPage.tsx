@@ -7,12 +7,14 @@ import {
   useUnfollowUser,
   useUsersList,
 } from '@wlist/core/hooks/social';
+import { clsx } from 'clsx';
 import { Search } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
+import { InfiniteScrollSentinel } from '../../components/primitives/infinite-scroll-sentinel';
 import { ProfileAvatar } from '../../components/primitives/profile-avatar';
 import { Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
@@ -20,7 +22,7 @@ import { useApiClient } from '../../providers/ApiClientProvider';
 
 const DEBOUNCE_MS = 300;
 
-const UserRow = ({
+const UserRow = memo(function UserRow({
   user,
   isSelf,
   isFollowing,
@@ -31,10 +33,10 @@ const UserRow = ({
   user: Profile;
   isSelf: boolean;
   isFollowing: boolean;
-  onFollow: () => void;
-  onUnfollow: () => void;
+  onFollow: (id: string) => void;
+  onUnfollow: (id: string) => void;
   isPending: boolean;
-}): React.JSX.Element => {
+}): React.JSX.Element {
   const { t } = useTranslation('common');
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
   const initial = (user.first_name || user.username || '?').trim().charAt(0).toUpperCase() || '?';
@@ -58,14 +60,14 @@ const UserRow = ({
           variant={isFollowing ? 'outline' : 'primary'}
           className="shrink-0"
           disabled={isPending}
-          onClick={isFollowing ? onUnfollow : onFollow}
+          onClick={() => (isFollowing ? onUnfollow(user.id) : onFollow(user.id))}
         >
           {isFollowing ? t('social.unfollow') : t('social.follow')}
         </Button>
       )}
     </div>
   );
-};
+});
 
 export const SearchUsersPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -88,6 +90,8 @@ export const SearchUsersPage = (): React.JSX.Element => {
 
   const follow = useFollowUser(api, me.data?.id);
   const unfollow = useUnfollowUser(api, me.data?.id);
+  const handleFollow = useCallback((id: string) => void follow.mutateAsync(id), [follow]);
+  const handleUnfollow = useCallback((id: string) => void unfollow.mutateAsync(id), [unfollow]);
 
   // Only the row whose toggle is in flight should disable — `variables` is the
   // id passed to the active mutateAsync, so a follow on one user leaves the rest
@@ -127,7 +131,7 @@ export const SearchUsersPage = (): React.JSX.Element => {
       </div>
 
       {isInitialLoading ? (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2" role="status" aria-label={t('states.loading')}>
           {[0, 1, 2].map((i) => (
             <li
               key={i}
@@ -145,12 +149,27 @@ export const SearchUsersPage = (): React.JSX.Element => {
       ) : users.isError ? (
         <p className="text-sm text-destructive">{t('states.error')}</p>
       ) : flat.length === 0 ? (
-        <p className="text-sm text-muted">
-          {isFiltering ? t('social.search.no_results') : t('social.search.empty')}
-        </p>
+        users.isPlaceholderData ? (
+          // `flat` here is still the *previous* query's (empty) result, kept visible by
+          // `keepPreviousData` while the new `query` fetch is in flight — the new query
+          // hasn't actually resolved to "no results" yet, so don't assert that message.
+          <p className="text-sm text-muted" aria-busy="true">
+            {t('states.loading')}
+          </p>
+        ) : (
+          <p className="text-sm text-muted">
+            {isFiltering ? t('social.search.no_results') : t('social.search.empty')}
+          </p>
+        )
       ) : (
         <>
-          <ul className="flex flex-col gap-2">
+          <ul
+            className={clsx(
+              'flex flex-col gap-2',
+              users.isPlaceholderData && 'opacity-60 transition-opacity',
+            )}
+            aria-busy={users.isFetching}
+          >
             {flat.map((u) => (
               <li key={u.id}>
                 <UserRow
@@ -158,24 +177,23 @@ export const SearchUsersPage = (): React.JSX.Element => {
                   isSelf={u.id === me.data?.id}
                   isFollowing={Boolean(status.data?.[u.id])}
                   isPending={pendingId === u.id}
-                  onFollow={() => void follow.mutateAsync(u.id)}
-                  onUnfollow={() => void unfollow.mutateAsync(u.id)}
+                  onFollow={handleFollow}
+                  onUnfollow={handleUnfollow}
                 />
               </li>
             ))}
           </ul>
 
           {users.hasNextPage ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="self-center"
-              disabled={users.isFetchingNextPage}
-              isLoading={users.isFetchingNextPage}
-              onClick={() => void users.fetchNextPage()}
-            >
-              {t('social.feed.load_more')}
-            </Button>
+            <InfiniteScrollSentinel
+              enabled={!users.isFetchingNextPage}
+              onIntersect={() => void users.fetchNextPage()}
+            />
+          ) : null}
+          {users.isFetchingNextPage ? (
+            <div className="flex justify-center py-2">
+              <Skeleton className="h-9 w-24 rounded-lg" />
+            </div>
           ) : null}
         </>
       )}
