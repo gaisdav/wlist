@@ -3,6 +3,7 @@ import { useWishEvents } from '@wlist/core/hooks/events';
 import { formatDate, formatWishAmount, truncateWishDescriptionForList } from '@wlist/core/lib';
 import { clsx } from 'clsx';
 import { Link2, Lock, Users } from 'lucide-react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
@@ -22,7 +23,11 @@ interface WishCardProps {
   viewerId?: string;
 }
 
-export const WishCard = ({ wish, isOwner = false, viewerId }: WishCardProps): React.JSX.Element => {
+export const WishCard = memo(function WishCard({
+  wish,
+  isOwner = false,
+  viewerId,
+}: WishCardProps): React.JSX.Element {
   const { t } = useTranslation('common');
   const api = useApiClient();
   const { data: events } = useWishEvents(api, wish.id);
@@ -120,4 +125,4 @@ export const WishCard = ({ wish, isOwner = false, viewerId }: WishCardProps): Re
       <WishSocialStrip wish={wish} isOwner={isOwner} />
     </div>
   );
-};
+});

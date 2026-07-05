@@ -9,7 +9,7 @@ import {
 } from '@wlist/core/hooks/social';
 import { clsx } from 'clsx';
 import { Search } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
@@ -22,7 +22,7 @@ import { useApiClient } from '../../providers/ApiClientProvider';
 
 const DEBOUNCE_MS = 300;
 
-const UserRow = ({
+const UserRow = memo(function UserRow({
   user,
   isSelf,
   isFollowing,
@@ -33,10 +33,10 @@ const UserRow = ({
   user: Profile;
   isSelf: boolean;
   isFollowing: boolean;
-  onFollow: () => void;
-  onUnfollow: () => void;
+  onFollow: (id: string) => void;
+  onUnfollow: (id: string) => void;
   isPending: boolean;
-}): React.JSX.Element => {
+}): React.JSX.Element {
   const { t } = useTranslation('common');
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
   const initial = (user.first_name || user.username || '?').trim().charAt(0).toUpperCase() || '?';
@@ -60,14 +60,14 @@ const UserRow = ({
           variant={isFollowing ? 'outline' : 'primary'}
           className="shrink-0"
           disabled={isPending}
-          onClick={isFollowing ? onUnfollow : onFollow}
+          onClick={() => (isFollowing ? onUnfollow(user.id) : onFollow(user.id))}
         >
           {isFollowing ? t('social.unfollow') : t('social.follow')}
         </Button>
       )}
     </div>
   );
-};
+});
 
 export const SearchUsersPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -90,6 +90,8 @@ export const SearchUsersPage = (): React.JSX.Element => {
 
   const follow = useFollowUser(api, me.data?.id);
   const unfollow = useUnfollowUser(api, me.data?.id);
+  const handleFollow = useCallback((id: string) => void follow.mutateAsync(id), [follow]);
+  const handleUnfollow = useCallback((id: string) => void unfollow.mutateAsync(id), [unfollow]);
 
   // Only the row whose toggle is in flight should disable — `variables` is the
   // id passed to the active mutateAsync, so a follow on one user leaves the rest
@@ -175,8 +177,8 @@ export const SearchUsersPage = (): React.JSX.Element => {
                   isSelf={u.id === me.data?.id}
                   isFollowing={Boolean(status.data?.[u.id])}
                   isPending={pendingId === u.id}
-                  onFollow={() => void follow.mutateAsync(u.id)}
-                  onUnfollow={() => void unfollow.mutateAsync(u.id)}
+                  onFollow={handleFollow}
+                  onUnfollow={handleUnfollow}
                 />
               </li>
             ))}

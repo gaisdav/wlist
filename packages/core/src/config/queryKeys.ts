@@ -59,6 +59,12 @@ export const queryKeys = {
     one: (wishId: string) => [...queryKeys.wishes.all(), 'one', wishId] as const,
   },
 
+  /** Batched events/likes/slots fetch for a page of wish ids — seeds the per-item caches below. */
+  wishesAncillary: {
+    batch: (wishIds: string[]) =>
+      [...queryKeys.all, 'wishesAncillary', [...wishIds].sort().join(',')] as const,
+  },
+
   slots: {
     byWish: (wishId: string) => [...queryKeys.all, 'slots', 'byWish', wishId] as const,
     myBookings: () => [...queryKeys.all, 'slots', 'myBookings'] as const,

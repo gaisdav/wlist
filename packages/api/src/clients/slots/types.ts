@@ -17,4 +17,6 @@ export interface SlotsApi {
   book(wishId: string, count: number): Promise<WishSlotRow[]>;
   cancel(slotId: string): Promise<void>;
   listMine(): Promise<WishSlotBookingRow[]>;
+  /** Batched `listByWish`: one round trip for a page of wish ids, keyed by `wish_id`. */
+  listByWishes(wishIds: string[]): Promise<Record<string, WishSlotRow[]>>;
 }

@@ -1,8 +1,10 @@
 import type { FeedEventRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
+import { useWishListAncillary } from '@wlist/core/hooks/wishes';
 import { formatRelativeTime } from '@wlist/core/lib';
 import { Inbox, WifiOff } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
@@ -28,7 +30,12 @@ export const FeedPage = (): React.JSX.Element => {
   const profile = useCurrentUser(api);
   const feed = useInfiniteFeed(api);
 
-  const flat = feed.data?.pages.flat() ?? [];
+  const flat = useMemo(() => feed.data?.pages.flat() ?? [], [feed.data]);
+  const wishIds = useMemo(
+    () => flat.map((row) => row.wish?.id).filter((id): id is string => Boolean(id)),
+    [flat],
+  );
+  useWishListAncillary(api, wishIds);
 
   useQueryErrorToast(feed.isError && !feed.isLoading, t('states.error'));
 

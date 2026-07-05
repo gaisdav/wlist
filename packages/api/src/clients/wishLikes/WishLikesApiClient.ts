@@ -38,4 +38,25 @@ export const createWishLikesApi = (sb: SupabaseClientLike): WishLikesApi => ({
       if (error) throw error;
     }
   },
+
+  async getStates(wishIds) {
+    const unique = [...new Set(wishIds.filter(Boolean))];
+    if (unique.length === 0) return {};
+    const { data: userData } = await sb.auth.getUser();
+    const uid = userData.user?.id;
+    const { data, error } = await sb
+      .from('wish_likes')
+      .select('wish_id, user_id')
+      .in('wish_id', unique);
+    if (error) throw error;
+    const out: Record<string, { count: number; likedByMe: boolean }> = {};
+    for (const id of unique) out[id] = { count: 0, likedByMe: false };
+    for (const row of data ?? []) {
+      const entry = out[row.wish_id];
+      if (!entry) continue;
+      entry.count += 1;
+      if (uid && row.user_id === uid) entry.likedByMe = true;
+    }
+    return out;
+  },
 });

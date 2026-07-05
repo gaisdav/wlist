@@ -7,8 +7,9 @@ import {
   useProfileById,
   useUnfollowUser,
 } from '@wlist/core/hooks/social';
-import { useUserWishes } from '@wlist/core/hooks/wishes';
+import { useUserWishes, useWishListAncillary } from '@wlist/core/hooks/wishes';
 import { Gift, Share2, WifiOff } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Redirect, useParams } from 'wouter';
 
@@ -51,6 +52,8 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const profile = useCurrentUser(api);
   const ownerProfile = useProfileById(api, userId);
   const wishes = useUserWishes(api, userId);
+  const wishIds = useMemo(() => wishes.data?.map((w) => w.id) ?? [], [wishes.data]);
+  useWishListAncillary(api, wishIds);
   const counts = useFollowsCounts(api, userId);
   const isFollowing = useIsFollowing(api, userId);
   const follow = useFollowUser(api, profile.data?.id);
