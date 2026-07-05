@@ -54,4 +54,8 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
+  /* Zoom is re-enabled (WCAG 1.4.4) via index.html dropping `user-scalable=no`;
+   * this guards against the accidental double-tap-zoom that setting used to
+   * suppress, without blocking pinch-zoom. */
+  touch-action: manipulation;
 }

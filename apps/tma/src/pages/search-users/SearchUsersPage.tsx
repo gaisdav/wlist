@@ -127,7 +127,7 @@ export const SearchUsersPage = (): React.JSX.Element => {
       </div>
 
       {isInitialLoading ? (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2" role="status" aria-label={t('states.loading')}>
           {[0, 1, 2].map((i) => (
             <li
               key={i}

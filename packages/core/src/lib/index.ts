@@ -1,6 +1,7 @@
 // Platform-agnostic utilities (formatPrice, wish field limits, etc).
 // May be called from any runtime — including Edge Functions.
 export * from './lastWishCurrencyPreference.js';
+export * from './patchWishInCaches.js';
 export * from './wishConstraints.js';
 export * from './wishCopyLines.js';
 export * from './wishPhotoLimits.js';

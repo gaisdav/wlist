@@ -7,14 +7,16 @@ import {
 } from '@tanstack/react-query';
 import type { ApiClient, WishSlotBookingRow, WishSlotRow } from '@wlist/api';
 
-import { queryKeys } from '../../config/index.js';
+import { disabledQueryKey, queryKeys } from '../../config/index.js';
 
 export const useSlotsByWish = (
   api: ApiClient,
   wishId: string | undefined,
 ): UseQueryResult<WishSlotRow[]> =>
   useQuery({
-    queryKey: wishId ? queryKeys.slots.byWish(wishId) : [...queryKeys.slots.byWish(''), 'pending'],
+    queryKey: wishId
+      ? queryKeys.slots.byWish(wishId)
+      : disabledQueryKey([...queryKeys.all, 'slots', 'byWish']),
     queryFn: async () => api.slots.listByWish(wishId as string),
     enabled: Boolean(wishId),
   });
@@ -34,7 +36,6 @@ export const useBookSlots = (
     onSuccess: (_rows, { wishId }) => {
       void qc.invalidateQueries({ queryKey: queryKeys.slots.byWish(wishId) });
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(wishId) });
-      void qc.invalidateQueries({ queryKey: queryKeys.wishes.all() });
       void qc.invalidateQueries({ queryKey: queryKeys.slots.myBookings() });
     },
   });
@@ -50,7 +51,6 @@ export const useCancelSlot = (
       await qc.invalidateQueries({ queryKey: queryKeys.slots.myBookings() });
       await qc.invalidateQueries({ queryKey: queryKeys.slots.byWish(wishId) });
       void qc.invalidateQueries({ queryKey: queryKeys.wishes.one(wishId) });
-      void qc.invalidateQueries({ queryKey: queryKeys.wishes.all() });
     },
   });
 };

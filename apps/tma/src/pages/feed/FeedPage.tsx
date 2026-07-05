@@ -39,7 +39,7 @@ export const FeedPage = (): React.JSX.Element => {
       </header>
 
       {feed.isLoading ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3" role="status" aria-label={t('states.loading')}>
           {[0, 1, 2].map((i) => (
             <li key={i} className="flex flex-col gap-1.5">
               <WishCardSkeleton />
