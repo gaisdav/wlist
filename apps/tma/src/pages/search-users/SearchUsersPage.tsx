@@ -7,12 +7,14 @@ import {
   useUnfollowUser,
   useUsersList,
 } from '@wlist/core/hooks/social';
+import { clsx } from 'clsx';
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'wouter';
 
 import { Button } from '../../components/primitives/button';
+import { InfiniteScrollSentinel } from '../../components/primitives/infinite-scroll-sentinel';
 import { ProfileAvatar } from '../../components/primitives/profile-avatar';
 import { Skeleton } from '../../components/primitives/skeleton';
 import { useQueryErrorToast } from '../../hooks/useQueryErrorToast';
@@ -145,12 +147,27 @@ export const SearchUsersPage = (): React.JSX.Element => {
       ) : users.isError ? (
         <p className="text-sm text-destructive">{t('states.error')}</p>
       ) : flat.length === 0 ? (
-        <p className="text-sm text-muted">
-          {isFiltering ? t('social.search.no_results') : t('social.search.empty')}
-        </p>
+        users.isPlaceholderData ? (
+          // `flat` here is still the *previous* query's (empty) result, kept visible by
+          // `keepPreviousData` while the new `query` fetch is in flight — the new query
+          // hasn't actually resolved to "no results" yet, so don't assert that message.
+          <p className="text-sm text-muted" aria-busy="true">
+            {t('states.loading')}
+          </p>
+        ) : (
+          <p className="text-sm text-muted">
+            {isFiltering ? t('social.search.no_results') : t('social.search.empty')}
+          </p>
+        )
       ) : (
         <>
-          <ul className="flex flex-col gap-2">
+          <ul
+            className={clsx(
+              'flex flex-col gap-2',
+              users.isPlaceholderData && 'opacity-60 transition-opacity',
+            )}
+            aria-busy={users.isFetching}
+          >
             {flat.map((u) => (
               <li key={u.id}>
                 <UserRow
@@ -166,16 +183,15 @@ export const SearchUsersPage = (): React.JSX.Element => {
           </ul>
 
           {users.hasNextPage ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="self-center"
-              disabled={users.isFetchingNextPage}
-              isLoading={users.isFetchingNextPage}
-              onClick={() => void users.fetchNextPage()}
-            >
-              {t('social.feed.load_more')}
-            </Button>
+            <InfiniteScrollSentinel
+              enabled={!users.isFetchingNextPage}
+              onIntersect={() => void users.fetchNextPage()}
+            />
+          ) : null}
+          {users.isFetchingNextPage ? (
+            <div className="flex justify-center py-2">
+              <Skeleton className="h-9 w-24 rounded-lg" />
+            </div>
           ) : null}
         </>
       )}

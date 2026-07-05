@@ -27,4 +27,7 @@ export const useInfiniteFeed = (api: ApiClient) =>
       if (lastPage.length < PAGE) return undefined;
       return allPages.length * PAGE;
     },
+    // Bounds memory/refetch cost for a user who scrolls very far into the feed.
+    // Forward-only list (no `getPreviousPageParam`), so there's nothing to prune backward.
+    maxPages: 5,
   });
