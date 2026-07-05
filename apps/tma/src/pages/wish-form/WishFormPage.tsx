@@ -417,6 +417,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         isOpen={isCopyInfoOpen}
         onClose={() => setIsCopyInfoOpen(false)}
         title={t('wishes.form.copy_lines_info_title')}
+        closeLabel={t('actions.close')}
       >
         <div className="flex flex-col gap-4 px-4 pb-4">
           <p className="text-sm text-muted">{t('wishes.form.copy_lines_info_body')}</p>

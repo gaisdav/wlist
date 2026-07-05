@@ -142,7 +142,7 @@ const CommentItem = ({
           <button
             type="button"
             onClick={() => onReply(comment.id)}
-            className="hover:text-foreground font-medium transition-colors"
+            className="py-2 -my-2 hover:text-foreground font-medium transition-colors"
           >
             {t('comments.reply')}
           </button>
@@ -152,14 +152,14 @@ const CommentItem = ({
             <button
               type="button"
               onClick={() => onEdit(comment)}
-              className="hover:text-foreground font-medium transition-colors"
+              className="py-2 -my-2 hover:text-foreground font-medium transition-colors"
             >
               {t('actions.edit')}
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="text-destructive/80 hover:text-destructive font-medium transition-colors"
+              className="py-2 -my-2 text-destructive/80 hover:text-destructive font-medium transition-colors"
               disabled={deleteComment.isPending}
             >
               {t('actions.delete')}
@@ -356,6 +356,7 @@ export function CommentsBottomSheet({
     <BottomSheet
       isOpen={isOpen}
       onClose={handleClose}
+      closeLabel={t('actions.close')}
       footerSlot={
         <CommentComposer
           isOpen={isOpen}
