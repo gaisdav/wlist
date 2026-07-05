@@ -1,5 +1,15 @@
 // Single source of truth for TanStack Query keys. Never inline `['wishes', id]`
 // in a component — always reach for queryKeys.x.y(...).
+
+/**
+ * Stable, non-colliding key for a query that's temporarily `enabled: false`
+ * because its real id argument (`wishId`, `userId`, ...) isn't known yet.
+ * Every disabled instance of a given hook shares one such key — that's fine
+ * since the query never runs — but it must never collide with a real key.
+ */
+export const disabledQueryKey = (base: readonly unknown[]): readonly unknown[] =>
+  [...base, '__disabled__'] as const;
+
 export const queryKeys = {
   all: ['wlist'] as const,
   currentUser: () => [...queryKeys.all, 'currentUser'] as const,

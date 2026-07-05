@@ -41,7 +41,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               className="text-foreground"
               aria-label={likedByMe ? t('social.unlike') : t('social.like')}
               aria-pressed={likedByMe}
-              disabled={likeState.isLoading || toggleLike.isPending}
+              disabled={likeState.isLoading}
               onClick={() => {
                 haptics.impact('light');
                 void toggleLike.mutateAsync({ wishId: wish.id, liked: !likedByMe });

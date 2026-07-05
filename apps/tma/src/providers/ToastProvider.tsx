@@ -6,6 +6,9 @@ import 'sonner/dist/styles.css';
 export const ToastProvider = ({ children }: PropsWithChildren): React.JSX.Element => (
   <>
     {children}
+    {/* sonner renders its own `aria-live="polite"` region internally (its
+     * toast list `<section>`), so toasts are already announced to screen
+     * readers — do not wrap this in another live region. */}
     <Toaster
       position="bottom-center"
       closeButton
