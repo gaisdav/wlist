@@ -39,7 +39,11 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               variant="ghost"
               size="iconRound"
               className="text-foreground"
-              aria-label={likedByMe ? t('social.unlike') : t('social.like')}
+              aria-label={
+                likedByMe
+                  ? t('social.unlike_with_count', { count: likesDisplay })
+                  : t('social.like_with_count', { count: likesDisplay })
+              }
               aria-pressed={likedByMe}
               disabled={likeState.isLoading || toggleLike.isPending}
               onClick={() => {
@@ -54,9 +58,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               />
             </Button>
           )}
-          {likesDisplay > 0 ? (
-            <span aria-label={t('social.likes_count')}>{likesDisplay}</span>
-          ) : null}
+          {likesDisplay > 0 ? <span aria-hidden="true">{likesDisplay}</span> : null}
         </div>
 
         <div className="flex items-center gap-1">
@@ -65,7 +67,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
             variant="ghost"
             size="iconRound"
             className="text-foreground"
-            aria-label={t('comments.title')}
+            aria-label={t('comments.title_with_count', { count: wish.comments_count })}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -74,9 +76,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
           >
             <MessageCircle className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
           </Button>
-          {wish.comments_count > 0 ? (
-            <span aria-label={t('comments.title')}>{wish.comments_count}</span>
-          ) : null}
+          {wish.comments_count > 0 ? <span aria-hidden="true">{wish.comments_count}</span> : null}
         </div>
 
         <div className="flex items-center gap-1">
@@ -92,7 +92,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               variant="ghost"
               size="iconRound"
               className="text-foreground"
-              aria-label={t('social.repost')}
+              aria-label={t('social.repost_with_count', { count: wish.reposts_count })}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -102,9 +102,7 @@ export const WishSocialStrip = ({ wish, isOwner }: WishSocialStripProps): React.
               <Repeat2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
             </Button>
           )}
-          {wish.reposts_count > 0 ? (
-            <span aria-label={t('social.reposts_count')}>{wish.reposts_count}</span>
-          ) : null}
+          {wish.reposts_count > 0 ? <span aria-hidden="true">{wish.reposts_count}</span> : null}
         </div>
       </div>
 

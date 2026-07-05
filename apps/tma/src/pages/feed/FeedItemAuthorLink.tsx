@@ -17,7 +17,7 @@ export const FeedItemAuthorLink = ({ userId }: FeedItemAuthorLinkProps): React.J
   return (
     <Link
       to={`/u/${userId}`}
-      className="min-w-0 truncate text-xs font-medium text-primary underline-offset-2 hover:underline"
+      className="min-w-0 truncate py-2 -my-2 text-xs font-medium text-primary underline-offset-2 hover:underline"
     >
       {label}
     </Link>

@@ -195,9 +195,12 @@
     "unfollow": "Unfollow",
     "like": "Like wish",
     "unlike": "Unlike wish",
+    "like_with_count": "Like wish ({{count}} likes)",
+    "unlike_with_count": "Unlike wish ({{count}} likes)",
     "likes_count": "Likes",
     "reposts_count": "Reposts",
     "repost": "Repost to my list",
+    "repost_with_count": "Repost to my list ({{count}} reposts)",
     "repost_prefill": "You are creating a copy from someone else's wish. Edit anything, then save.",
     "repost_source_unavailable": "This wish cannot be opened for repost (removed or not visible).",
     "counts": {
@@ -229,6 +232,7 @@
   },
   "comments": {
     "title": "Comments",
+    "title_with_count": "Comments ({{count}})",
     "placeholder": "Message...",
     "send": "Send",
     "reply": "Reply",
