@@ -46,3 +46,5 @@ supabase/.branches/
 # Claude Code
 .claude/settings.json
 .claude/settings.local.json
+# Claude Code agent worktree scaffolding (isolation: worktree checkouts)
+.claude/worktrees/
