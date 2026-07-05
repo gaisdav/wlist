@@ -65,4 +65,10 @@ export const queryKeys = {
     wishes: (eventId: string) => [...queryKeys.events.all(), 'wishes', eventId] as const,
     forWish: (wishId: string) => [...queryKeys.events.all(), 'forWish', wishId] as const,
   },
+
+  storage: {
+    /** Signed read URL for a private `wish-photos` object, cached until near its TTL. */
+    wishPhotoSignedUrl: (path: string) =>
+      [...queryKeys.all, 'storage', 'wishPhotoSignedUrl', path] as const,
+  },
 } as const;

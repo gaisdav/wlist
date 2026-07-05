@@ -159,7 +159,7 @@ export const ProfilePage = (): React.JSX.Element => {
   return (
     <div className="flex flex-col gap-5 p-4">
       <header className="flex flex-col items-center gap-3 pt-2">
-        <ProfileAvatar photoUrl={data.photo_url} initial={initial} className="size-20" />
+        <ProfileAvatar photoUrl={data.photo_url} initial={initial} className="size-20" eager />
         <div className="flex flex-col items-center gap-0.5 text-center">
           <h1 className="text-xl font-semibold text-foreground">{fullName || displayName}</h1>
           {handle ? <p className="text-sm text-muted">{handle}</p> : null}

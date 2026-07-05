@@ -6,8 +6,8 @@ import { Inbox, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
-import { Button } from '../../components/primitives/button';
 import { EmptyState } from '../../components/primitives/empty-state';
+import { InfiniteScrollSentinel } from '../../components/primitives/infinite-scroll-sentinel';
 import { Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes/WishCard';
 import { WishCardSkeleton } from '../../components/wishes/WishCardSkeleton';
@@ -66,7 +66,7 @@ export const FeedPage = (): React.JSX.Element => {
           action={{ label: t('nav.tabs.find_people'), onClick: () => navigate('/search') }}
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3" aria-busy={feed.isFetchingNextPage}>
           {flat.map((row) => {
             const viewerId = profile.data?.id;
 
@@ -109,16 +109,15 @@ export const FeedPage = (): React.JSX.Element => {
       )}
 
       {feed.hasNextPage ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="self-center"
-          disabled={feed.isFetchingNextPage}
-          isLoading={feed.isFetchingNextPage}
-          onClick={() => void feed.fetchNextPage()}
-        >
-          {t('social.feed.load_more')}
-        </Button>
+        <InfiniteScrollSentinel
+          enabled={!feed.isFetchingNextPage}
+          onIntersect={() => void feed.fetchNextPage()}
+        />
+      ) : null}
+      {feed.isFetchingNextPage ? (
+        <div className="flex justify-center py-2">
+          <Skeleton className="h-9 w-24 rounded-lg" />
+        </div>
       ) : null}
     </div>
   );

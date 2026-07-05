@@ -118,6 +118,8 @@ const CommentItem = ({
             <img
               src={profile.photo_url}
               alt=""
+              loading="lazy"
+              decoding="async"
               onError={() => setImgError(true)}
               className="size-8 rounded-full object-cover shrink-0"
             />
