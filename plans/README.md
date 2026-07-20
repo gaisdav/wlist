@@ -79,6 +79,8 @@
 | 13  | ⬜     | [`13-future-features.md`](./13-future-features.md)         | Backlog: Secret Santa, AI, геймификация, календарь, TG-чаты вне TMA   |
 | 14  | 🔵     | [`14-wish-form-ux.md`](./14-wish-form-ux.md)               | Редизайн экрана создания/редактирования желания (UX-план)            |
 | 15  | 🔵     | [`15-event-list-ux.md`](./15-event-list-ux.md)             | UX форм события и списков + сквозные замечания (UX-план)             |
+| 16  | 🔵     | [`16-pinned-and-non-reservable-wishes.md`](./16-pinned-and-non-reservable-wishes.md) | Закрепление желаний (`pinned_at`) + желания без бронирования (`is_reservable`) |
+| 17  | 🔵     | [`17-mark-as-received-and-close-notice.md`](./17-mark-as-received-and-close-notice.md) | «Уже подарили»: ручное закрытие желания + приватное уведомление бронировавшим |
 
 ## Структура файла этапа
 
