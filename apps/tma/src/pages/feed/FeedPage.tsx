@@ -1,13 +1,15 @@
 import type { FeedEventRow } from '@wlist/api';
 import { useCurrentUser } from '@wlist/core/hooks/auth';
 import { useInfiniteFeed } from '@wlist/core/hooks/social';
+import { useWishListAncillary } from '@wlist/core/hooks/wishes';
 import { formatRelativeTime } from '@wlist/core/lib';
 import { Inbox, WifiOff } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'wouter';
 
-import { Button } from '../../components/primitives/button';
 import { EmptyState } from '../../components/primitives/empty-state';
+import { InfiniteScrollSentinel } from '../../components/primitives/infinite-scroll-sentinel';
 import { Skeleton } from '../../components/primitives/skeleton';
 import { WishCard } from '../../components/wishes/WishCard';
 import { WishCardSkeleton } from '../../components/wishes/WishCardSkeleton';
@@ -28,7 +30,12 @@ export const FeedPage = (): React.JSX.Element => {
   const profile = useCurrentUser(api);
   const feed = useInfiniteFeed(api);
 
-  const flat = feed.data?.pages.flat() ?? [];
+  const flat = useMemo(() => feed.data?.pages.flat() ?? [], [feed.data]);
+  const wishIds = useMemo(
+    () => flat.map((row) => row.wish?.id).filter((id): id is string => Boolean(id)),
+    [flat],
+  );
+  useWishListAncillary(api, wishIds);
 
   useQueryErrorToast(feed.isError && !feed.isLoading, t('states.error'));
 
@@ -39,7 +46,7 @@ export const FeedPage = (): React.JSX.Element => {
       </header>
 
       {feed.isLoading ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3" role="status" aria-label={t('states.loading')}>
           {[0, 1, 2].map((i) => (
             <li key={i} className="flex flex-col gap-1.5">
               <WishCardSkeleton />
@@ -66,7 +73,7 @@ export const FeedPage = (): React.JSX.Element => {
           action={{ label: t('nav.tabs.find_people'), onClick: () => navigate('/search') }}
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3" aria-busy={feed.isFetchingNextPage}>
           {flat.map((row) => {
             const viewerId = profile.data?.id;
 
@@ -109,16 +116,15 @@ export const FeedPage = (): React.JSX.Element => {
       )}
 
       {feed.hasNextPage ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="self-center"
-          disabled={feed.isFetchingNextPage}
-          isLoading={feed.isFetchingNextPage}
-          onClick={() => void feed.fetchNextPage()}
-        >
-          {t('social.feed.load_more')}
-        </Button>
+        <InfiniteScrollSentinel
+          enabled={!feed.isFetchingNextPage}
+          onIntersect={() => void feed.fetchNextPage()}
+        />
+      ) : null}
+      {feed.isFetchingNextPage ? (
+        <div className="flex justify-center py-2">
+          <Skeleton className="h-9 w-24 rounded-lg" />
+        </div>
       ) : null}
     </div>
   );

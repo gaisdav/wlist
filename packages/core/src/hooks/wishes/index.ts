@@ -7,3 +7,4 @@ export {
 } from './useWishMutations.js';
 export { useWish } from './useWish.js';
 export { useMyWishes, useUserWishes, useWishesByOwner } from './useWishesByOwner.js';
+export { useWishListAncillary } from './useWishListAncillary.js';

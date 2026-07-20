@@ -25,4 +25,6 @@ export interface EventsApi {
   unlinkWish(eventId: string, wishId: string): Promise<void>;
   setWishEvents(wishId: string, eventIds: string[]): Promise<void>;
   listForWish(wishId: string): Promise<EventRow[]>;
+  /** Batched `listForWish`: one round trip for a page of wish ids, keyed by `wish_id`. */
+  listForWishes(wishIds: string[]): Promise<Record<string, EventRow[]>>;
 }

@@ -8,7 +8,7 @@ import {
   useWish,
 } from '@wlist/core/hooks/wishes';
 import { formatDate, formatWishAmount } from '@wlist/core/lib';
-import { Check, ChevronLeft, ChevronRight, Copy, Lock, Repeat2, Share2, Users } from 'lucide-react';
+import { Check, Copy, Lock, Repeat2, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'wouter';
@@ -27,9 +27,12 @@ import { confirm } from '../../telegram/confirm';
 import { haptics } from '../../telegram/haptics';
 import { share } from '../../telegram/share';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
-import { useTelegramSecondaryButton } from '../../telegram/useTelegramSecondaryButton';
 
+import { WishDetailBottomBar } from './WishDetailBottomBar';
 import { WishDetailHero } from './WishDetailHero';
+
+/** Scroll target the bottom bar's "Gift slots" action jumps to. */
+const SLOTS_ANCHOR_ID = 'wish-slots';
 
 export const WishDetailPage = (): React.JSX.Element => {
   const { t } = useTranslation('common');
@@ -81,14 +84,6 @@ export const WishDetailPage = (): React.JSX.Element => {
       text: t('share.wish', { title: wish.data.title }),
     });
   };
-  // Native SecondaryButton for Share, when the client renders it. The in-page
-  // Share button below is always rendered too, so the action is never lost even
-  // if the standalone secondary button doesn't appear (no MainButton here).
-  useTelegramSecondaryButton({
-    text: t('actions.share'),
-    onClick: onShare,
-    isVisible: Boolean(wish.data),
-  });
 
   if (!wishId) {
     return <p className="p-4 text-sm text-muted">{t('states.error')}</p>;
@@ -121,7 +116,11 @@ export const WishDetailPage = (): React.JSX.Element => {
       ? list[indexInList + 1]?.id
       : undefined;
 
-  const showSiblingNav = Boolean(prevWishId || nextWishId);
+  const onOpenSlots = (): void => {
+    document
+      .getElementById(SLOTS_ANCHOR_ID)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   const onArchive = async (): Promise<void> => {
     await archive.mutateAsync(w.id);
@@ -162,11 +161,8 @@ export const WishDetailPage = (): React.JSX.Element => {
         onClose={() => setLightboxOpen(false)}
       />
 
-      <article
-        className={`flex flex-col gap-4 p-4${
-          showSiblingNav ? ' pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]' : ''
-        }`}
-      >
+      {/* Always reserve space for the fixed bottom bar so it never covers content. */}
+      <article className="flex flex-col gap-4 p-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         <WishDetailHero
           hasUploadedPhoto={hasUploadedPhoto}
           photoSrc={photoSrc}
@@ -270,21 +266,6 @@ export const WishDetailPage = (): React.JSX.Element => {
 
         <WishSocialStrip wish={w} isOwner={isOwner} />
 
-        {/* Always render the in-page Share button. The native SecondaryButton is
-            a companion to the MainButton, which this screen doesn't have, so it
-            may not render standalone in some Telegram clients — the in-page
-            button guarantees the affordance is never lost. */}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="inline-flex items-center gap-2 self-start"
-          onClick={onShare}
-        >
-          <Share2 className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
-          {t('actions.share')}
-        </Button>
-
         {!isOwner && !w.is_archived ? (
           <Link
             to={`/wish/new?repostFrom=${w.id}`}
@@ -295,8 +276,13 @@ export const WishDetailPage = (): React.JSX.Element => {
           </Link>
         ) : null}
 
-        {!isOwner && !w.is_archived && viewerId ? (
-          <WishReservationSection wish={w} viewerId={viewerId} />
+        {/* Ordinary wishes: reserve/cancel lives only in the bottom bar (no
+            duplicate here). Group gifts keep the rich multi-slot section, which
+            the bar's "Gift slots" action scrolls to via this anchor. */}
+        {!isOwner && !w.is_archived && viewerId && w.is_collaborative ? (
+          <div id={SLOTS_ANCHOR_ID} className="scroll-mt-4">
+            <WishReservationSection wish={w} viewerId={viewerId} />
+          </div>
         ) : null}
 
         {isOwner ? (
@@ -341,35 +327,15 @@ export const WishDetailPage = (): React.JSX.Element => {
         ) : null}
       </article>
 
-      {showSiblingNav ? (
-        <nav
-          className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-4 border-t border-border bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] backdrop-blur supports-[backdrop-filter]:bg-background/80"
-          aria-label={t('wishes.detail.sibling_nav')}
-        >
-          <div className="flex min-w-0 flex-1 justify-start">
-            {prevWishId ? (
-              <Link
-                to={`/wish/${prevWishId}`}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
-                aria-label={t('wishes.detail.prev_wish')}
-              >
-                <ChevronLeft className="h-6 w-6" strokeWidth={2} aria-hidden />
-              </Link>
-            ) : null}
-          </div>
-          <div className="flex min-w-0 flex-1 justify-end">
-            {nextWishId ? (
-              <Link
-                to={`/wish/${nextWishId}`}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border bg-surface p-2 text-foreground hover:bg-muted"
-                aria-label={t('wishes.detail.next_wish')}
-              >
-                <ChevronRight className="h-6 w-6" strokeWidth={2} aria-hidden />
-              </Link>
-            ) : null}
-          </div>
-        </nav>
-      ) : null}
+      <WishDetailBottomBar
+        wish={w}
+        isOwner={isOwner}
+        viewerId={viewerId}
+        prevWishId={prevWishId}
+        nextWishId={nextWishId}
+        onShare={onShare}
+        onOpenSlots={onOpenSlots}
+      />
     </>
   );
 };

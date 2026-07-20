@@ -3,6 +3,8 @@ import { SignInError, type SignInErrorCode } from '@wlist/api';
 import { useCurrentUser, useSession, useSignInWithTelegram } from '@wlist/core/hooks/auth';
 import { useEffect, useRef } from 'react';
 
+import { i18n } from '../i18n';
+import { resolveAppLanguage } from '../lib/resolveAppLanguage';
 import { useApiClient } from '../providers/ApiClientProvider';
 
 /**
@@ -40,6 +42,7 @@ export const useAuthBootstrap = (): AuthBootstrapStatus => {
   const signIn = useSignInWithTelegram(api);
   const profile = useCurrentUser(api);
   const triggered = useRef(false);
+  const languageSynced = useRef(false);
 
   useEffect(() => {
     if (sessionStatus !== 'unauthenticated') return;
@@ -52,6 +55,20 @@ export const useAuthBootstrap = (): AuthBootstrapStatus => {
     triggered.current = true;
     signIn.mutate({ initData });
   }, [sessionStatus, signIn]);
+
+  // Secondary language sync: Telegram's `language_code` (read synchronously
+  // at boot in `i18n.ts`) is the source of truth for the very first paint,
+  // but the device language may have changed since the profile's stored
+  // `language_code` was last persisted, or vice versa. Once the profile is
+  // loaded, reconcile once — not on every render/refetch.
+  useEffect(() => {
+    if (languageSynced.current) return;
+    if (!profile.data) return;
+
+    languageSynced.current = true;
+    const resolved = resolveAppLanguage(profile.data.language_code);
+    if (resolved !== i18n.language) void i18n.changeLanguage(resolved);
+  }, [profile.data]);
 
   if (signIn.isError) {
     const err = signIn.error;

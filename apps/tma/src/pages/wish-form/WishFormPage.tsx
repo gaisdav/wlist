@@ -30,6 +30,7 @@ import { haptics } from '../../telegram/haptics';
 import { useClosingConfirmation } from '../../telegram/useClosingConfirmation';
 import { useTelegramBackButton } from '../../telegram/useTelegramBackButton';
 import { useTelegramMainButton } from '../../telegram/useTelegramMainButton';
+import { useTelegramSecondaryButton } from '../../telegram/useTelegramSecondaryButton';
 
 import { wishPhotoMimeForApi } from './prepareWishPhotoUpload';
 import {
@@ -293,6 +294,16 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
     isEnabled: !isSaving,
   });
 
+  // Cancel as the SecondaryButton beside Save, only while the MainButton drives
+  // the CTA (inside Telegram). In-page forms fall back to BackButton / navigation.
+  useTelegramSecondaryButton({
+    text: t('actions.cancel'),
+    position: 'left',
+    onClick: goBack,
+    isVisible: mainButtonActive,
+    isEnabled: !isSaving,
+  });
+
   // Wait on the repost source's chosen lists too, so a reposted 'lists' wish
   // doesn't render (and can't be saved) before its list prefill is seeded.
   if (mode === 'create' && repostFromId && (repostSource.isLoading || repostLists.isLoading)) {
@@ -406,6 +417,7 @@ export const WishFormPage = ({ mode }: WishFormPageProps): React.JSX.Element => 
         isOpen={isCopyInfoOpen}
         onClose={() => setIsCopyInfoOpen(false)}
         title={t('wishes.form.copy_lines_info_title')}
+        closeLabel={t('actions.close')}
       >
         <div className="flex flex-col gap-4 px-4 pb-4">
           <p className="text-sm text-muted">{t('wishes.form.copy_lines_info_body')}</p>

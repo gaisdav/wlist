@@ -25,6 +25,14 @@ export const createProfilesApi = (sb: SupabaseClientLike): ProfilesApi => ({
     return (data as ProfileRow | null) ?? null;
   },
 
+  async getByIds(ids: string[]) {
+    const unique = [...new Set(ids.filter(Boolean))];
+    if (unique.length === 0) return [];
+    const { data, error } = await sb.from('profiles').select('*').in('id', unique);
+    if (error) throw error;
+    return (data ?? []) as ProfileRow[];
+  },
+
   async listUsers({ query, limit, offset }: ListUsersParams) {
     let q = sb
       .from('profiles')

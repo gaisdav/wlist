@@ -7,8 +7,9 @@ import {
   useProfileById,
   useUnfollowUser,
 } from '@wlist/core/hooks/social';
-import { useUserWishes } from '@wlist/core/hooks/wishes';
+import { useUserWishes, useWishListAncillary } from '@wlist/core/hooks/wishes';
 import { Gift, Share2, WifiOff } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Redirect, useParams } from 'wouter';
 
@@ -51,6 +52,8 @@ export const UserWishlistPage = (): React.JSX.Element => {
   const profile = useCurrentUser(api);
   const ownerProfile = useProfileById(api, userId);
   const wishes = useUserWishes(api, userId);
+  const wishIds = useMemo(() => wishes.data?.map((w) => w.id) ?? [], [wishes.data]);
+  useWishListAncillary(api, wishIds);
   const counts = useFollowsCounts(api, userId);
   const isFollowing = useIsFollowing(api, userId);
   const follow = useFollowUser(api, profile.data?.id);
@@ -101,7 +104,12 @@ export const UserWishlistPage = (): React.JSX.Element => {
   return (
     <div className="flex flex-col gap-5 p-4">
       <header className="flex flex-col items-center gap-3 pt-2">
-        <ProfileAvatar photoUrl={owner?.photo_url ?? null} initial={initial} className="size-20" />
+        <ProfileAvatar
+          photoUrl={owner?.photo_url ?? null}
+          initial={initial}
+          className="size-20"
+          eager
+        />
         <div className="flex flex-col items-center gap-0.5 text-center">
           <h1 className="text-xl font-semibold text-foreground">{fullName || displayName}</h1>
           {handle ? <p className="text-sm text-muted">{handle}</p> : null}

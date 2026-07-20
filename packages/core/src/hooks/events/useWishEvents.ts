@@ -1,7 +1,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { ApiClient } from '@wlist/api';
 
-import { queryKeys } from '../../config/index.js';
+import { disabledQueryKey, queryKeys } from '../../config/index.js';
 import { type Event, eventSchema } from '../../entities/event/index.js';
 
 export const useWishEvents = (
@@ -11,7 +11,7 @@ export const useWishEvents = (
   useQuery({
     queryKey: wishId
       ? queryKeys.events.forWish(wishId)
-      : [...queryKeys.events.all(), 'forWish', 'pending'],
+      : disabledQueryKey([...queryKeys.events.all(), 'forWish']),
     queryFn: async () => {
       const rows = await api.events.listForWish(wishId as string);
       return rows.map((r) => eventSchema.parse(r));

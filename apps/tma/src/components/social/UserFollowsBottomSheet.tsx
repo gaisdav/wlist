@@ -121,7 +121,12 @@ export function UserFollowsBottomSheet({
   );
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose} headerSlot={header}>
+    <BottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      closeLabel={t('actions.close')}
+      headerSlot={header}
+    >
       <div className="flex flex-col gap-3 py-2">
         {list.isLoading ? (
           <div className="py-8 text-center text-sm text-muted">{t('states.loading')}</div>
